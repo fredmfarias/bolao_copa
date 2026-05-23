@@ -1,36 +1,33 @@
 # syntax=docker/dockerfile:1
 
-# ─── Base ─────────────────────────────────────────────────────────────────────
 FROM node:20-alpine AS base
-RUN npm install -g pnpm@9 turbo@2 --no-fund --no-audit
+RUN corepack enable
 
-# ─── Pruner ───────────────────────────────────────────────────────────────────
-FROM base AS pruner
+# ── Install deps (cached layer) ───────────────────────────────────────────────
+FROM base AS deps
 WORKDIR /app
-COPY . .
-RUN turbo prune @bolao/frontend --docker
-
-# ─── Installer ────────────────────────────────────────────────────────────────
-FROM base AS installer
-WORKDIR /app
-COPY --from=pruner /app/out/json/ .
-COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+COPY packages/shared/package.json ./packages/shared/
+COPY apps/frontend/package.json ./apps/frontend/
 RUN pnpm install --frozen-lockfile
 
-# ─── Builder ──────────────────────────────────────────────────────────────────
-FROM installer AS builder
-COPY --from=pruner /app/out/full/ .
-ARG NEXT_PUBLIC_API_URL
+# ── Build ─────────────────────────────────────────────────────────────────────
+FROM deps AS builder
+COPY packages/shared/ ./packages/shared/
+COPY apps/frontend/ ./apps/frontend/
+# NEXT_PUBLIC_* vars are baked into the bundle at build time
+ARG NEXT_PUBLIC_API_URL=http://localhost:3001
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 RUN pnpm --filter @bolao/frontend build
 
-# ─── Runner ───────────────────────────────────────────────────────────────────
+# ── Runner (Next.js standalone) ───────────────────────────────────────────────
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Next.js standalone output
+# standalone/ contains server.js + minimal node_modules for the server
 COPY --from=builder /app/apps/frontend/.next/standalone ./
+# Static assets must be alongside the standalone server
 COPY --from=builder /app/apps/frontend/.next/static ./apps/frontend/.next/static
 COPY --from=builder /app/apps/frontend/public ./apps/frontend/public
 

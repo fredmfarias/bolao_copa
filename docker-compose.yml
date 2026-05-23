@@ -1,11 +1,11 @@
-# Ambiente de desenvolvimento local — apenas serviços de infra.
-# Backend e frontend rodam localmente via: pnpm dev
+# Stack local completa — docker compose up --build
 #
-# Uso:
-#   docker compose up -d
-#   cp .env.example apps/backend/.env   # preencha as vars
-#   cp .env.example apps/frontend/.env.local
-#   pnpm dev
+# Acesso:
+#   Frontend:  http://localhost:3000
+#   Backend:   http://localhost:3001
+#   Mailpit:   http://localhost:8025  (webmail para inspecionar emails)
+#
+# Para substituir variáveis, copie .env.example → .env e edite.
 
 services:
   postgres:
@@ -37,6 +37,64 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://bolao:secret@postgres:5432/bolao_trovao
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:-local-jwt-secret-change-in-production-min32}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-local-refresh-secret-change-in-production}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-30d}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL:-http://localhost:3001/auth/google/callback}
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      SMTP_USER: ""
+      SMTP_PASS: ""
+      SMTP_FROM: ${SMTP_FROM:-Bolão Trovão <noreply@bolao.local>}
+      # VAPID keys são opcionais — web push desabilitado se não configurado
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_MAILTO: ${VAPID_MAILTO:-mailto:admin@bolao.local}
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      PORT: 3001
+      NODE_ENV: development
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+      args:
+        # Baked into o bundle — aponta para o backend acessível pelo browser
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:

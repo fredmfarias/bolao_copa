@@ -6,12 +6,19 @@ import * as webpush from 'web-push';
 
 @Injectable()
 export class NotificacaoService {
+  private readonly vapidConfigured: boolean;
+
   constructor(private prisma: PrismaService, private config: ConfigService) {
-    webpush.setVapidDetails(
-      config.get('VAPID_SUBJECT')!,
-      config.get('VAPID_PUBLIC_KEY')!,
-      config.get('VAPID_PRIVATE_KEY')!,
-    );
+    const pub = config.get<string>('VAPID_PUBLIC_KEY');
+    const priv = config.get<string>('VAPID_PRIVATE_KEY');
+    this.vapidConfigured = !!(pub && priv);
+    if (this.vapidConfigured) {
+      webpush.setVapidDetails(
+        config.get('VAPID_MAILTO') ?? 'mailto:admin@bolao.local',
+        pub!,
+        priv!,
+      );
+    }
   }
 
   async subscribe(usuarioId: string, dto: SubscribeDto) {
@@ -28,6 +35,7 @@ export class NotificacaoService {
   }
 
   async enviarParaUsuario(usuarioId: string, payload: object) {
+    if (!this.vapidConfigured) return;
     const subs = await this.prisma.notificacaoSubscription.findMany({ where: { usuarioId } });
     await Promise.allSettled(
       subs.map((s) =>

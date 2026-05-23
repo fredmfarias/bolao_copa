@@ -1,48 +1,46 @@
 # syntax=docker/dockerfile:1
 
-# ─── Base ─────────────────────────────────────────────────────────────────────
 FROM node:20-alpine AS base
-RUN npm install -g pnpm@9 turbo@2 --no-fund --no-audit
+RUN corepack enable
 
-# ─── Pruner ───────────────────────────────────────────────────────────────────
-FROM base AS pruner
+# ── Install deps (cached layer) ───────────────────────────────────────────────
+FROM base AS deps
 WORKDIR /app
-COPY . .
-RUN turbo prune @bolao/backend --docker
-
-# ─── Installer ────────────────────────────────────────────────────────────────
-FROM base AS installer
-WORKDIR /app
-COPY --from=pruner /app/out/json/ .
-COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+COPY packages/shared/package.json ./packages/shared/
+COPY apps/backend/package.json ./apps/backend/
 RUN pnpm install --frozen-lockfile
 
-# ─── Builder ──────────────────────────────────────────────────────────────────
-FROM installer AS builder
-COPY --from=pruner /app/out/full/ .
-RUN pnpm --filter @bolao/backend build
-# Generate Prisma client for the target platform
+# ── Build ─────────────────────────────────────────────────────────────────────
+FROM deps AS builder
+COPY packages/shared/ ./packages/shared/
+COPY apps/backend/ ./apps/backend/
+# Compile shared package to JS (runtime needs dist/index.js via exports map)
+RUN pnpm --filter @bolao/shared build
+# Generate Prisma client for linux-alpine target
 RUN pnpm --filter @bolao/backend exec prisma generate
+# Compile NestJS app
+RUN pnpm --filter @bolao/backend build
 
-# ─── Runner ───────────────────────────────────────────────────────────────────
+# ── Runner ────────────────────────────────────────────────────────────────────
 FROM node:20-alpine AS runner
-RUN npm install -g pnpm@9 --no-fund --no-audit
 WORKDIR /app
 ENV NODE_ENV=production
+# Prisma CLI for migrate deploy (runtime only — not in devDeps)
+RUN npm install -g prisma@5 --no-fund --no-audit
 
-# Only copy what's needed to run
-COPY --from=builder /app/apps/backend/dist ./dist
-COPY --from=builder /app/apps/backend/prisma ./prisma
-COPY --from=builder /app/apps/backend/package.json ./package.json
-COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
-
-# Install production dependencies only
+# Workspace node_modules (includes Prisma native client for linux-alpine)
 COPY --from=builder /app/node_modules ./node_modules
+# Package-local node_modules (pnpm may place some deps here)
 COPY --from=builder /app/apps/backend/node_modules ./apps/backend/node_modules
+# packages/shared/dist/ is resolved at runtime via node_modules/@bolao/shared symlink
 COPY --from=builder /app/packages ./packages
+# Compiled backend
+COPY --from=builder /app/apps/backend/dist ./apps/backend/dist
+# Prisma schema + migrations (for migrate deploy)
+COPY --from=builder /app/apps/backend/prisma ./apps/backend/prisma
+COPY --from=builder /app/apps/backend/package.json ./apps/backend/package.json
 
-COPY apps/backend/entrypoint.sh ./entrypoint.sh
-RUN chmod +x entrypoint.sh
-
+WORKDIR /app/apps/backend
 EXPOSE 3001
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["sh", "-c", "prisma migrate deploy && exec node dist/main"]
