@@ -1,0 +1,188 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role             { ADMIN USER }
+enum BolaoStatus      { ATIVO PAGO ARQUIVADO }
+enum BolaoEscopo      { GRUPOS ELIMINATORIAS AMBOS }
+enum JogoFase         { GRUPOS OITAVAS QUARTAS SEMIS TERCEIRO_LUGAR FINAL }
+enum BolaoMembroPapel { MODERADOR PARTICIPANTE }
+
+model Usuario {
+  id              String    @id @default(uuid())
+  nome            String
+  email           String    @unique
+  senhaHash       String?
+  googleId        String?   @unique
+  role            Role      @default(USER)
+  avatarUrl       String?
+  emailVerificado Boolean   @default(false)
+  criadoEm        DateTime  @default(now())
+
+  membros       BolaoMembro[]
+  apostas       Aposta[]
+  rankings      Ranking[]
+  boloesGeridos Bolao[]                   @relation("BolaoCriador")
+  convites      BolaoConvite[]
+  subscriptions NotificacaoSubscription[]
+  configuracoes ConfiguracaoPontuacao[]
+
+  @@map("usuario")
+}
+
+model Bolao {
+  id               String      @id @default(uuid())
+  nome             String
+  descricao        String?
+  status           BolaoStatus @default(ATIVO)
+  escopo           BolaoEscopo
+  maxParticipantes Int
+  precoReais       Decimal     @db.Decimal(10, 2)
+  criadoPorId      String
+  criadoPor        Usuario     @relation("BolaoCriador", fields: [criadoPorId], references: [id])
+  criadoEm        DateTime    @default(now())
+
+  membros  BolaoMembro[]
+  convites BolaoConvite[]
+  apostas  Aposta[]
+  rankings Ranking[]
+
+  @@map("bolao")
+}
+
+model BolaoMembro {
+  id        String           @id @default(uuid())
+  bolaoId   String
+  bolao     Bolao            @relation(fields: [bolaoId], references: [id])
+  usuarioId String
+  usuario   Usuario          @relation(fields: [usuarioId], references: [id])
+  papel     BolaoMembroPapel @default(PARTICIPANTE)
+  entrouEm  DateTime         @default(now())
+
+  @@unique([bolaoId, usuarioId])
+  @@map("bolao_membro")
+}
+
+model BolaoConvite {
+  id          String    @id @default(uuid())
+  bolaoId     String
+  bolao       Bolao     @relation(fields: [bolaoId], references: [id])
+  token       String    @unique @default(uuid())
+  criadoPorId String
+  criadoPor   Usuario   @relation(fields: [criadoPorId], references: [id])
+  expiraEm    DateTime?
+
+  @@map("bolao_convite")
+}
+
+model Selecao {
+  id          String @id @default(uuid())
+  nome        String
+  codigo      String @unique
+  bandeiraSvg String
+  grupo       String @db.Char(1)
+
+  jogosCasa      Jogo[] @relation("JogoSelecaoCasa")
+  jogosVisitante Jogo[] @relation("JogoSelecaoVisitante")
+
+  @@map("selecao")
+}
+
+model Estadio {
+  id     String @id @default(uuid())
+  nome   String @unique
+  cidade String
+  pais   String
+
+  jogos Jogo[]
+
+  @@map("estadio")
+}
+
+model Jogo {
+  id                 String   @id @default(uuid())
+  selecaoCasaId      String
+  selecaoCasa        Selecao  @relation("JogoSelecaoCasa", fields: [selecaoCasaId], references: [id])
+  selecaoVisitanteId String
+  selecaoVisitante   Selecao  @relation("JogoSelecaoVisitante", fields: [selecaoVisitanteId], references: [id])
+  estadioId          String
+  estadio            Estadio  @relation(fields: [estadioId], references: [id])
+  dataHora           DateTime
+  rodada             Int
+  grupo              String?  @db.Char(1)
+  fase               JogoFase
+  placarCasa         Int?
+  placarVisitante    Int?
+  pesoPontuacao      Int      @default(1)
+
+  apostas Aposta[]
+
+  @@map("jogo")
+}
+
+model Aposta {
+  id              String   @id @default(uuid())
+  usuarioId       String
+  usuario         Usuario  @relation(fields: [usuarioId], references: [id])
+  jogoId          String
+  jogo            Jogo     @relation(fields: [jogoId], references: [id])
+  bolaoId         String
+  bolao           Bolao    @relation(fields: [bolaoId], references: [id])
+  placarCasa      Int
+  placarVisitante Int
+  pontuacao       Int?
+  criadoEm       DateTime @default(now())
+  atualizadoEm   DateTime @updatedAt
+
+  @@unique([usuarioId, jogoId, bolaoId])
+  @@map("aposta")
+}
+
+model Ranking {
+  id                    String  @id @default(uuid())
+  bolaoId               String
+  bolao                 Bolao   @relation(fields: [bolaoId], references: [id])
+  usuarioId             String
+  usuario               Usuario @relation(fields: [usuarioId], references: [id])
+  pontuacaoTotal        Int     @default(0)
+  acertosPlacarExato    Int     @default(0)
+  acertosPlacarVencedor Int     @default(0)
+  acertosPlacarPerdedor Int     @default(0)
+  acertosEmpate         Int     @default(0)
+  acertosGanhador       Int     @default(0)
+  acertosNada           Int     @default(0)
+  posicao               Int     @default(0)
+  apostasPostadas       Int     @default(0)
+
+  @@unique([bolaoId, usuarioId])
+  @@map("ranking")
+}
+
+model ConfiguracaoPontuacao {
+  id              String   @id @default(uuid())
+  nivel           Int      @unique
+  descricao       String
+  pontos          Int
+  atualizadoEm    DateTime @updatedAt
+  atualizadoPorId String?
+  atualizadoPor   Usuario? @relation(fields: [atualizadoPorId], references: [id])
+
+  @@map("configuracao_pontuacao")
+}
+
+model NotificacaoSubscription {
+  id        String   @id @default(uuid())
+  usuarioId String
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  criadoEm  DateTime @default(now())
+
+  @@map("notificacao_subscription")
+}
