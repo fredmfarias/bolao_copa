@@ -1,0 +1,6 @@
+{
+  "name": "@bolao/frontend",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": { "dev": "echo 'frontend not yet implemented'" }
+}
