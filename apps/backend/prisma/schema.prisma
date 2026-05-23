@@ -7,11 +7,36 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role             { ADMIN USER }
-enum BolaoStatus      { ATIVO PAGO ARQUIVADO }
-enum BolaoEscopo      { GRUPOS ELIMINATORIAS AMBOS }
-enum JogoFase         { GRUPOS OITAVAS QUARTAS SEMIS TERCEIRO_LUGAR FINAL }
-enum BolaoMembroPapel { MODERADOR PARTICIPANTE }
+enum Role {
+  ADMIN
+  USER
+}
+
+enum BolaoStatus {
+  ATIVO
+  PAGO
+  ARQUIVADO
+}
+
+enum BolaoEscopo {
+  GRUPOS
+  ELIMINATORIAS
+  AMBOS
+}
+
+enum JogoFase {
+  GRUPOS
+  OITAVAS
+  QUARTAS
+  SEMIS
+  TERCEIRO_LUGAR
+  FINAL
+}
+
+enum BolaoMembroPapel {
+  MODERADOR
+  PARTICIPANTE
+}
 
 model Usuario {
   id              String    @id @default(uuid())
