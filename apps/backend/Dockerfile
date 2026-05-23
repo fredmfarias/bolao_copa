@@ -1,7 +1,8 @@
 # syntax=docker/dockerfile:1
 
 FROM node:20-alpine AS base
-RUN corepack enable
+# OpenSSL is required by Prisma's Rust binaries (schema-engine, query-engine)
+RUN apk add --no-cache openssl && corepack enable
 
 # ── Install deps (cached layer) ───────────────────────────────────────────────
 FROM base AS deps
@@ -24,6 +25,8 @@ RUN pnpm --filter @bolao/backend build
 
 # ── Runner ────────────────────────────────────────────────────────────────────
 FROM node:20-alpine AS runner
+# OpenSSL needed by Prisma query-engine and schema-engine at runtime
+RUN apk add --no-cache openssl
 WORKDIR /app
 ENV NODE_ENV=production
 # Prisma CLI for migrate deploy (runtime only — not in devDeps)

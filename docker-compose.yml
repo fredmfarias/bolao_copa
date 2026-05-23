@@ -5,6 +5,10 @@
 #   Backend:   http://localhost:3001
 #   Mailpit:   http://localhost:8025  (webmail para inspecionar emails)
 #
+# Postgres e Redis não expõem porta no host — serviços comunicam
+# internamente. Para acesso direto ao DB, adicione manualmente:
+#   ports: ["5433:5432"]
+#
 # Para substituir variáveis, copie .env.example → .env e edite.
 
 services:
@@ -15,8 +19,6 @@ services:
       POSTGRES_DB: bolao_trovao
       POSTGRES_USER: bolao
       POSTGRES_PASSWORD: secret
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -28,8 +30,6 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
-    ports:
-      - "6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:
