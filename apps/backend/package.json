@@ -10,6 +10,7 @@
     "test:watch": "jest --watch",
     "lint": "eslint src --ext .ts",
     "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
     "db:seed": "ts-node prisma/seed.ts",
     "db:reset": "prisma migrate reset --force"
   },
