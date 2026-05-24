@@ -3,10 +3,8 @@
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { JogoCard } from '@/components/JogoCard';
-import { ApostaForm } from '@/components/ApostaForm';
 import type { Jogo } from '@/types/api';
 import { JogoFase } from '@bolao/shared';
-import { BOLAO_GLOBAL_ID } from '@bolao/shared';
 
 const FASES = ['Todos', ...Object.values(JogoFase)];
 
@@ -43,16 +41,8 @@ export default function JogosPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           {jogos.map(jogo => (
-            <div key={jogo.id}>
-              {apostando === jogo.id ? (
-                <ApostaForm jogo={jogo} bolaoId={BOLAO_GLOBAL_ID}
-                  onSuccess={() => { setApostando(null); carregar(); }}
-                  onCancel={() => setApostando(null)} />
-              ) : (
-                <JogoCard jogo={jogo} aposta={undefined}
-                  onApostar={() => setApostando(jogo.id)} />
-              )}
-            </div>
+            <JogoCard key={jogo.id} jogo={jogo}
+              onApostar={() => setApostando(jogo.id)} />
           ))}
         </div>
       )}

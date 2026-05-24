@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { api } from '@/lib/api';
 import { useAuth } from '@/components/AuthProvider';
 import { JogoCard } from '@/components/JogoCard';
-import { ApostaForm } from '@/components/ApostaForm';
+import { ApostaDrawer } from '@/components/ApostaDrawer';
 import type { Bolao, Jogo, Aposta } from '@/types/api';
 
 export default function BolaoDetalhePage() {
@@ -66,21 +66,24 @@ export default function BolaoDetalhePage() {
 
       <div>
         <h2 className="text-sm font-semibold text-gray-400 mb-3">Jogos e apostas</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-3">
           {jogos.map(jogo => (
-            <div key={jogo.id}>
-              {apostando === jogo.id ? (
-                <ApostaForm jogo={jogo} bolaoId={id}
-                  apostaAtual={apostaMap[jogo.id]}
-                  onSuccess={() => { setApostando(null); carregar(); }}
-                  onCancel={() => setApostando(null)} />
-              ) : (
-                <JogoCard jogo={jogo} aposta={apostaMap[jogo.id]}
-                  onApostar={() => setApostando(jogo.id)} />
-              )}
-            </div>
+            <JogoCard key={jogo.id} jogo={jogo} aposta={apostaMap[jogo.id]}
+              onApostar={() => setApostando(jogo.id)} />
           ))}
         </div>
+
+        {apostando && (
+          <ApostaDrawer
+            key={apostando}
+            jogo={jogos.find(j => j.id === apostando)!}
+            aposta={apostaMap[apostando]}
+            bolaoId={id}
+            aberto={true}
+            onFechar={() => setApostando(null)}
+            onSalvo={carregar}
+          />
+        )}
       </div>
     </div>
   );
