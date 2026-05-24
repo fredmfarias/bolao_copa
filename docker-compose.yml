@@ -52,6 +52,7 @@ services:
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://bolao:secret@postgres:5432/bolao_trovao
+      REDIS_URL: redis://redis:6379
       REDIS_HOST: redis
       REDIS_PORT: 6379
       JWT_SECRET: ${JWT_SECRET:-local-jwt-secret-change-in-production-min32}
