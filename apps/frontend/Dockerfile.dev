@@ -1,0 +1,10 @@
+# syntax=docker/dockerfile:1
+# Dev only — fonte montada via volume, hot-reload via next dev
+
+FROM node:20-alpine
+RUN corepack enable
+WORKDIR /app
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+COPY packages/shared/package.json ./packages/shared/
+COPY apps/frontend/package.json ./apps/frontend/
+RUN pnpm install --frozen-lockfile

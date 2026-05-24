@@ -6,18 +6,22 @@ import * as webpush from 'web-push';
 
 @Injectable()
 export class NotificacaoService {
-  private readonly vapidConfigured: boolean;
+  private vapidConfigured: boolean;
 
   constructor(private prisma: PrismaService, private config: ConfigService) {
     const pub = config.get<string>('VAPID_PUBLIC_KEY');
     const priv = config.get<string>('VAPID_PRIVATE_KEY');
     this.vapidConfigured = !!(pub && priv);
     if (this.vapidConfigured) {
-      webpush.setVapidDetails(
-        config.get('VAPID_MAILTO') ?? 'mailto:admin@bolao.local',
-        pub!,
-        priv!,
-      );
+      try {
+        webpush.setVapidDetails(
+          config.get('VAPID_MAILTO') ?? 'mailto:admin@bolao.local',
+          pub!,
+          priv!,
+        );
+      } catch {
+        this.vapidConfigured = false;
+      }
     }
   }
 
