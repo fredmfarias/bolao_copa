@@ -10,6 +10,7 @@ import { JogoModule } from './jogo/jogo.module';
 import { ApostaModule } from './aposta/aposta.module';
 import { RankingModule } from './ranking/ranking.module';
 import { NotificacaoModule } from './notificacao/notificacao.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { NotificacaoModule } from './notificacao/notificacao.module';
     ApostaModule,
     RankingModule,
     NotificacaoModule,
+    AdminModule,
   ],
 })
 export class AppModule {}
