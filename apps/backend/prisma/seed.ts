@@ -1,4 +1,5 @@
 import { PrismaClient, BolaoStatus, BolaoEscopo, Role, JogoFase } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -6,6 +7,7 @@ const ADMIN_ID = '00000000-0000-0000-0000-000000000000';
 const BOLAO_GLOBAL_ID = '00000000-0000-0000-0000-000000000001';
 
 async function main() {
+  const senhaHash = await bcrypt.hash('admin123', 12);
   await prisma.usuario.upsert({
     where: { id: ADMIN_ID },
     update: {},
@@ -15,7 +17,7 @@ async function main() {
       email: 'admin@bolao.com',
       role: Role.ADMIN,
       emailVerificado: true,
-      senhaHash: null,
+      senhaHash,
     },
   });
 
