@@ -12,10 +12,10 @@ const SIZES = {
 
 export function SelecaoAvatar({ nome, bandeiraSvg, size = 'md' }: SelecaoAvatarProps) {
   return (
-    <div
-      title={nome}
-      className={`${SIZES[size]} rounded-full overflow-hidden flex-shrink-0 [&>svg]:w-full [&>svg]:h-full`}
-      dangerouslySetInnerHTML={{ __html: bandeiraSvg }}
+    <img
+      src={bandeiraSvg}
+      alt={nome}
+      className={`${SIZES[size]} rounded-full object-cover flex-shrink-0`}
     />
   );
 }
