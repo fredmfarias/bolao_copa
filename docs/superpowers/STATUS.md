@@ -10,8 +10,8 @@
 | Campo | Valor |
 |---|---|
 | **Módulo ativo** | M1 — Fundação |
-| **Ticket ativo** | [T101 — shadcn/ui + tokens visuais](./tickets/T101-shadcn-tokens.md) |
-| **Próxima ação** | Executar T101 (Fase B) |
+| **Ticket ativo** | [T102 — BottomNav + AppLayout](./tickets/T102-bottom-nav.md) |
+| **Próxima ação** | Executar T102 (Fase B) |
 
 ---
 
@@ -19,7 +19,7 @@
 
 | Módulo | Status | Tickets |
 |---|---|---|
-| M1 — Fundação | `pronto para execução` | 5 / 5 criados · 0 / 5 concluídos |
+| M1 — Fundação | `em execução` | 5 / 5 criados · 1 / 5 concluídos |
 | M2 — Apostas | `aguardando M1` | — |
 | M3 — Ranking | `aguardando M2` | — |
 | M4 — Admin | `aguardando M3` | — |
@@ -30,5 +30,5 @@
 ## Última sessão
 
 **Data:** 2026-05-24  
-**O que foi feito:** Tickets T101–T105 do M1 criados com código completo (testes, implementação, validação, commit).  
-**Commit:** (pendente — commitar tickets agora)
+**O que foi feito:** T101 concluído — shadcn/ui + jest + tokens trovao-* aplicados. Fix: shadcn v4 incompatível com Tailwind v3 (removida import shadcn/tailwind.css). `tsc --noEmit` passa sem erros.  
+**Commit:** (ver abaixo)

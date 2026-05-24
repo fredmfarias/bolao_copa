@@ -2,7 +2,7 @@
 
 > **Módulo:** [M1 — Fundação](../modules/M1-fundacao.md)
 > **Tamanho:** `M`
-> **Status:** `pendente`
+> **Status:** `concluído`
 
 ---
 
@@ -28,7 +28,7 @@ Instalar shadcn/ui e a infraestrutura de testes, depois aplicar a paleta `trovao
 
 ## Passos
 
-- [ ] **Passo 1: Instalar dependências de teste**
+- [x] **Passo 1: Instalar dependências de teste**
 
 ```bash
 pnpm add -D jest jest-environment-jsdom @types/jest \
@@ -37,7 +37,7 @@ pnpm add -D jest jest-environment-jsdom @types/jest \
   --filter @bolao/frontend
 ```
 
-- [ ] **Passo 2: Adicionar script de teste ao `package.json`**
+- [x] **Passo 2: Adicionar script de teste ao `package.json`**
 
 Editar `apps/frontend/package.json` — adicionar na seção `scripts`:
 
@@ -46,7 +46,7 @@ Editar `apps/frontend/package.json` — adicionar na seção `scripts`:
 "test:watch": "jest --watch"
 ```
 
-- [ ] **Passo 3: Criar `jest.config.ts`**
+- [x] **Passo 3: Criar `jest.config.ts`**
 
 ```typescript
 // apps/frontend/jest.config.ts
@@ -57,20 +57,20 @@ const createJestConfig = nextJest({ dir: './' });
 
 const config: Config = {
   testEnvironment: 'jsdom',
-  setupFilesAfterFramework: ['<rootDir>/jest.setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
 };
 
 export default createJestConfig(config);
 ```
 
-- [ ] **Passo 4: Criar `jest.setup.ts`**
+- [x] **Passo 4: Criar `jest.setup.ts`**
 
 ```typescript
 // apps/frontend/jest.setup.ts
 import '@testing-library/jest-dom';
 ```
 
-- [ ] **Passo 5: Verificar que o jest está configurado**
+- [x] **Passo 5: Verificar que o jest está configurado**
 
 ```bash
 pnpm test --filter @bolao/frontend
@@ -78,7 +78,7 @@ pnpm test --filter @bolao/frontend
 
 Saída esperada: `No tests found, exiting with code 0` (sem erro de configuração).
 
-- [ ] **Passo 6: Instalar shadcn/ui**
+- [x] **Passo 6: Instalar shadcn/ui**
 
 ```bash
 cd apps/frontend
@@ -87,7 +87,7 @@ pnpm dlx shadcn@latest init -d
 
 Isso cria `components.json` e `src/lib/utils.ts` com o helper `cn()`.
 
-- [ ] **Passo 7: Substituir `tailwind.config.ts`**
+- [x] **Passo 7: Substituir `tailwind.config.ts`**
 
 ```typescript
 // apps/frontend/tailwind.config.ts
@@ -121,7 +121,7 @@ const config: Config = {
 export default config;
 ```
 
-- [ ] **Passo 8: Substituir `globals.css`**
+- [x] **Passo 8: Substituir `globals.css`**
 
 ```css
 /* apps/frontend/src/app/globals.css */
@@ -137,7 +137,7 @@ export default config;
 }
 ```
 
-- [ ] **Passo 9: Validar build**
+- [x] **Passo 9: Validar build**
 
 ```bash
 pnpm build --filter @bolao/frontend

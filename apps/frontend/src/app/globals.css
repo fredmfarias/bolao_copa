@@ -2,6 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply bg-gray-950 text-gray-100 min-h-screen;
+@layer base {
+  /*
+   * CSS variables em formato HSL para compatibilidade com componentes shadcn
+   * que serão adicionados via `pnpm dlx shadcn@latest add <component>`
+   */
+  :root {
+    --background:           133 58% 7%;   /* #071A0E */
+    --foreground:           0 0% 100%;
+    --card:                 151 53% 11%;  /* #0D2A1C */
+    --card-foreground:      0 0% 100%;
+    --popover:              151 53% 11%;
+    --popover-foreground:   0 0% 100%;
+    --primary:              51 100% 50%;  /* #FFD600 */
+    --primary-foreground:   133 58% 7%;
+    --secondary:            148 32% 18%;  /* #1E3A2A */
+    --secondary-foreground: 0 0% 100%;
+    --muted:                148 32% 18%;
+    --muted-foreground:     215 16% 65%;  /* #94A3B8 */
+    --accent:               148 32% 18%;
+    --accent-foreground:    0 0% 100%;
+    --destructive:          0 84% 60%;   /* #EF4444 */
+    --destructive-foreground: 0 0% 100%;
+    --border:               148 32% 18%;
+    --input:                148 32% 18%;
+    --ring:                 51 100% 50%;
+    --radius:               0.75rem;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply bg-trovao-base text-white font-sans;
+    min-height: 100dvh;
+  }
 }
