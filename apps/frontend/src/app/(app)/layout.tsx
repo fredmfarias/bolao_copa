@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
-import { NavBar } from '@/components/NavBar';
+import { BottomNav } from '@/components/BottomNav';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -16,7 +16,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <span className="text-gray-400">Carregando...</span>
+        <span className="text-trovao-muted text-sm">Carregando...</span>
       </div>
     );
   }
@@ -24,9 +24,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <NavBar />
-      <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-6">{children}</main>
+    <div className="min-h-screen">
+      <main className="max-w-lg mx-auto w-full px-4 pt-6 pb-24">
+        {children}
+      </main>
+      <BottomNav />
     </div>
   );
 }
