@@ -2,7 +2,7 @@
 
 > **Módulo:** [M1 — Fundação](../modules/M1-fundacao.md)
 > **Tamanho:** `S`
-> **Status:** `pendente`
+> **Status:** `concluído`
 > **Depende de:** T101 concluído (jest configurado)
 
 ---
