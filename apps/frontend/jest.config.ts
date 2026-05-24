@@ -7,6 +7,9 @@ const config: Config = {
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   modulePathIgnorePatterns: ['<rootDir>/.next/standalone'],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+  },
 };
 
 export default createJestConfig(config);
