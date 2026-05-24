@@ -10,8 +10,8 @@
 | Campo | Valor |
 |---|---|
 | **Módulo ativo** | M1 — Fundação |
-| **Ticket ativo** | [T102 — BottomNav + AppLayout](./tickets/T102-bottom-nav.md) |
-| **Próxima ação** | Executar T102 (Fase B) |
+| **Ticket ativo** | [T103 — PageSkeleton e EmptyState](./tickets/T103-skeleton-empty.md) |
+| **Próxima ação** | Executar T103 (Fase B) |
 
 ---
 
@@ -19,7 +19,7 @@
 
 | Módulo | Status | Tickets |
 |---|---|---|
-| M1 — Fundação | `em execução` | 5 / 5 criados · 1 / 5 concluídos |
+| M1 — Fundação | `em execução` | 5 / 5 criados · 2 / 5 concluídos |
 | M2 — Apostas | `aguardando M1` | — |
 | M3 — Ranking | `aguardando M2` | — |
 | M4 — Admin | `aguardando M3` | — |

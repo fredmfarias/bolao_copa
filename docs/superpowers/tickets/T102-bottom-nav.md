@@ -2,7 +2,7 @@
 
 > **Módulo:** [M1 — Fundação](../modules/M1-fundacao.md)
 > **Tamanho:** `S`
-> **Status:** `pendente`
+> **Status:** `concluído`
 > **Depende de:** T101 concluído (jest configurado)
 
 ---
@@ -26,13 +26,13 @@ Criar `BottomNav` mobile-first fixo no rodapé e atualizar o `AppLayout` para us
 
 ## Passos
 
-- [ ] **Passo 1: Instalar lucide-react**
+- [x] **Passo 1: Instalar lucide-react**
 
 ```bash
 pnpm add lucide-react --filter @bolao/frontend
 ```
 
-- [ ] **Passo 2: Escrever o teste (vai falhar)**
+- [x] **Passo 2: Escrever o teste (vai falhar)**
 
 ```typescript
 // apps/frontend/src/__tests__/BottomNav.test.tsx
@@ -58,7 +58,7 @@ it('marca o item ativo quando pathname bate', () => {
 });
 ```
 
-- [ ] **Passo 3: Rodar para confirmar falha**
+- [x] **Passo 3: Rodar para confirmar falha**
 
 ```bash
 pnpm test --filter @bolao/frontend -- BottomNav
@@ -66,7 +66,7 @@ pnpm test --filter @bolao/frontend -- BottomNav
 
 Saída esperada: `FAIL — Cannot find module '@/components/BottomNav'`
 
-- [ ] **Passo 4: Implementar `BottomNav`**
+- [x] **Passo 4: Implementar `BottomNav`**
 
 ```typescript
 // apps/frontend/src/components/BottomNav.tsx
@@ -110,7 +110,7 @@ export function BottomNav() {
 }
 ```
 
-- [ ] **Passo 5: Rodar testes — devem passar**
+- [x] **Passo 5: Rodar testes — devem passar**
 
 ```bash
 pnpm test --filter @bolao/frontend -- BottomNav
@@ -118,7 +118,7 @@ pnpm test --filter @bolao/frontend -- BottomNav
 
 Saída esperada: `PASS · 2 tests passed`
 
-- [ ] **Passo 6: Atualizar `AppLayout`**
+- [x] **Passo 6: Atualizar `AppLayout`**
 
 ```typescript
 // apps/frontend/src/app/(app)/layout.tsx
@@ -158,13 +158,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 }
 ```
 
-- [ ] **Passo 7: Deletar `NavBar.tsx`**
+- [x] **Passo 7: Deletar `NavBar.tsx`**
 
 ```bash
 rm apps/frontend/src/components/NavBar.tsx
 ```
 
-- [ ] **Passo 8: Validar build**
+- [x] **Passo 8: Validar build**
 
 ```bash
 pnpm build --filter @bolao/frontend
@@ -172,7 +172,7 @@ pnpm build --filter @bolao/frontend
 
 Saída esperada: sem erros de tipo ou referências ao `NavBar`.
 
-- [ ] **Passo 9: Commit**
+- [x] **Passo 9: Commit**
 
 ```bash
 git add apps/frontend/src/components/BottomNav.tsx \

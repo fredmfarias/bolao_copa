@@ -53,7 +53,7 @@ Carregar antes de começar:
 ## Tickets
 
 - [x] [T101 — shadcn/ui + jest + tokens visuais](../tickets/T101-shadcn-tokens.md)
-- [ ] [T102 — BottomNav + atualizar AppLayout](../tickets/T102-bottom-nav.md)
+- [x] [T102 — BottomNav + atualizar AppLayout](../tickets/T102-bottom-nav.md)
 - [ ] [T103 — PageSkeleton e EmptyState](../tickets/T103-skeleton-empty.md)
 - [ ] [T104 — SelecaoAvatar e ScoreDisplay](../tickets/T104-avatar-score.md)
 - [ ] [T105 — Hooks base: useAutoSave, useAdmin, useModerador](../tickets/T105-hooks.md)
