@@ -98,6 +98,23 @@ export class BolaoService {
     return this.prisma.bolao.update({ where: { id: bolaoId }, data: { status: dto.status } });
   }
 
+  async lookupConvite(token: string) {
+    const convite = await this.prisma.bolaoConvite.findUnique({
+      where: { token },
+      include: { bolao: true, criadoPor: { select: { nome: true } } },
+    });
+    if (!convite) return { valido: false, bolaoId: null, bolaoNome: null, descricao: null, criadorNome: null, expiraEm: null };
+    const valido = !convite.expiraEm || convite.expiraEm > new Date();
+    return {
+      valido,
+      bolaoId: convite.bolaoId,
+      bolaoNome: convite.bolao.nome,
+      descricao: convite.bolao.descricao,
+      criadorNome: convite.criadoPor.nome,
+      expiraEm: convite.expiraEm?.toISOString() ?? null,
+    };
+  }
+
   private async adicionarMembro(bolaoId: string, usuarioId: string) {
     const bolao = await this.prisma.bolao.findUnique({ where: { id: bolaoId } });
     if (!bolao) throw new NotFoundException('Bolão não encontrado.');

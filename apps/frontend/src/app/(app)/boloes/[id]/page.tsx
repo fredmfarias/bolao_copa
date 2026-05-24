@@ -7,6 +7,8 @@ import { api } from '@/lib/api';
 import { useAuth } from '@/components/AuthProvider';
 import { JogoCard } from '@/components/JogoCard';
 import { ApostaDrawer } from '@/components/ApostaDrawer';
+import { ModeradorPanel } from '@/components/ModeradorPanel';
+import { ConvitePanel } from '@/components/ConvitePanel';
 import type { Bolao, Jogo, Aposta } from '@/types/api';
 
 export default function BolaoDetalhePage() {
@@ -49,20 +51,29 @@ export default function BolaoDetalhePage() {
           className="text-sm text-yellow-400 hover:underline">Ver ranking</Link>
       </div>
 
-      <div>
-        <h2 className="text-sm font-semibold text-gray-400 mb-3">
-          Membros ({bolao.membros?.length ?? 0})
-        </h2>
-        <div className="flex flex-wrap gap-2">
-          {bolao.membros?.map(m => (
-            <div key={m.id} className="flex items-center gap-1.5 bg-gray-800 rounded-full px-3 py-1 text-xs">
-              {m.usuario.avatarUrl && <img src={m.usuario.avatarUrl} alt="" className="w-4 h-4 rounded-full" />}
-              <span>{m.usuario.nome}</span>
-              {m.papel === 'MODERADOR' && <span className="text-yellow-400">★</span>}
-            </div>
-          ))}
+      {isModerador && (
+        <div className="space-y-4">
+          <ConvitePanel bolaoId={id} />
+          <ModeradorPanel bolaoId={id} membros={bolao.membros ?? []} onAtualizado={carregar} />
         </div>
-      </div>
+      )}
+
+      {!isModerador && (
+        <div>
+          <h2 className="text-sm font-semibold text-gray-400 mb-3">
+            Membros ({bolao.membros?.length ?? 0})
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {bolao.membros?.map(m => (
+              <div key={m.id} className="flex items-center gap-1.5 bg-gray-800 rounded-full px-3 py-1 text-xs">
+                {m.usuario.avatarUrl && <img src={m.usuario.avatarUrl} alt="" className="w-4 h-4 rounded-full" />}
+                <span>{m.usuario.nome}</span>
+                {m.papel === 'MODERADOR' && <span className="text-yellow-400">★</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div>
         <h2 className="text-sm font-semibold text-gray-400 mb-3">Jogos e apostas</h2>

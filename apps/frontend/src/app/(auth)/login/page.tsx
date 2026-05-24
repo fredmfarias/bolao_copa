@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 
 export default function LoginPage() {
   const { login } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get('redirect') ?? '/jogos';
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
@@ -19,7 +21,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(email, senha);
-      router.push('/jogos');
+      router.push(redirect);
     } catch (err: any) {
       setErro(err.message ?? 'Erro ao fazer login.');
     } finally {

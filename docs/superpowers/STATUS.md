@@ -9,9 +9,9 @@
 
 | Campo | Valor |
 |---|---|
-| **Módulo ativo** | M2 — Apostas |
+| **Módulo ativo** | — |
 | **Ticket ativo** | — |
-| **Próxima ação** | Escrever contratos jogo-card.md e aposta-drawer.md, depois Fase A M3 |
+| **Próxima ação** | Todos os módulos concluídos. Frontend maduro completo. |
 
 ---
 
@@ -21,14 +21,14 @@
 |---|---|---|
 | M1 — Fundação | `concluído` | 5 / 5 criados · 5 / 5 concluídos |
 | M2 — Apostas | `concluído` | 3 / 3 criados · 3 / 3 concluídos |
-| M3 — Ranking | `aguardando M2` | — |
-| M4 — Admin | `aguardando M3` | — |
-| M5 — Bolão/Convite | `aguardando M4` | — |
+| M3 — Ranking | `concluído` | 5 / 5 criados · 5 / 5 concluídos |
+| M4 — Admin | `concluído` | 5 / 5 criados · 5 / 5 concluídos |
+| M5 — Bolão/Convite | `concluído` | 5 / 5 criados · 5 / 5 concluídos |
 
 ---
 
 ## Última sessão
 
 **Data:** 2026-05-24  
-**O que foi feito:** M2 concluído — T201 (JogoCard 4 estados), T202 (ApostaDrawer + Sheet shadcn), T203 (FaseFilterChips + jogos/page agrupada por data + load paralelo apostas). Fix: `moduleNameMapper` para `@bolao/shared` no jest.config.ts. 36 testes passando.  
-**Próximo:** escrever contratos jogo-card.md e aposta-drawer.md → Fase A M3
+**O que foi feito:** M3/M4 completos (RankingPodium, RankingRow, ApostasDialog, AdminPlacardCard, AdminRankingPreview, AdminUsuarioRow, admin layout, admin pages). M5 completo (ConvitePanel, ModeradorPanel, landing convite/[codigo], redirect pós-auth, BolaoModule registrando ConvitePublicoController, integração ModeradorPanel+ConvitePanel em boloes/[id]). Contratos ranking.md, admin.md, convite.md escritos. Backend + frontend compilam sem erros.  
+**Próximo:** — (projeto completo)

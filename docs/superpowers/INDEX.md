@@ -10,9 +10,9 @@
 |---|---|---|---|
 | [M1 — Fundação](./modules/M1-fundacao.md) | shadcn/ui, tokens, hooks base, BottomNav | `concluído` | — |
 | [M2 — Apostas](./modules/M2-apostas.md) | JogoCard, ApostaDrawer, auto-save | `concluído` | jogo-card, aposta-drawer |
-| [M3 — Ranking](./modules/M3-ranking.md) | Pódio, accordion, palpites, draft state | `pendente` | ranking |
-| [M4 — Admin](./modules/M4-admin.md) | Placares, ranking admin, usuários | `pendente` | admin |
-| [M5 — Bolão/Convite](./modules/M5-bolao-convite.md) | Link de convite, landing, moderador | `pendente` | convite |
+| [M3 — Ranking](./modules/M3-ranking.md) | Pódio, accordion, palpites, draft state | `concluído` | ranking |
+| [M4 — Admin](./modules/M4-admin.md) | Placares, ranking admin, usuários | `concluído` | admin |
+| [M5 — Bolão/Convite](./modules/M5-bolao-convite.md) | Link de convite, landing, moderador | `concluído` | convite |
 
 ---
 

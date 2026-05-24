@@ -10,6 +10,16 @@ import { CreateBolaoDto } from './dto/create-bolao.dto';
 import { UpdateBolaoStatusDto } from './dto/update-bolao-status.dto';
 import { Role } from '@bolao/shared';
 
+@Controller('convites')
+export class ConvitePublicoController {
+  constructor(private service: BolaoService) {}
+
+  @Get(':token')
+  lookup(@Param('token') token: string) {
+    return this.service.lookupConvite(token);
+  }
+}
+
 @UseGuards(JwtAuthGuard)
 @Controller('boloes')
 export class BolaoController {
