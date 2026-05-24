@@ -46,16 +46,11 @@ git clone <url-do-repo>
 cd bolao-trovao
 pnpm install
 
-# 2. Configure as variáveis de ambiente
-cp .env.example .env
-# Edite .env com os valores necessários (veja a seção Variáveis de Ambiente)
+# 2. Suba todos os serviços (migrations rodam automaticamente)
+docker compose up --build -d
 
-# 3. Suba todos os serviços
-docker compose up --build
-
-# 4. Popule o banco (em outro terminal)
-cd apps/backend
-pnpm db:seed
+# 3. Popule o banco com estádios, seleções e jogos da Copa 2026
+docker exec bolao-trovao-backend-1 sh -c "cd /app/apps/backend && npx prisma db seed"
 ```
 
 Serviços disponíveis após a inicialização:
@@ -67,9 +62,14 @@ Serviços disponíveis após a inicialização:
 | Mailpit (e-mails de dev) | http://localhost:8025 |
 
 > [!NOTE]
-> O seed cria dois usuários de teste:
-> - `fred@bolao.com` / `senha123` — perfil **ADMIN**
-> - `maria@bolao.com` / `senha123` — perfil **USER**
+> O seed cria o usuário administrador do sistema (`admin@bolao.com`) sem senha — esse usuário é usado internamente pela aplicação. Para fazer login, **registre sua conta** em http://localhost:3000/registrar ou use o Google OAuth.
+
+> [!TIP]
+> Para recriar o banco do zero (apaga todos os dados):
+> ```bash
+> docker compose down -v && docker compose up --build -d
+> docker exec bolao-trovao-backend-1 sh -c "cd /app/apps/backend && npx prisma db seed"
+> ```
 
 ### Desenvolvimento local (sem Docker)
 
