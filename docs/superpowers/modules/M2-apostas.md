@@ -3,7 +3,7 @@
 > **Spec:** [`2026-05-23-frontend-maduro-design.md`](../specs/2026-05-23-frontend-maduro-design.md#camada-2--apostas)
 > **Depende de:** [M1 — Fundação](./M1-fundacao.md)
 > **Produz contratos:** [`contracts/jogo-card.md`](../contracts/jogo-card.md), [`contracts/aposta-drawer.md`](../contracts/aposta-drawer.md)
-> **Status:** `pendente`
+> **Status:** `concluído`
 
 ---
 
@@ -45,9 +45,9 @@ Carregar antes de começar:
 
 ## Tickets
 
-- [ ] [T201 — JogoCard com 4 estados visuais](../tickets/T201-jogo-card.md)
-- [ ] [T202 — ApostaDrawer com stepper](../tickets/T202-aposta-drawer.md)
-- [ ] [T203 — Lista de jogos agrupada por data com chips de filtro](../tickets/T203-jogos-lista.md)
+- [x] [T201 — JogoCard com 4 estados visuais](../tickets/T201-jogo-card.md)
+- [x] [T202 — ApostaDrawer com stepper](../tickets/T202-aposta-drawer.md)
+- [x] [T203 — Lista de jogos agrupada por data com chips de filtro](../tickets/T203-jogos-lista.md)
 
 ---
 
