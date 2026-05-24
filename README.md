@@ -62,7 +62,11 @@ Serviços disponíveis após a inicialização:
 | Mailpit (e-mails de dev) | http://localhost:8025 |
 
 > [!NOTE]
-> O seed cria o usuário administrador do sistema (`admin@bolao.com`) sem senha — esse usuário é usado internamente pela aplicação. Para fazer login, **registre sua conta** em http://localhost:3000/registrar ou use o Google OAuth.
+> O seed cria o usuário administrador com credenciais padrão:
+> - **E-mail:** `admin@bolao.com`
+> - **Senha:** `admin123`
+>
+> Troque a senha após o primeiro login. Para criar outros usuários, acesse http://localhost:3000/registrar.
 
 > [!TIP]
 > Para recriar o banco do zero (apaga todos os dados):
