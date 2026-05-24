@@ -5,6 +5,7 @@ import { BolaoModeradorGuard } from '../common/guards/bolao-moderador.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { BolaoService } from './bolao.service';
+import { ApostaService } from '../aposta/aposta.service';
 import { CreateBolaoDto } from './dto/create-bolao.dto';
 import { UpdateBolaoStatusDto } from './dto/update-bolao-status.dto';
 import { Role } from '@bolao/shared';
@@ -12,7 +13,7 @@ import { Role } from '@bolao/shared';
 @UseGuards(JwtAuthGuard)
 @Controller('boloes')
 export class BolaoController {
-  constructor(private service: BolaoService) {}
+  constructor(private service: BolaoService, private apostaService: ApostaService) {}
 
   @Post()
   criar(@CurrentUser() user: { id: string }, @Body() dto: CreateBolaoDto) {
@@ -70,6 +71,11 @@ export class BolaoController {
   @Post(':bolaoId/eleger/:usuarioId')
   eleger(@Param('bolaoId') bolaoId: string, @Param('usuarioId') usuarioId: string) {
     return this.service.elegerModerador(bolaoId, usuarioId);
+  }
+
+  @Get(':bolaoId/apostas')
+  listarPalpites(@Param('bolaoId') bolaoId: string, @Query('jogoId') jogoId: string) {
+    return this.apostaService.listarPalpitesPorJogo(bolaoId, jogoId);
   }
 
   @UseGuards(RolesGuard)

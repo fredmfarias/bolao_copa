@@ -66,4 +66,20 @@ export class ApostaService {
       orderBy: { jogo: { dataHora: 'asc' } },
     });
   }
+
+  async listarPalpitesPorJogo(bolaoId: string, jogoId: string) {
+    const apostas = await this.prisma.aposta.findMany({
+      where: { bolaoId, jogoId },
+      include: { usuario: { select: { id: true, nome: true, avatarUrl: true } } },
+      orderBy: [{ pontuacao: 'desc' }, { usuario: { nome: 'asc' } }],
+    });
+    return apostas.map(a => ({
+      usuarioId: a.usuarioId,
+      nome: a.usuario.nome,
+      avatarUrl: a.usuario.avatarUrl,
+      placarCasa: a.placarCasa,
+      placarVisitante: a.placarVisitante,
+      pontuacao: a.pontuacao,
+    }));
+  }
 }

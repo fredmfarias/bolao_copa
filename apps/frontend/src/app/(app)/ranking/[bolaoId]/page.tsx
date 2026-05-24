@@ -5,7 +5,10 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import { useAuth } from '@/components/AuthProvider';
-import { RankingTable } from '@/components/RankingTable';
+import { RankingPodium } from '@/components/RankingPodium';
+import { RankingRow } from '@/components/RankingRow';
+import { PageSkeleton } from '@/components/PageSkeleton';
+import { EmptyState } from '@/components/EmptyState';
 import type { RankingEntry } from '@/types/api';
 
 export default function RankingPage() {
@@ -15,21 +18,34 @@ export default function RankingPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get<RankingEntry[]>(`/boloes/${bolaoId}/ranking`).catch(() => [])
-      .then(setRanking)
-      .finally(() => setLoading(false));
+    api.get<RankingEntry[]>(`/boloes/${bolaoId}/ranking`)
+      .catch(() => [] as RankingEntry[])
+      .then(data => { setRanking(data); setLoading(false); });
   }, [bolaoId]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">Ranking</h1>
-        <Link href={`/boloes/${bolaoId}`} className="text-sm text-gray-400 hover:text-white">← Voltar</Link>
+        <Link href={`/boloes/${bolaoId}`} className="text-trovao-muted text-sm hover:text-white">← Voltar</Link>
       </div>
+
       {loading ? (
-        <p className="text-gray-500 text-center">Carregando...</p>
+        <PageSkeleton />
+      ) : ranking.length === 0 ? (
+        <EmptyState
+          titulo="Aguardando publicação"
+          descricao="O ranking será publicado pelo administrador após os jogos."
+        />
       ) : (
-        <RankingTable ranking={ranking} myId={user?.id} />
+        <>
+          <RankingPodium ranking={ranking} myId={user?.id} />
+          <div className="space-y-2 mt-4">
+            {ranking.slice(3).map(entry => (
+              <RankingRow key={entry.id} entry={entry} myId={user?.id} />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
