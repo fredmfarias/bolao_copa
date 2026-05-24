@@ -3,7 +3,7 @@
 > **Spec:** [`2026-05-23-frontend-maduro-design.md`](../specs/2026-05-23-frontend-maduro-design.md#camada-1--fundação)
 > **Depende de:** nada
 > **Produz contratos:** nenhum (fundação interna)
-> **Status:** `pendente`
+> **Status:** `concluído`
 
 ---
 
@@ -56,7 +56,7 @@ Carregar antes de começar:
 - [x] [T102 — BottomNav + atualizar AppLayout](../tickets/T102-bottom-nav.md)
 - [x] [T103 — PageSkeleton e EmptyState](../tickets/T103-skeleton-empty.md)
 - [x] [T104 — SelecaoAvatar e ScoreDisplay](../tickets/T104-avatar-score.md)
-- [ ] [T105 — Hooks base: useAutoSave, useAdmin, useModerador](../tickets/T105-hooks.md)
+- [x] [T105 — Hooks base: useAutoSave, useAdmin, useModerador](../tickets/T105-hooks.md)
 
 ---
 

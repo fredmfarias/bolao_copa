@@ -8,7 +8,7 @@
 
 | Módulo | Descrição | Status | Contratos produzidos |
 |---|---|---|---|
-| [M1 — Fundação](./modules/M1-fundacao.md) | shadcn/ui, tokens, hooks base, BottomNav | `pendente` | — |
+| [M1 — Fundação](./modules/M1-fundacao.md) | shadcn/ui, tokens, hooks base, BottomNav | `concluído` | — |
 | [M2 — Apostas](./modules/M2-apostas.md) | JogoCard, ApostaDrawer, auto-save | `pendente` | jogo-card, aposta-drawer |
 | [M3 — Ranking](./modules/M3-ranking.md) | Pódio, accordion, palpites, draft state | `pendente` | ranking |
 | [M4 — Admin](./modules/M4-admin.md) | Placares, ranking admin, usuários | `pendente` | admin |

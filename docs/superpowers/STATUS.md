@@ -10,8 +10,8 @@
 | Campo | Valor |
 |---|---|
 | **Módulo ativo** | M1 — Fundação |
-| **Ticket ativo** | [T105 — Hooks base](./tickets/T105-hooks.md) |
-| **Próxima ação** | Executar T105 (Fase B) |
+| **Ticket ativo** | — |
+| **Próxima ação** | Fase A — criar tickets do M2 |
 
 ---
 
@@ -19,8 +19,8 @@
 
 | Módulo | Status | Tickets |
 |---|---|---|
-| M1 — Fundação | `em execução` | 5 / 5 criados · 4 / 5 concluídos |
-| M2 — Apostas | `aguardando M1` | — |
+| M1 — Fundação | `concluído` | 5 / 5 criados · 5 / 5 concluídos |
+| M2 — Apostas | `pronto para Fase A` | — |
 | M3 — Ranking | `aguardando M2` | — |
 | M4 — Admin | `aguardando M3` | — |
 | M5 — Bolão/Convite | `aguardando M4` | — |
