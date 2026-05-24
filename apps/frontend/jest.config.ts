@@ -9,6 +9,7 @@ const config: Config = {
   modulePathIgnorePatterns: ['<rootDir>/.next/standalone'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^@bolao/shared$': '<rootDir>/../../packages/shared/src/index.ts',
   },
 };
 

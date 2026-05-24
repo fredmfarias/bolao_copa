@@ -76,7 +76,7 @@ export default function BolaoDetalhePage() {
                   onCancel={() => setApostando(null)} />
               ) : (
                 <JogoCard jogo={jogo} aposta={apostaMap[jogo.id]}
-                  bolaoId={id} onApostar={jid => setApostando(jid)} />
+                  onApostar={() => setApostando(jogo.id)} />
               )}
             </div>
           ))}

@@ -49,8 +49,8 @@ export default function JogosPage() {
                   onSuccess={() => { setApostando(null); carregar(); }}
                   onCancel={() => setApostando(null)} />
               ) : (
-                <JogoCard jogo={jogo} bolaoId={BOLAO_GLOBAL_ID}
-                  onApostar={id => setApostando(id)} />
+                <JogoCard jogo={jogo} aposta={undefined}
+                  onApostar={() => setApostando(jogo.id)} />
               )}
             </div>
           ))}

@@ -1,70 +1,97 @@
-'use client';
-
 import type { Jogo, Aposta } from '@/types/api';
+import { SelecaoAvatar } from '@/components/SelecaoAvatar';
+import { ScoreDisplay } from '@/components/ScoreDisplay';
+import { MINUTOS_PRAZO_APOSTA } from '@bolao/shared';
 
-interface Props {
+type JogoCardEstado = 'aberto' | 'salvo' | 'incompleto' | 'fechado';
+
+const ESTADO_BORDER: Record<JogoCardEstado, string> = {
+  aberto:    'border-trovao-border hover:border-trovao-green/40',
+  salvo:     'border-trovao-green',
+  incompleto:'border-trovao-gold',
+  fechado:   'border-trovao-border opacity-60',
+};
+
+function getEstado(jogo: Jogo, aposta?: Aposta): JogoCardEstado {
+  const prazo = new Date(jogo.dataHora).getTime() - MINUTOS_PRAZO_APOSTA * 60 * 1000;
+  const estaFechado = Date.now() >= prazo;
+  if (!estaFechado && !aposta) return 'aberto';
+  if (!estaFechado && aposta)  return 'salvo';
+  if (estaFechado  && aposta)  return 'fechado';
+  return 'incompleto';
+}
+
+function formatHora(iso: string) {
+  return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
+interface JogoCardProps {
   jogo: Jogo;
   aposta?: Aposta;
-  bolaoId?: string;
-  onApostar?: (jogoId: string) => void;
+  onApostar?: () => void;
 }
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleString('pt-BR', {
-    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
-  });
-}
-
-export function JogoCard({ jogo, aposta, bolaoId, onApostar }: Props) {
-  const fechado = new Date() >= new Date(new Date(jogo.dataHora).getTime() - 60 * 60 * 1000);
+export function JogoCard({ jogo, aposta, onApostar }: JogoCardProps) {
+  const estado = getEstado(jogo, aposta);
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-3">
-      <div className="flex justify-between items-center text-xs text-gray-500">
-        <span>{jogo.fase} {jogo.grupo ? `· Grupo ${jogo.grupo}` : ''} · Rodada {jogo.rodada}</span>
-        <span>{formatDate(jogo.dataHora)}</span>
+    <div className={`bg-trovao-card border rounded-xl p-4 space-y-3 transition-colors ${ESTADO_BORDER[estado]}`}>
+      {/* Header */}
+      <div className="flex justify-between items-center text-xs text-trovao-muted">
+        <span>{jogo.fase}{jogo.grupo ? ` · Grupo ${jogo.grupo}` : ''} · R{jogo.rodada}</span>
+        <span>{formatHora(jogo.dataHora)}</span>
       </div>
 
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex-1 text-right">
-          <p className="font-semibold">{jogo.selecaoCasa.nome}</p>
-          <p className="text-xs text-gray-500">{jogo.selecaoCasa.codigo}</p>
+      {/* Times */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col items-center gap-1 flex-1">
+          <SelecaoAvatar nome={jogo.selecaoCasa.nome} bandeiraSvg={jogo.selecaoCasa.bandeiraSvg} size="md" />
+          <p className="text-xs font-semibold text-white">{jogo.selecaoCasa.codigo}</p>
         </div>
 
-        <div className="text-center min-w-[60px]">
-          {jogo.placarCasa !== null ? (
-            <span className="text-2xl font-bold text-yellow-400">
-              {jogo.placarCasa} x {jogo.placarVisitante}
-            </span>
-          ) : (
-            <span className="text-gray-600 text-sm">vs</span>
+        <div className="flex flex-col items-center gap-0.5">
+          <ScoreDisplay placarCasa={jogo.placarCasa} placarVisitante={jogo.placarVisitante} />
+          {estado === 'aberto' && (
+            <span className="text-trovao-muted text-[10px]">Aposte agora</span>
           )}
         </div>
 
-        <div className="flex-1 text-left">
-          <p className="font-semibold">{jogo.selecaoVisitante.nome}</p>
-          <p className="text-xs text-gray-500">{jogo.selecaoVisitante.codigo}</p>
+        <div className="flex flex-col items-center gap-1 flex-1">
+          <SelecaoAvatar nome={jogo.selecaoVisitante.nome} bandeiraSvg={jogo.selecaoVisitante.bandeiraSvg} size="md" />
+          <p className="text-xs font-semibold text-white">{jogo.selecaoVisitante.codigo}</p>
         </div>
       </div>
 
-      {aposta && (
-        <div className="text-xs text-center text-gray-400 border-t border-gray-800 pt-2">
-          Sua aposta: {aposta.placarCasa} x {aposta.placarVisitante}
+      {/* Footer por estado */}
+      {(estado === 'salvo' || estado === 'fechado') && aposta && (
+        <div className="border-t border-trovao-border pt-2 flex items-center justify-between text-xs">
+          <span className="text-trovao-muted">Seu palpite:</span>
+          <span className="text-white font-mono font-semibold">
+            {aposta.placarCasa} × {aposta.placarVisitante}
+          </span>
           {aposta.pontuacao !== null && (
-            <span className="ml-2 text-yellow-400 font-bold">+{aposta.pontuacao} pts</span>
+            <span className="text-trovao-gold font-bold">+{aposta.pontuacao} pts</span>
           )}
         </div>
       )}
 
-      {bolaoId && onApostar && !fechado && (
-        <button onClick={() => onApostar(jogo.id)}
-          className="w-full text-xs bg-yellow-400 text-gray-900 font-bold py-1.5 rounded-lg hover:bg-yellow-300">
-          {aposta ? 'Editar aposta' : 'Apostar'}
-        </button>
+      {estado === 'incompleto' && (
+        <p className="text-trovao-muted text-xs text-center border-t border-trovao-border pt-2">
+          Prazo encerrado — sem aposta
+        </p>
       )}
 
-      {bolaoId && fechado && !aposta && (
-        <p className="text-xs text-center text-gray-600">Prazo encerrado</p>
+      {(estado === 'aberto' || estado === 'salvo') && onApostar && (
+        <button
+          onClick={onApostar}
+          className={`w-full py-1.5 rounded-lg text-xs font-bold transition-colors ${
+            estado === 'salvo'
+              ? 'bg-trovao-surface text-trovao-green border border-trovao-green hover:bg-trovao-green/10'
+              : 'bg-trovao-gold text-trovao-base hover:bg-trovao-gold/90'
+          }`}
+        >
+          {estado === 'salvo' ? 'Editar palpite' : 'Apostar'}
+        </button>
       )}
     </div>
   );
