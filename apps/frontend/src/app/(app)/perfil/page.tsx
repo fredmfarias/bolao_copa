@@ -1,15 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { useAuth } from '@/components/AuthProvider';
 
 export default function PerfilPage() {
-  const { user, refresh } = useAuth();
+  const { user, refresh, logout } = useAuth();
+  const router = useRouter();
   const [form, setForm] = useState({ nome: user?.nome ?? '', avatarUrl: user?.avatarUrl ?? '' });
   const [sucesso, setSucesso] = useState('');
   const [erro, setErro] = useState('');
   const [loading, setLoading] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
 
   useEffect(() => {
     if (user) setForm({ nome: user.nome, avatarUrl: user.avatarUrl ?? '' });
@@ -32,6 +35,12 @@ export default function PerfilPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleLogout() {
+    setLogoutLoading(true);
+    await logout();
+    router.push('/login');
   }
 
   return (
@@ -59,20 +68,37 @@ export default function PerfilPage() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm text-gray-400 mb-1">Nome</label>
-          <input value={form.nome} onChange={e => setForm(p => ({ ...p, nome: e.target.value }))}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-yellow-400" />
+          <input
+            value={form.nome}
+            onChange={e => setForm(p => ({ ...p, nome: e.target.value }))}
+            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-yellow-400"
+          />
         </div>
         <div>
           <label className="block text-sm text-gray-400 mb-1">Avatar URL (opcional)</label>
-          <input value={form.avatarUrl} onChange={e => setForm(p => ({ ...p, avatarUrl: e.target.value }))}
+          <input
+            value={form.avatarUrl}
+            onChange={e => setForm(p => ({ ...p, avatarUrl: e.target.value }))}
             placeholder="https://..."
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-yellow-400" />
+            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-yellow-400"
+          />
         </div>
-        <button type="submit" disabled={loading}
-          className="bg-yellow-400 text-gray-900 font-bold px-6 py-2 rounded-lg hover:bg-yellow-300 disabled:opacity-50">
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-yellow-400 text-gray-900 font-bold px-6 py-2 rounded-lg hover:bg-yellow-300 disabled:opacity-50"
+        >
           {loading ? 'Salvando...' : 'Salvar'}
         </button>
       </form>
+
+      <button
+        onClick={handleLogout}
+        disabled={logoutLoading}
+        className="border border-red-500 text-red-400 hover:bg-red-500/10 px-6 py-2 rounded-lg font-medium disabled:opacity-50"
+      >
+        {logoutLoading ? 'Saindo...' : 'Sair'}
+      </button>
     </div>
   );
 }
