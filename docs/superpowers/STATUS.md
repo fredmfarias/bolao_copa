@@ -10,8 +10,8 @@
 | Campo | Valor |
 |---|---|
 | **Módulo ativo** | M1 — Fundação |
-| **Ticket ativo** | — (tickets ainda não criados) |
-| **Próxima ação** | Criar tickets do M1 |
+| **Ticket ativo** | [T101 — shadcn/ui + tokens visuais](./tickets/T101-shadcn-tokens.md) |
+| **Próxima ação** | Executar T101 (Fase B) |
 
 ---
 
@@ -19,7 +19,7 @@
 
 | Módulo | Status | Tickets |
 |---|---|---|
-| M1 — Fundação | `planejamento` | 0 / 5 criados |
+| M1 — Fundação | `pronto para execução` | 5 / 5 criados · 0 / 5 concluídos |
 | M2 — Apostas | `aguardando M1` | — |
 | M3 — Ranking | `aguardando M2` | — |
 | M4 — Admin | `aguardando M3` | — |
@@ -29,6 +29,6 @@
 
 ## Última sessão
 
-**Data:** 2026-05-23  
-**O que foi feito:** Criada a arquitetura documental completa — templates, INDEX, plans, context/ (4 arquivos) e modules/ (5 arquivos). Nenhum código implementado ainda.  
-**Commit:** `3b04ee6`
+**Data:** 2026-05-24  
+**O que foi feito:** Tickets T101–T105 do M1 criados com código completo (testes, implementação, validação, commit).  
+**Commit:** (pendente — commitar tickets agora)

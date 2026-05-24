@@ -52,10 +52,10 @@ Carregar antes de começar:
 
 ## Tickets
 
-- [ ] [T101 — Instalar shadcn/ui e aplicar tokens visuais](../tickets/T101-shadcn-tokens.md)
+- [ ] [T101 — shadcn/ui + jest + tokens visuais](../tickets/T101-shadcn-tokens.md)
 - [ ] [T102 — BottomNav + atualizar AppLayout](../tickets/T102-bottom-nav.md)
-- [ ] [T103 — Componentes base: PageSkeleton e EmptyState](../tickets/T103-skeleton-empty.md)
-- [ ] [T104 — Componentes base: SelecaoAvatar e ScoreDisplay](../tickets/T104-avatar-score.md)
+- [ ] [T103 — PageSkeleton e EmptyState](../tickets/T103-skeleton-empty.md)
+- [ ] [T104 — SelecaoAvatar e ScoreDisplay](../tickets/T104-avatar-score.md)
 - [ ] [T105 — Hooks base: useAutoSave, useAdmin, useModerador](../tickets/T105-hooks.md)
 
 ---
