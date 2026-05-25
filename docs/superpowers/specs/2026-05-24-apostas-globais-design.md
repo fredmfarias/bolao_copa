@@ -28,7 +28,7 @@ A mudança: apostas se tornam globais. Um usuário faz **uma única aposta por j
 ### O que não muda
 
 - Regras de prazo: 60 minutos antes do kickoff
-- Limites de apostas idênticas: 25 na fase de grupos, 8 nas eliminatórias
+- Limites de apostas idênticas: 18 na fase de grupos, 8 nas eliminatórias
 - Cálculo de pontuação por nível (1–5)
 - Ranking por bolão
 - `BOLAO_GLOBAL_ID` continua existindo como bolão
@@ -351,6 +351,18 @@ Para jogos com prazo de apostas encerrado (verificação local em `jogo.dataHora
 | Usuário sem bolões privados | Seletor pré-seleciona o bolão global |
 | Usuário aposta após prazo | Backend retorna `403 Forbidden` (regra já existente) |
 | Limite de apostas idênticas atingido | Backend retorna `400 Bad Request` |
+
+---
+
+## Alteração de constante
+
+**Arquivo:** `packages/shared/src/enums.ts`
+
+Atualizar `MAX_APOSTAS_IGUAIS_GRUPOS` de `25` para `18`:
+
+```typescript
+export const MAX_APOSTAS_IGUAIS_GRUPOS = 18;
+```
 
 ---
 
