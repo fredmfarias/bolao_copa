@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { ApostaService } from './aposta.service';
@@ -14,8 +14,8 @@ export class ApostaController {
     return this.service.upsert(user.id, dto);
   }
 
-  @Get('bolao/:bolaoId')
-  listar(@CurrentUser() user: { id: string }, @Param('bolaoId') bolaoId: string) {
-    return this.service.listarPorBolao(bolaoId, user.id);
+  @Get()
+  listar(@CurrentUser() user: { id: string }) {
+    return this.service.listar(user.id);
   }
 }

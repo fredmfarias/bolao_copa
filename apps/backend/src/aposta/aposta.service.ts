@@ -17,13 +17,8 @@ export class ApostaService {
     const prazo = new Date(jogo.dataHora.getTime() - MINUTOS_PRAZO_APOSTA * 60 * 1000);
     if (new Date() >= prazo) throw new ForbiddenException('Prazo para apostas encerrado.');
 
-    const membro = await this.prisma.bolaoMembro.findUnique({
-      where: { bolaoId_usuarioId: { bolaoId: dto.bolaoId, usuarioId } },
-    });
-    if (!membro) throw new ForbiddenException('Você não é membro deste bolão.');
-
     const apostaExistente = await this.prisma.aposta.findUnique({
-      where: { usuarioId_jogoId_bolaoId: { usuarioId, jogoId: dto.jogoId, bolaoId: dto.bolaoId } },
+      where: { usuarioId_jogoId: { usuarioId, jogoId: dto.jogoId } },
     });
 
     const placarMudou =
@@ -38,7 +33,6 @@ export class ApostaService {
       const totalIguais = await this.prisma.aposta.count({
         where: {
           usuarioId,
-          bolaoId: dto.bolaoId,
           placarCasa: dto.placarCasa,
           placarVisitante: dto.placarVisitante,
           jogo: { fase: isElim ? { in: FASES_ELIMINATORIAS as any } : { equals: 'GRUPOS' as any } },
@@ -53,26 +47,41 @@ export class ApostaService {
     }
 
     return this.prisma.aposta.upsert({
-      where: { usuarioId_jogoId_bolaoId: { usuarioId, jogoId: dto.jogoId, bolaoId: dto.bolaoId } },
+      where: { usuarioId_jogoId: { usuarioId, jogoId: dto.jogoId } },
       update: { placarCasa: dto.placarCasa, placarVisitante: dto.placarVisitante, pontuacao: null },
-      create: { usuarioId, jogoId: dto.jogoId, bolaoId: dto.bolaoId, placarCasa: dto.placarCasa, placarVisitante: dto.placarVisitante },
+      create: { usuarioId, jogoId: dto.jogoId, placarCasa: dto.placarCasa, placarVisitante: dto.placarVisitante },
     });
   }
 
-  async listarPorBolao(bolaoId: string, usuarioId: string) {
+  async listar(usuarioId: string) {
     return this.prisma.aposta.findMany({
-      where: { bolaoId, usuarioId },
+      where: { usuarioId },
       include: { jogo: { include: { selecaoCasa: true, selecaoVisitante: true } } },
       orderBy: { jogo: { dataHora: 'asc' } },
     });
   }
 
   async listarPalpitesPorJogo(bolaoId: string, jogoId: string) {
+    const jogo = await this.prisma.jogo.findUnique({ where: { id: jogoId } });
+    if (!jogo) throw new NotFoundException('Jogo não encontrado.');
+
+    const prazo = new Date(jogo.dataHora.getTime() - MINUTOS_PRAZO_APOSTA * 60 * 1000);
+    if (new Date() < prazo) {
+      throw new ForbiddenException('Palpites disponíveis apenas após o encerramento das apostas.');
+    }
+
+    const membros = await this.prisma.bolaoMembro.findMany({
+      where: { bolaoId },
+      select: { usuarioId: true },
+    });
+    const usuarioIds = membros.map(m => m.usuarioId);
+
     const apostas = await this.prisma.aposta.findMany({
-      where: { bolaoId, jogoId },
+      where: { jogoId, usuarioId: { in: usuarioIds } },
       include: { usuario: { select: { id: true, nome: true, avatarUrl: true } } },
       orderBy: [{ pontuacao: 'desc' }, { usuario: { nome: 'asc' } }],
     });
+
     return apostas.map(a => ({
       usuarioId: a.usuarioId,
       nome: a.usuario.nome,
