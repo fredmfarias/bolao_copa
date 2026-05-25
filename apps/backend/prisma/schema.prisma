@@ -74,7 +74,6 @@ model Bolao {
 
   membros  BolaoMembro[]
   convites BolaoConvite[]
-  apostas  Aposta[]
   rankings Ranking[]
 
   @@map("bolao")
@@ -156,15 +155,13 @@ model Aposta {
   usuario         Usuario  @relation(fields: [usuarioId], references: [id])
   jogoId          String
   jogo            Jogo     @relation(fields: [jogoId], references: [id])
-  bolaoId         String
-  bolao           Bolao    @relation(fields: [bolaoId], references: [id])
   placarCasa      Int
   placarVisitante Int
   pontuacao       Int?
   criadoEm       DateTime @default(now())
   atualizadoEm   DateTime @updatedAt
 
-  @@unique([usuarioId, jogoId, bolaoId])
+  @@unique([usuarioId, jogoId])
   @@map("aposta")
 }
 
