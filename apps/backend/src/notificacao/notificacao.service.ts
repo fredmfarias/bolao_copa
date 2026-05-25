@@ -69,9 +69,9 @@ export class NotificacaoService {
 
     const apostasExistentes = await this.prisma.aposta.findMany({
       where: { jogoId },
-      select: { usuarioId: true, bolaoId: true },
+      select: { usuarioId: true },
     });
-    const apostasSet = new Set(apostasExistentes.map((a) => `${a.usuarioId}:${a.bolaoId}`));
+    const apostasSet = new Set(apostasExistentes.map((a) => a.usuarioId));
 
     const membros = await this.prisma.bolaoMembro.findMany({
       where: {
@@ -80,13 +80,13 @@ export class NotificacaoService {
           escopo: { in: ['AMBOS', jogo.fase === 'GRUPOS' ? 'GRUPOS' : 'ELIMINATORIAS'] },
         },
       },
-      select: { usuarioId: true, bolaoId: true },
+      select: { usuarioId: true },
     });
 
     const usuariosUnicos = [
       ...new Set(
         membros
-          .filter((m) => !apostasSet.has(`${m.usuarioId}:${m.bolaoId}`))
+          .filter((m) => !apostasSet.has(m.usuarioId))
           .map((m) => m.usuarioId),
       ),
     ];
