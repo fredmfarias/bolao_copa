@@ -116,7 +116,7 @@ export class AuthService {
       { sub: usuarioId, type: 'email-confirm' },
       { secret: this.config.get('JWT_SECRET'), expiresIn: '24h' },
     );
-    const url = `${this.config.get('APP_URL')}/confirmar-email?token=${token}`;
+    const url = `${this.config.get('APP_URL')}/auth/confirmar-email?token=${token}`;
     await this.mailer.sendMail({
       to: email,
       subject: 'Confirme seu e-mail — Bolão Trovão',

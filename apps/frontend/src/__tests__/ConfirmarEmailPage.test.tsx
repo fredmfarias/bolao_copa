@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import ConfirmarEmailPage from '@/app/(auth)/confirmar-email/page';
+import ConfirmarEmailPage from '@/app/auth/confirmar-email/page';
 
 const mockPush = jest.fn();
 const mockGetParam = jest.fn().mockReturnValue('valid-token');

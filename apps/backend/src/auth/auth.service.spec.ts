@@ -55,12 +55,11 @@ describe('AuthService', () => {
     );
   });
 
-  it('envia e-mail de confirmação com URL sem prefixo /auth/', async () => {
+  it('envia e-mail de confirmação com URL /auth/confirmar-email', async () => {
     prismaMock.usuario.findUnique.mockResolvedValue(null);
     prismaMock.usuario.create.mockResolvedValue({ id: 'new-id', email: 'b@b.com', nome: 'Test' });
     await service.registrar({ nome: 'Test', email: 'b@b.com', senha: '12345678' });
     const html: string = mailerMock.sendMail.mock.calls[0][0].html;
-    expect(html).toContain('/confirmar-email?token=');
-    expect(html).not.toContain('/auth/confirmar-email');
+    expect(html).toContain('/auth/confirmar-email?token=');
   });
 });
