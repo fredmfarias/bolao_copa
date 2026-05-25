@@ -10,6 +10,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect') ?? '/jogos';
+  const emailConfirmado = searchParams.get('emailConfirmado');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
@@ -35,6 +36,11 @@ function LoginForm() {
         <h1 className="text-2xl font-bold text-center text-yellow-400">⚡ Bolão Trovão</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           {erro && <p className="text-red-400 text-sm text-center">{erro}</p>}
+          {emailConfirmado && (
+            <p className="text-green-400 text-sm text-center">
+              E-mail verificado com sucesso! Faça login para continuar.
+            </p>
+          )}
           <div>
             <label className="block text-sm text-gray-400 mb-1">E-mail</label>
             <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
