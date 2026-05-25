@@ -14,13 +14,12 @@ import { SelecaoAvatar } from '@/components/SelecaoAvatar';
 interface ApostaDrawerProps {
   jogo: Jogo;
   aposta?: Aposta;
-  bolaoId: string;
   aberto: boolean;
   onFechar: () => void;
   onSalvo: () => void;
 }
 
-export function ApostaDrawer({ jogo, aposta, bolaoId, aberto, onFechar, onSalvo }: ApostaDrawerProps) {
+export function ApostaDrawer({ jogo, aposta, aberto, onFechar, onSalvo }: ApostaDrawerProps) {
   const [casa, setCasa] = useState(aposta?.placarCasa ?? 0);
   const [visitante, setVisitante] = useState(aposta?.placarVisitante ?? 0);
   const [salvando, setSalvando] = useState(false);
@@ -31,7 +30,7 @@ export function ApostaDrawer({ jogo, aposta, bolaoId, aberto, onFechar, onSalvo 
     setSalvando(true);
     setErro('');
     try {
-      await api.post('/apostas', { jogoId: jogo.id, bolaoId, placarCasa, placarVisitante });
+      await api.post('/apostas', { jogoId: jogo.id, placarCasa, placarVisitante });
       isDirtyRef.current = false;
       onSalvo();
       return true;

@@ -22,7 +22,6 @@ const jogo: Jogo = {
 
 const props = {
   jogo,
-  bolaoId: 'b1',
   aberto: true,
   onFechar: jest.fn(),
   onSalvo: jest.fn(),
@@ -61,7 +60,7 @@ it('Confirmar chama api.post com payload correto', async () => {
   fireEvent.click(screen.getByRole('button', { name: /confirmar/i }));
   await waitFor(() => {
     expect(mockPost).toHaveBeenCalledWith('/apostas', {
-      jogoId: 'j1', bolaoId: 'b1', placarCasa: 2, placarVisitante: 0,
+      jogoId: 'j1', placarCasa: 2, placarVisitante: 0,
     });
   });
 });

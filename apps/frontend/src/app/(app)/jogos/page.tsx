@@ -8,7 +8,7 @@ import { FaseFilterChips } from '@/components/FaseFilterChips';
 import { PageSkeleton } from '@/components/PageSkeleton';
 import { EmptyState } from '@/components/EmptyState';
 import type { Jogo, Aposta } from '@/types/api';
-import { JogoFase, BOLAO_GLOBAL_ID } from '@bolao/shared';
+import { JogoFase } from '@bolao/shared';
 
 const FASES = ['Todos', ...Object.values(JogoFase)];
 
@@ -36,7 +36,7 @@ export default function JogosPage() {
     const params = fase !== 'Todos' ? `?fase=${fase}` : '';
     const [jogosData, apostasData] = await Promise.all([
       api.get<Jogo[]>(`/jogos${params}`).catch(() => [] as Jogo[]),
-      api.get<Aposta[]>(`/apostas/bolao/${BOLAO_GLOBAL_ID}`).catch(() => [] as Aposta[]),
+      api.get<Aposta[]>('/apostas').catch(() => [] as Aposta[]),
     ]);
     setJogos(jogosData);
     setApostas(new Map(apostasData.map(a => [a.jogoId, a])));
@@ -44,9 +44,7 @@ export default function JogosPage() {
   }
 
   async function recarregarApostas() {
-    const apostasData = await api
-      .get<Aposta[]>(`/apostas/bolao/${BOLAO_GLOBAL_ID}`)
-      .catch(() => [] as Aposta[]);
+    const apostasData = await api.get<Aposta[]>('/apostas').catch(() => [] as Aposta[]);
     setApostas(new Map(apostasData.map(a => [a.jogoId, a])));
   }
 
@@ -91,7 +89,6 @@ export default function JogosPage() {
           key={jogoSelecionado.id}
           jogo={jogoSelecionado}
           aposta={apostas.get(jogoSelecionado.id)}
-          bolaoId={BOLAO_GLOBAL_ID}
           aberto={true}
           onFechar={() => setJogoSelecionado(null)}
           onSalvo={recarregarApostas}

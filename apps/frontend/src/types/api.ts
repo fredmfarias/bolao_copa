@@ -49,7 +49,6 @@ export interface Jogo {
 export interface Aposta {
   id: string;
   jogoId: string;
-  bolaoId: string;
   placarCasa: number;
   placarVisitante: number;
   pontuacao: number | null;
