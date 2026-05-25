@@ -65,7 +65,7 @@ describe('ApostaService', () => {
     prismaMock.jogo.findUnique.mockResolvedValue(jogoGrupos);
     prismaMock.bolaoMembro.findUnique.mockResolvedValue({ papel: 'PARTICIPANTE' });
     prismaMock.aposta.findUnique.mockResolvedValue({ id: 'a1', placarCasa: 1, placarVisitante: 0 });
-    prismaMock.aposta.count.mockResolvedValue(25);
+    prismaMock.aposta.count.mockResolvedValue(18);
     prismaMock.aposta.upsert.mockResolvedValue({});
     await expect(
       service.upsert('user-1', { jogoId: 'jogo-1', bolaoId: 'b1', placarCasa: 1, placarVisitante: 0 }),
