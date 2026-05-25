@@ -45,7 +45,12 @@ export class RankingService {
       await this.prisma.aposta.update({ where: { id: aposta.id }, data: { pontuacao } });
     }
 
-    const bolaoIds = [...new Set(apostas.map((a) => a.bolaoId))];
+    const usuarioIds = apostas.map(a => a.usuarioId);
+    const membros = await this.prisma.bolaoMembro.findMany({
+      where: { usuarioId: { in: usuarioIds } },
+      select: { bolaoId: true },
+    });
+    const bolaoIds = [...new Set(membros.map(m => m.bolaoId))];
     for (const bolaoId of bolaoIds) {
       await this.recalcularRankingBolao(bolaoId);
     }
@@ -60,8 +65,14 @@ export class RankingService {
   }
 
   private async recalcularRankingBolao(bolaoId: string) {
+    const membros = await this.prisma.bolaoMembro.findMany({
+      where: { bolaoId },
+      select: { usuarioId: true },
+    });
+    const usuarioIds = membros.map(m => m.usuarioId);
+
     const apostas = await this.prisma.aposta.findMany({
-      where: { bolaoId, pontuacao: { not: null } },
+      where: { usuarioId: { in: usuarioIds }, pontuacao: { not: null } },
       include: { jogo: true },
     });
 
