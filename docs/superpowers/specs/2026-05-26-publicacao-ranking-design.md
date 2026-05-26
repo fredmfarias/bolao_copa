@@ -75,10 +75,20 @@ model RankingSnapshot {
   pontuacaoTotal  Int        // acumulado até esta publicação (ranking geral)
   pontuacaoRodada Int        // pontos só dos jogos desta publicação (ranking da publicação)
 
+  // estatísticas congeladas (espelham Ranking) para o accordion do participante
+  acertosPlacarExato    Int @default(0)
+  acertosPlacarVencedor Int @default(0)
+  acertosPlacarPerdedor Int @default(0)
+  acertosEmpate         Int @default(0)
+  acertosGanhador       Int @default(0)
+  acertosNada           Int @default(0)
+  apostasPostadas       Int @default(0)
+
   @@unique([publicacaoId, bolaoId, usuarioId])
   @@map("ranking_snapshot")
 }
 ```
+As estatísticas espelham `Ranking` porque o participante vê a foto congelada (incluindo o detalhamento de acertos), não o estado ao vivo.
 
 O modelo `Ranking` atual permanece como **draft ao vivo** (estado que o admin pré-visualiza). O participante lê sempre o `RankingSnapshot` da última publicação.
 
@@ -125,7 +135,7 @@ Tudo lido do `RankingSnapshot` da última publicação do bolão.
 - Default = última publicação.
 - Mesmas linhas, ordenadas/exibindo `pontuacaoRodada` (pontos só da rodada).
 - **Sem variação** (regra: ranking detalhado não tem variação).
-- Seletor de publicação (N, N-1, ...) para navegar rodadas passadas.
+- Seletor de publicação (N, N-1, ...) para navegar rodadas passadas, alimentado por `GET /boloes/:bolaoId/ranking/publicacoes` → `[{ numero, publicadoEm }]`.
 
 ### Gráfico de evolução — `GET /boloes/:bolaoId/ranking/evolucao?usuarioId=`
 - Retorna `[{ numero, posicao }]` de todos os snapshots do usuário no bolão, ordenado por `numero`.
