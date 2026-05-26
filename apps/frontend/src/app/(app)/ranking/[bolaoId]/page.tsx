@@ -7,10 +7,9 @@ import { api } from '@/lib/api';
 import { useAuth } from '@/components/AuthProvider';
 import { RankingPodium } from '@/components/RankingPodium';
 import { RankingRow } from '@/components/RankingRow';
-import { RankingEvolucao } from '@/components/RankingEvolucao';
 import { PageSkeleton } from '@/components/PageSkeleton';
 import { EmptyState } from '@/components/EmptyState';
-import type { RankingEntry, PublicacaoResumo, EvolucaoPonto } from '@/types/api';
+import type { RankingEntry, PublicacaoResumo } from '@/types/api';
 
 type Aba = 'geral' | 'rodada';
 
@@ -21,24 +20,20 @@ export default function RankingPage() {
   const [ranking, setRanking] = useState<RankingEntry[]>([]);
   const [publicacoes, setPublicacoes] = useState<PublicacaoResumo[]>([]);
   const [publicacaoSel, setPublicacaoSel] = useState<number | null>(null);
-  const [evolucao, setEvolucao] = useState<EvolucaoPonto[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       api.get<RankingEntry[]>(`/boloes/${bolaoId}/ranking`).catch(() => [] as RankingEntry[]),
       api.get<PublicacaoResumo[]>(`/boloes/${bolaoId}/ranking/publicacoes`).catch(() => [] as PublicacaoResumo[]),
-      api.get<EvolucaoPonto[]>(`/boloes/${bolaoId}/ranking/evolucao`).catch(() => [] as EvolucaoPonto[]),
-    ]).then(([r, pubs, ev]) => {
+    ]).then(([r, pubs]) => {
       setRanking(r);
       setPublicacoes(pubs);
       setPublicacaoSel(pubs[0]?.numero ?? null);
-      setEvolucao(ev);
       setLoading(false);
     });
   }, [bolaoId]);
 
-  // Ao trocar a publicação selecionada na aba rodada, recarrega aquele snapshot.
   useEffect(() => {
     if (publicacaoSel === null) return;
     api.get<RankingEntry[]>(`/boloes/${bolaoId}/ranking?publicacao=${publicacaoSel}`)
@@ -94,23 +89,18 @@ export default function RankingPage() {
           )}
 
           {aba === 'geral' && (
-            <>
-              <RankingPodium ranking={ordenado} myId={user?.id} />
-              <div className="mt-2">
-                <h2 className="text-sm font-semibold text-trovao-muted mb-2">Sua evolução</h2>
-                <RankingEvolucao dados={evolucao} />
-              </div>
-            </>
+            <RankingPodium ranking={ordenado} myId={user?.id} />
           )}
 
           <div className="space-y-2 mt-4">
-            {(aba === 'geral' ? ordenado.slice(3) : ordenado).map((entry) => (
+            {ordenado.map((entry) => (
               <RankingRow
                 key={entry.id}
                 entry={aba === 'rodada'
                   ? { ...entry, pontuacaoTotal: entry.pontuacaoRodada, posicoesGanhas: 0 }
                   : entry}
                 myId={user?.id}
+                bolaoId={bolaoId}
               />
             ))}
           </div>
