@@ -26,10 +26,26 @@ export function JogoCard({ jogo, aposta, onApostar }: JogoCardProps) {
 
   return (
     <div className={`bg-trovao-card border rounded-xl p-4 space-y-3 transition-colors ${ESTADO_BORDER[estado]}`}>
+      {/* Título */}
+      <p className="text-sm font-semibold text-white text-center">
+        {jogo.selecaoCasa.nome} × {jogo.selecaoVisitante.nome}
+      </p>
+
       {/* Header */}
       <div className="flex justify-between items-center text-xs text-trovao-muted">
         <span>{jogo.fase}{jogo.grupo ? ` · Grupo ${jogo.grupo}` : ''} · R{jogo.rodada}</span>
-        <span>{formatHora(jogo.dataHora)}</span>
+        <div className="flex items-center gap-2">
+          <span
+            className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
+              jogo.pesoPontuacao > 1
+                ? 'bg-trovao-gold text-trovao-base'
+                : 'bg-trovao-surface text-trovao-muted'
+            }`}
+          >
+            ×{jogo.pesoPontuacao}
+          </span>
+          <span>{formatHora(jogo.dataHora)}</span>
+        </div>
       </div>
 
       {/* Times + palpite central */}

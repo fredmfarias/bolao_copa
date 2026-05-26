@@ -71,3 +71,27 @@ it('chama onApostar ao clicar no botão', () => {
   fireEvent.click(screen.getByRole('button', { name: /apostar/i }));
   expect(onApostar).toHaveBeenCalledTimes(1);
 });
+
+it('exibe título com nomes completos das seleções', () => {
+  render(<JogoCard jogo={{ ...jogoBase, dataHora: HORA_FUTURA }} onApostar={jest.fn()} />);
+  expect(screen.getByText('Brasil × Argentina')).toBeInTheDocument();
+});
+
+it('mantém as siglas sob os avatares', () => {
+  render(<JogoCard jogo={{ ...jogoBase, dataHora: HORA_FUTURA }} onApostar={jest.fn()} />);
+  expect(screen.getByText('BRA')).toBeInTheDocument();
+  expect(screen.getByText('ARG')).toBeInTheDocument();
+});
+
+it('peso 1 — badge ×1 discreto (muted, sem destaque dourado)', () => {
+  render(<JogoCard jogo={{ ...jogoBase, dataHora: HORA_FUTURA, pesoPontuacao: 1 }} onApostar={jest.fn()} />);
+  const badge = screen.getByText('×1');
+  expect(badge.className).toMatch(/trovao-muted/);
+  expect(badge.className).not.toMatch(/trovao-gold/);
+});
+
+it('peso > 1 — badge ×2 com destaque dourado', () => {
+  render(<JogoCard jogo={{ ...jogoBase, dataHora: HORA_FUTURA, pesoPontuacao: 2 }} onApostar={jest.fn()} />);
+  const badge = screen.getByText('×2');
+  expect(badge.className).toMatch(/trovao-gold/);
+});
