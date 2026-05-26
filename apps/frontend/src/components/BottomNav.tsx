@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Users, Trophy, User } from 'lucide-react';
+import { Home, Users, Trophy, User, ShieldCheck } from 'lucide-react';
+import { useAuth } from '@/components/AuthProvider';
 
 const NAV_ITEMS = [
   { href: '/jogos',   icon: Home,   label: 'Jogos'   },
@@ -13,6 +14,7 @@ const NAV_ITEMS = [
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { user } = useAuth();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-trovao-card border-t border-trovao-border z-50">
@@ -32,6 +34,17 @@ export function BottomNav() {
             </Link>
           );
         })}
+        {user?.role === 'ADMIN' && (
+          <Link
+            href="/admin/boloes"
+            className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-colors ${
+              pathname.startsWith('/admin') ? 'text-trovao-gold' : 'text-trovao-muted hover:text-white'
+            }`}
+          >
+            <ShieldCheck className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Admin</span>
+          </Link>
+        )}
       </div>
     </nav>
   );
