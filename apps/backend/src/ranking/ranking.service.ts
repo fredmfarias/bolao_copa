@@ -56,12 +56,39 @@ export class RankingService {
     }
   }
 
-  async obterRanking(bolaoId: string) {
-    return this.prisma.ranking.findMany({
-      where: { bolaoId, bolao: { status: 'PAGO' } },
+  async obterRanking(bolaoId: string, numero?: number) {
+    const publicacao = numero
+      ? await this.prisma.publicacao.findUnique({ where: { numero } })
+      : await this.prisma.publicacao.findFirst({ orderBy: { numero: 'desc' } });
+    if (!publicacao) return [];
+
+    return this.prisma.rankingSnapshot.findMany({
+      where: { bolaoId, publicacaoId: publicacao.id },
       include: { usuario: { select: { id: true, nome: true, avatarUrl: true } } },
-      orderBy: [{ posicao: 'asc' }],
+      orderBy: { posicao: 'asc' },
     });
+  }
+
+  async listarPublicacoes(bolaoId: string) {
+    const snapshots = await this.prisma.rankingSnapshot.findMany({
+      where: { bolaoId },
+      distinct: ['publicacaoId'],
+      include: { publicacao: { select: { numero: true, publicadoEm: true } } },
+      orderBy: { publicacao: { numero: 'desc' } },
+    });
+    return snapshots.map((s) => ({
+      numero: s.publicacao.numero,
+      publicadoEm: s.publicacao.publicadoEm,
+    }));
+  }
+
+  async evolucao(bolaoId: string, usuarioId: string) {
+    const snapshots = await this.prisma.rankingSnapshot.findMany({
+      where: { bolaoId, usuarioId },
+      include: { publicacao: { select: { numero: true } } },
+      orderBy: { publicacao: { numero: 'asc' } },
+    });
+    return snapshots.map((s) => ({ numero: s.publicacao.numero, posicao: s.posicao }));
   }
 
   async recalcularRankingBolao(bolaoId: string) {
