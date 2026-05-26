@@ -36,8 +36,8 @@ export function RankingEvolucao({ dados }: RankingEvolucaoProps) {
             tick={{ fill: '#9ca3af', fontSize: 12 }}
           />
           <Tooltip
-            formatter={(v: number) => [`${v}º`, 'Posição']}
-            labelFormatter={(l) => `Rodada ${l}`}
+            formatter={(v: any) => [`${v}º`, 'Posição'] as [string, string]}
+            labelFormatter={(l: any) => `Rodada ${l}`}
             contentStyle={{ background: '#1f2937', border: 'none', borderRadius: 8, color: '#fff' }}
           />
           <Line type="monotone" dataKey="posicao" stroke="#fbbf24" strokeWidth={2} dot={{ r: 3 }} />
