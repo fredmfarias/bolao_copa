@@ -11,14 +11,14 @@ import { Role } from '@bolao/shared';
 export class AdminController {
   constructor(private service: AdminService) {}
 
+  @Get('boloes')
+  listarBoloes() {
+    return this.service.listarBoloes();
+  }
+
   @Get('ranking/:bolaoId/draft')
   getRankingDraft(@Param('bolaoId') bolaoId: string) {
     return this.service.getRankingDraft(bolaoId);
-  }
-
-  @Post('ranking/:bolaoId/publicar')
-  publicarRanking(@Param('bolaoId') bolaoId: string) {
-    return this.service.publicarRanking(bolaoId);
   }
 
   @Get('usuarios')
@@ -27,7 +27,15 @@ export class AdminController {
   }
 
   @Patch('usuarios/:id')
-  atualizarUsuario(@Param('id') id: string, @Body() dto: { role?: 'ADMIN' | 'USER' }) {
+  atualizarUsuario(
+    @Param('id') id: string,
+    @Body() dto: { role?: 'ADMIN' | 'USER'; ativo?: boolean },
+  ) {
     return this.service.atualizarUsuario(id, dto);
+  }
+
+  @Post('usuarios/:id/reset-senha')
+  resetarSenha(@Param('id') id: string) {
+    return this.service.resetarSenha(id);
   }
 }
