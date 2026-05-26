@@ -64,7 +64,7 @@ export class RankingService {
     });
   }
 
-  private async recalcularRankingBolao(bolaoId: string) {
+  async recalcularRankingBolao(bolaoId: string) {
     const membros = await this.prisma.bolaoMembro.findMany({
       where: { bolaoId },
       select: { usuarioId: true },
