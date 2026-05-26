@@ -4,13 +4,13 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { JogoCard } from '@/components/JogoCard';
 import { ApostaDrawer } from '@/components/ApostaDrawer';
-import { FaseFilterChips } from '@/components/FaseFilterChips';
+import { FiltroJogosChips } from '@/components/FiltroJogosChips';
 import { PageSkeleton } from '@/components/PageSkeleton';
 import { EmptyState } from '@/components/EmptyState';
 import type { Jogo, Aposta } from '@/types/api';
-import { JogoFase } from '@bolao/shared';
-
-const FASES = ['Todos', ...Object.values(JogoFase)];
+import {
+  getEstadoAposta, jogoNoFiltro, ordenarPorFiltro, type FiltroJogo,
+} from '@/lib/jogoEstado';
 
 function agruparPorData(jogos: Jogo[]): Map<string, Jogo[]> {
   const grupos = new Map<string, Jogo[]>();
@@ -27,15 +27,14 @@ function agruparPorData(jogos: Jogo[]): Map<string, Jogo[]> {
 export default function JogosPage() {
   const [jogos, setJogos] = useState<Jogo[]>([]);
   const [apostas, setApostas] = useState<Map<string, Aposta>>(new Map());
-  const [fase, setFase] = useState('Todos');
+  const [filtro, setFiltro] = useState<FiltroJogo>('Pendentes');
   const [jogoSelecionado, setJogoSelecionado] = useState<Jogo | null>(null);
   const [loading, setLoading] = useState(true);
 
   async function carregar() {
     setLoading(true);
-    const params = fase !== 'Todos' ? `?fase=${fase}` : '';
     const [jogosData, apostasData] = await Promise.all([
-      api.get<Jogo[]>(`/jogos${params}`).catch(() => [] as Jogo[]),
+      api.get<Jogo[]>('/jogos').catch(() => [] as Jogo[]),
       api.get<Aposta[]>('/apostas').catch(() => [] as Aposta[]),
     ]);
     setJogos(jogosData);
@@ -48,20 +47,24 @@ export default function JogosPage() {
     setApostas(new Map(apostasData.map(a => [a.jogoId, a])));
   }
 
-  useEffect(() => { carregar(); }, [fase]);
+  useEffect(() => { carregar(); }, []);
 
-  const grupos = agruparPorData(jogos);
+  const jogosFiltrados = ordenarPorFiltro(
+    jogos.filter(j => jogoNoFiltro(getEstadoAposta(j, apostas.get(j.id)), filtro)),
+    filtro,
+  );
+  const grupos = agruparPorData(jogosFiltrados);
 
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-bold">Jogos</h1>
 
-      <FaseFilterChips fases={FASES} selecionada={fase} onChange={setFase} />
+      <FiltroJogosChips selecionada={filtro} onChange={setFiltro} />
 
       {loading ? (
         <PageSkeleton />
-      ) : jogos.length === 0 ? (
-        <EmptyState titulo="Nenhum jogo" descricao="Não há jogos para esta fase." />
+      ) : jogosFiltrados.length === 0 ? (
+        <EmptyState titulo="Nenhum jogo" descricao="Não há jogos para este filtro." />
       ) : (
         <div className="space-y-6">
           {Array.from(grupos.entries()).map(([data, jogosGrupo]) => (
