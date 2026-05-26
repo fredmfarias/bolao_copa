@@ -10,6 +10,13 @@ const ESTADO_BORDER: Record<EstadoAposta, string> = {
   fechado:   'border-trovao-border opacity-60',
 };
 
+const PESO_BADGE: Record<number, string> = {
+  1: 'bg-trovao-surface text-trovao-muted',
+  2: 'bg-trovao-green text-trovao-base',
+  3: 'bg-trovao-gold text-trovao-base',
+  4: 'bg-trovao-red text-white',
+};
+
 function formatHora(iso: string) {
   return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
@@ -25,21 +32,17 @@ export function JogoCard({ jogo, aposta, onApostar }: JogoCardProps) {
   const temResultado = jogo.placarCasa !== null && jogo.placarVisitante !== null;
 
   return (
-    <div className={`bg-trovao-card border rounded-xl p-4 space-y-3 transition-colors ${ESTADO_BORDER[estado]}`}>
-      {/* Título */}
-      <p className="text-sm font-semibold text-white text-center">
-        {jogo.selecaoCasa.nome} × {jogo.selecaoVisitante.nome}
-      </p>
-
-      {/* Header */}
-      <div className="flex justify-between items-center text-xs text-trovao-muted">
-        <span>{jogo.fase}{jogo.grupo ? ` · Grupo ${jogo.grupo}` : ''} · R{jogo.rodada}</span>
-        <div className="flex items-center gap-2">
+    <div className={`bg-trovao-card border rounded-xl p-4 space-y-2 transition-colors ${ESTADO_BORDER[estado]}`}>
+      {/* Header: título + peso + hora */}
+      <div className="flex justify-between items-center gap-2">
+        <p className="flex-1 text-xs font-semibold uppercase tracking-wide text-white/90 leading-tight">
+          {jogo.selecaoCasa.nome} × {jogo.selecaoVisitante.nome}
+        </p>
+        <div className="flex items-center gap-2 text-xs text-trovao-muted shrink-0">
           <span
-            className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
-              jogo.pesoPontuacao > 1
-                ? 'bg-trovao-gold text-trovao-base'
-                : 'bg-trovao-surface text-trovao-muted'
+            title={`Esse jogo tem peso ×${jogo.pesoPontuacao}`}
+            className={`cursor-help rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
+              PESO_BADGE[jogo.pesoPontuacao] ?? PESO_BADGE[4]
             }`}
           >
             ×{jogo.pesoPontuacao}
@@ -48,14 +51,23 @@ export function JogoCard({ jogo, aposta, onApostar }: JogoCardProps) {
         </div>
       </div>
 
+      {/* Pílula fase/grupo/rodada */}
+      <div className="flex justify-center">
+        <span className="rounded-full bg-trovao-surface px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-trovao-muted">
+          {jogo.fase}{jogo.grupo ? ` · Grupo ${jogo.grupo}` : ''} · R{jogo.rodada}
+        </span>
+      </div>
+
       {/* Times + palpite central */}
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-2">
         <div className="flex flex-col items-center gap-1 flex-1">
-          <SelecaoAvatar nome={jogo.selecaoCasa.nome} bandeiraSvg={jogo.selecaoCasa.bandeiraSvg} size="md" />
+          <div className="rounded-md bg-trovao-surface p-1 ring-1 ring-trovao-border">
+            <SelecaoAvatar nome={jogo.selecaoCasa.nome} bandeiraSvg={jogo.selecaoCasa.bandeiraSvg} size="lg" shape="rect" />
+          </div>
           <p className="text-xs font-semibold text-white">{jogo.selecaoCasa.codigo}</p>
         </div>
 
-        <div className="flex flex-col items-center gap-0.5">
+        <div className="flex flex-col items-center gap-0.5 rounded-xl bg-trovao-surface px-3 py-2">
           <ScoreDisplay
             placarCasa={aposta?.placarCasa ?? null}
             placarVisitante={aposta?.placarVisitante ?? null}
@@ -67,17 +79,19 @@ export function JogoCard({ jogo, aposta, onApostar }: JogoCardProps) {
         </div>
 
         <div className="flex flex-col items-center gap-1 flex-1">
-          <SelecaoAvatar nome={jogo.selecaoVisitante.nome} bandeiraSvg={jogo.selecaoVisitante.bandeiraSvg} size="md" />
+          <div className="rounded-md bg-trovao-surface p-1 ring-1 ring-trovao-border">
+            <SelecaoAvatar nome={jogo.selecaoVisitante.nome} bandeiraSvg={jogo.selecaoVisitante.bandeiraSvg} size="lg" shape="rect" />
+          </div>
           <p className="text-xs font-semibold text-white">{jogo.selecaoVisitante.codigo}</p>
         </div>
       </div>
 
-      {/* Rodapé: placar real do jogo */}
-      {temResultado && (
+      {/* Rodapé: placar real do jogo e/ou pontuação */}
+      {(temResultado || aposta?.pontuacao != null) && (
         <div className="border-t border-trovao-border pt-2 flex items-center justify-between text-xs">
           <span className="text-trovao-muted">Placar:</span>
           <span className="text-white font-mono font-semibold">
-            {jogo.placarCasa} × {jogo.placarVisitante}
+            {temResultado ? `${jogo.placarCasa} × ${jogo.placarVisitante}` : '—'}
           </span>
           {aposta?.pontuacao != null && (
             <span className="text-trovao-gold font-bold">+{aposta.pontuacao} pts</span>
