@@ -198,4 +198,17 @@ describe('RankingService.recalcularRankingBolao', () => {
       where: { bolaoId: 'b1', usuarioId: { notIn: ['u-ana', 'u-bob'] } },
     });
   });
+
+  it('desempata por ordem alfabética crescente do nome', async () => {
+    prismaMock.bolaoMembro.findMany.mockResolvedValue([
+      { usuarioId: 'u-bruno', usuario: { nome: 'Bruno' } },
+      { usuarioId: 'u-ana', usuario: { nome: 'Ana' } },
+    ]);
+    prismaMock.aposta.findMany.mockResolvedValue([]);
+
+    await service.recalcularRankingBolao('b1');
+
+    expect(posicaoDe('u-ana')).toBe(1);
+    expect(posicaoDe('u-bruno')).toBe(2);
+  });
 });

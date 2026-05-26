@@ -163,6 +163,6 @@ export class RankingService {
     if (b.acertosEmpate !== a.acertosEmpate) return b.acertosEmpate - a.acertosEmpate;
     if (b.acertosPlacarPerdedor !== a.acertosPlacarPerdedor) return b.acertosPlacarPerdedor - a.acertosPlacarPerdedor;
     if (b.acertosGanhador !== a.acertosGanhador) return b.acertosGanhador - a.acertosGanhador;
-    return 0;
+    return (a.nome ?? '').localeCompare(b.nome ?? '');
   }
 }
