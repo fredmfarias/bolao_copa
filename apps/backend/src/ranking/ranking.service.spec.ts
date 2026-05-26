@@ -114,3 +114,88 @@ describe('RankingService leitura de snapshot', () => {
     });
   });
 });
+
+describe('RankingService.recalcularRankingBolao', () => {
+  const prismaMock = {
+    bolaoMembro: { findMany: jest.fn() },
+    aposta: { findMany: jest.fn() },
+    ranking: { upsert: jest.fn(), deleteMany: jest.fn() },
+  };
+  let service: RankingService;
+
+  beforeEach(async () => {
+    const module = await Test.createTestingModule({
+      providers: [RankingService, { provide: PrismaService, useValue: prismaMock }],
+    }).compile();
+    service = module.get(RankingService);
+    jest.clearAllMocks();
+    prismaMock.ranking.upsert.mockResolvedValue({});
+    prismaMock.ranking.deleteMany.mockResolvedValue({});
+  });
+
+  function posicaoDe(usuarioId: string): number | undefined {
+    const call = prismaMock.ranking.upsert.mock.calls.find(
+      (c: any) => c[0].where.bolaoId_usuarioId.usuarioId === usuarioId,
+    );
+    return call?.[0].update.posicao;
+  }
+
+  it('só busca membros ativos do bolão', async () => {
+    prismaMock.bolaoMembro.findMany.mockResolvedValue([]);
+    prismaMock.aposta.findMany.mockResolvedValue([]);
+    await service.recalcularRankingBolao('b1');
+    expect(prismaMock.bolaoMembro.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { bolaoId: 'b1', usuario: { ativo: true } },
+      }),
+    );
+  });
+
+  it('membro sem apostas fica no fundo, não no topo', async () => {
+    prismaMock.bolaoMembro.findMany.mockResolvedValue([
+      { usuarioId: 'u-ana', usuario: { nome: 'Ana' } },
+      { usuarioId: 'u-bob', usuario: { nome: 'Bob' } },
+    ]);
+    prismaMock.aposta.findMany.mockResolvedValue([
+      {
+        usuarioId: 'u-ana',
+        placarCasa: 2,
+        placarVisitante: 1,
+        pontuacao: 10,
+        jogo: { placarCasa: 2, placarVisitante: 1 },
+      },
+    ]);
+
+    await service.recalcularRankingBolao('b1');
+
+    expect(posicaoDe('u-ana')).toBe(1);
+    expect(posicaoDe('u-bob')).toBe(2);
+  });
+
+  it('não envia o campo nome no upsert (não é coluna do Ranking)', async () => {
+    prismaMock.bolaoMembro.findMany.mockResolvedValue([
+      { usuarioId: 'u-ana', usuario: { nome: 'Ana' } },
+    ]);
+    prismaMock.aposta.findMany.mockResolvedValue([]);
+
+    await service.recalcularRankingBolao('b1');
+
+    const call = prismaMock.ranking.upsert.mock.calls[0][0];
+    expect(call.update).not.toHaveProperty('nome');
+    expect(call.create).not.toHaveProperty('nome');
+  });
+
+  it('remove linhas Ranking de membros não-ativos', async () => {
+    prismaMock.bolaoMembro.findMany.mockResolvedValue([
+      { usuarioId: 'u-ana', usuario: { nome: 'Ana' } },
+      { usuarioId: 'u-bob', usuario: { nome: 'Bob' } },
+    ]);
+    prismaMock.aposta.findMany.mockResolvedValue([]);
+
+    await service.recalcularRankingBolao('b1');
+
+    expect(prismaMock.ranking.deleteMany).toHaveBeenCalledWith({
+      where: { bolaoId: 'b1', usuarioId: { notIn: ['u-ana', 'u-bob'] } },
+    });
+  });
+});

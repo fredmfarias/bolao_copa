@@ -93,10 +93,10 @@ export class RankingService {
 
   async recalcularRankingBolao(bolaoId: string) {
     const membros = await this.prisma.bolaoMembro.findMany({
-      where: { bolaoId },
-      select: { usuarioId: true },
+      where: { bolaoId, usuario: { ativo: true } },
+      select: { usuarioId: true, usuario: { select: { nome: true } } },
     });
-    const usuarioIds = membros.map(m => m.usuarioId);
+    const usuarioIds = membros.map((m) => m.usuarioId);
 
     const apostas = await this.prisma.aposta.findMany({
       where: { usuarioId: { in: usuarioIds }, pontuacao: { not: null } },
@@ -105,15 +105,19 @@ export class RankingService {
 
     const porUsuario = new Map<string, any>();
 
+    // Semeia todos os membros ativos zerados, carregando o nome para o desempate.
+    for (const m of membros) {
+      porUsuario.set(m.usuarioId, {
+        nome: m.usuario.nome,
+        pontuacaoTotal: 0, acertosPlacarExato: 0, acertosPlacarVencedor: 0,
+        acertosPlacarPerdedor: 0, acertosEmpate: 0, acertosGanhador: 0,
+        acertosNada: 0, apostasPostadas: 0,
+      });
+    }
+
     for (const aposta of apostas) {
-      if (!porUsuario.has(aposta.usuarioId)) {
-        porUsuario.set(aposta.usuarioId, {
-          pontuacaoTotal: 0, acertosPlacarExato: 0, acertosPlacarVencedor: 0,
-          acertosPlacarPerdedor: 0, acertosEmpate: 0, acertosGanhador: 0,
-          acertosNada: 0, apostasPostadas: 0,
-        });
-      }
       const r = porUsuario.get(aposta.usuarioId);
+      if (!r) continue;
       r.apostasPostadas += 1;
       r.pontuacaoTotal += aposta.pontuacao ?? 0;
 
@@ -138,12 +142,18 @@ export class RankingService {
     rankings.forEach((r, idx) => (r.posicao = idx + 1));
 
     for (const r of rankings) {
+      const { nome, ...dados } = r; // nome é só para o desempate, não é coluna do Ranking
       await this.prisma.ranking.upsert({
         where: { bolaoId_usuarioId: { bolaoId, usuarioId: r.usuarioId } },
-        update: r,
-        create: { bolaoId, ...r },
+        update: dados,
+        create: { bolaoId, ...dados },
       });
     }
+
+    // Remove linhas de membros não-ativos (ex.: desativados após o join).
+    await this.prisma.ranking.deleteMany({
+      where: { bolaoId, usuarioId: { notIn: usuarioIds } },
+    });
   }
 
   private comparadorRanking(a: any, b: any): number {
