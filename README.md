@@ -9,10 +9,12 @@
 - **Grupos (Bolões)** — crie grupos privados com código de convite ou participe do bolão global automático
 - **Palpites** — envie previsões de placar com prazo de 60 min antes do apito inicial; re-envios substituem o palpite anterior
 - **Pontuação automática** — placar exato, acerto de vencedor, empate e outros níveis de acerto computados assincronamente via fila Redis
-- **Ranking ao vivo** — pódio e tabela por bolão, recalculado após cada atualização de placar
+- **Ranking por publicação** — participantes veem um snapshot congelado publicado pelo admin; dois modos: **Geral** (acumulado) e **Rodada** (pontos da publicação)
+- **Variação de posição** — seta colorida indicando quantas posições o participante subiu ou caiu em relação à publicação anterior
+- **Gráfico de evolução** — line chart com a trajetória de posição do participante ao longo das rodadas
 - **Notificações push** — alertas via Web Push (PWA) quando partidas começam ou terminam
 - **Login social** — autenticação com Google OAuth ou e-mail/senha
-- **Painel administrativo** — gerenciar placares, rascunhar e publicar rankings, moderar usuários
+- **Painel administrativo** — habilitar/desabilitar bolões, gerenciar placares, pré-visualizar ranking (draft ao vivo), publicar rankings globalmente e gerir usuários (ativar/desativar, resetar senha)
 
 ---
 
@@ -21,7 +23,7 @@
 | Camada | Tecnologias |
 |---|---|
 | **Backend** | NestJS 10, Prisma 5 (PostgreSQL), Bull 4 (Redis), Passport.js (JWT + Google OAuth), Nodemailer, web-push |
-| **Frontend** | Next.js 14 (App Router), React 18, shadcn/ui v4, Tailwind CSS 3.4 |
+| **Frontend** | Next.js 14 (App Router), React 18, shadcn/ui v4, Tailwind CSS 3.4, Recharts |
 | **Shared** | Pacote TypeScript com enums e constantes compartilhados |
 | **Infra** | Docker Compose, Nginx (proxy reverso), Turborepo, pnpm workspaces |
 | **Testes** | Jest 29 + Testing Library (frontend), ts-jest (backend) |
@@ -150,20 +152,22 @@ bolao-trovao/
 ├── apps/
 │   ├── backend/          # API REST (NestJS)
 │   │   ├── src/
-│   │   │   ├── admin/    # Gerenciamento de placares e rankings
-│   │   │   ├── aposta/   # Palpites (upsert)
-│   │   │   ├── auth/     # JWT + Google OAuth
-│   │   │   ├── bolao/    # CRUD de bolões e convites
-│   │   │   ├── jogo/     # Partidas da copa
-│   │   │   ├── ranking/  # Processador Bull + tabela de pontos
+│   │   │   ├── admin/       # Draft de ranking, status de bolão, gestão de usuários
+│   │   │   ├── aposta/      # Palpites (upsert)
+│   │   │   ├── auth/        # JWT + Google OAuth (bloqueia usuário inativo)
+│   │   │   ├── bolao/       # CRUD de bolões e convites
+│   │   │   ├── jogo/        # Partidas da copa
+│   │   │   ├── publicacao/  # Evento global de publicação de ranking
+│   │   │   ├── ranking/     # Processador Bull + snapshots publicados
 │   │   │   └── ...
-│   │   └── prisma/       # Schema, migrações e seed
-│   └── frontend/         # Aplicação web (Next.js 14)
+│   │   └── prisma/          # Schema, migrações e seed
+│   └── frontend/            # Aplicação web (Next.js 14)
 │       └── src/
 │           ├── app/
 │           │   ├── (auth)/        # Páginas públicas (login, cadastro)
-│           │   └── (app)/         # Área protegida (jogos, ranking, bolões)
-│           ├── components/        # Componentes reutilizáveis
+│           │   ├── (app)/         # Área protegida (jogos, ranking, bolões)
+│           │   └── (admin)/       # Painel admin (bolões, placares, ranking, usuários)
+│           ├── components/        # Componentes reutilizáveis (incl. RankingEvolucao)
 │           └── hooks/             # Custom React hooks
 └── packages/
     └── shared/           # Enums e constantes TypeScript compartilhados
@@ -190,15 +194,23 @@ O Nginx escuta na porta 80 e roteia:
 
 ---
 
-## Como funciona a pontuação
+## Como funciona a pontuação e publicação
 
-O recálculo de pontos é assíncrono e orientado a eventos:
+O fluxo é em duas etapas — **cálculo ao vivo** e **publicação** — para que o admin controle o momento em que os participantes veem os resultados.
+
+### Cálculo (assíncrono, após cada placar)
 
 1. Admin registra o placar final de uma partida via painel
 2. Backend enfileira um job no Bull (Redis)
 3. `RankingProcessor` calcula os pontos de todos os palpites daquela partida
-4. Resultados são gravados na tabela `ranking`
-5. Frontend lê o ranking pré-computado em tempo de resposta
+4. Resultados são gravados na tabela `Ranking` (draft ao vivo — visível só ao admin)
+
+### Publicação (evento global, acionado pelo admin)
+
+5. Admin clica em **Publicar rodada** no painel
+6. Um único evento (`POST /admin/publicacoes`) marca todos os jogos com placar preenchido como pertencentes à nova publicação (rodada N)
+7. Para cada bolão habilitado × participante é gravado um `RankingSnapshot` com posição, pontuação total, pontos da rodada e variação vs publicação anterior
+8. Participantes passam a ver o snapshot congelado; correções de placar posteriores só aparecem na próxima publicação
 
 > [!IMPORTANT]
 > O Redis é um componente **crítico** do sistema. Sem ele, o Bull não consegue processar as filas e os rankings não são atualizados. Certifique-se de que `REDIS_HOST` aponta para o serviço correto (dentro do Docker, use o nome do serviço `redis`).
