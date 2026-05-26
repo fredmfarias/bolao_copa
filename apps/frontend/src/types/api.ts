@@ -53,6 +53,7 @@ export interface Aposta {
   placarCasa: number;
   placarVisitante: number;
   pontuacao: number | null;
+  atualizadoEm: string;
   jogo: Jogo;
 }
 
