@@ -93,10 +93,22 @@ O gráfico aparece abaixo dos acertos **somente se** o array retornado tiver dad
 
 #### Estrutura do painel expandido
 
+O grid de acertos exibe 6 itens em 2 colunas, mapeados para os seguintes campos de `RankingEntry`:
+
+| Label | Campo |
+|---|---|
+| Placar exato | `acertosPlacarExato` |
+| Placar do vencedor correto | `acertosPlacarVencedor` |
+| Empate correto (sem placar exato) | `acertosEmpate` |
+| Placar do perdedor correto | `acertosPlacarPerdedor` |
+| Acertou apenas o vencedor | `acertosGanhador` |
+| Apostas feitas | `apostasPostadas` |
+
 ```
 ┌─ Acertos (grid 2 colunas) ──────────────────────────────┐
-│ Placar exato    N    Vencedor       N                    │
-│ Empate          N    Apostas feitas N                    │
+│ Placar exato              N    Placar do vencedor    N   │
+│ Empate correto            N    Placar do perdedor    N   │
+│ Acertou apenas vencedor   N    Apostas feitas        N   │
 └──────────────────────────────────────────────────────────┘
 ┌─ Evolução (só se houver dados) ─────────────────────────┐
 │  [spinner enquanto carrega]                              │
