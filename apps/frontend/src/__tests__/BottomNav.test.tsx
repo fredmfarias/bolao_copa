@@ -38,3 +38,9 @@ it('exibe item Admin somente para usuários ADMIN', () => {
   const adminLink = screen.getByText('Admin').closest('a');
   expect(adminLink).toHaveAttribute('href', '/admin/boloes');
 });
+
+it('não exibe item Admin quando user é null', () => {
+  mockUseAuth.mockReturnValue({ user: null });
+  render(<BottomNav />);
+  expect(screen.queryByText('Admin')).not.toBeInTheDocument();
+});
