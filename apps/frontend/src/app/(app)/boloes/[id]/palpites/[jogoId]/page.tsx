@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { api } from '@/lib/api';
 import { PageSkeleton } from '@/components/PageSkeleton';
 import { EmptyState } from '@/components/EmptyState';
@@ -60,6 +61,12 @@ export default function PalpitesPage() {
 
   return (
     <div className="space-y-4">
+      <div>
+        <Link href={`/boloes/${bolaoId}`} className="text-trovao-muted text-sm hover:text-white">
+          ← Voltar
+        </Link>
+      </div>
+
       {/* Cabeçalho do jogo */}
       <div className="text-center">
         <p className="text-trovao-muted text-xs mb-1">{jogo.fase} · Rodada {jogo.rodada}</p>
