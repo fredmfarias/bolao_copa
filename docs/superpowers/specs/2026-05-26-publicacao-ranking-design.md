@@ -21,8 +21,9 @@ Formalizar o modelo de **publicação de ranking** do bolão, atendendo às regr
 3. Publicação como evento (admin decide quando os resultados ficam visíveis) — hoje `publicarRanking` é stub que só muda status para `PAGO`.
 4. Habilitar/desabilitar bolões privados — formalizado via status do bolão.
 5. Gráfico de evolução de posição do participante ao longo das rodadas.
+6. Gestão de usuários pelo admin: ativar/desativar e resetar senha.
 
-**Fora de escopo (YAGNI):** gestão de usuários pelo admin (ativar/desativar, reset de senha). As regras de persona não pedem isso.
+**Gestão de usuários pelo admin (no escopo):** ativar/desativar usuário e resetar senha.
 
 ## Decisões-chave (validadas)
 
@@ -81,7 +82,16 @@ model RankingSnapshot {
 
 O modelo `Ranking` atual permanece como **draft ao vivo** (estado que o admin pré-visualiza). O participante lê sempre o `RankingSnapshot` da última publicação.
 
-Sem mudança em `Bolao.status` (`PAGO` = habilitado). Sem `Usuario.ativo`.
+Sem mudança em `Bolao.status` (`PAGO` = habilitado).
+
+### Alterado: `Usuario.ativo` (gestão pelo admin)
+```prisma
+model Usuario {
+  // ... campos existentes ...
+  ativo Boolean @default(true)
+}
+```
+Usuário desativado é bloqueado no login (gate de autenticação).
 
 ## Fluxo de publicação (backend)
 
@@ -124,17 +134,17 @@ Tudo lido do `RankingSnapshot` da última publicação do bolão.
 
 ## Capacidades do admin
 
-Exatamente as quatro das regras (nada além):
-
 1. **Habilitar/desabilitar bolões privados** — `PATCH /admin/boloes/:bolaoId/status`. Habilitar = `PAGO` (entra nas publicações, ranking visível); desabilitar = `ATIVO`/`ARQUIVADO` (sai das publicações; snapshots existentes permanecem).
 2. **Controlar placar** — `PATCH /jogos/:jogoId/placar` (já existe). Recalcula pontuação ao vivo; participante vê na próxima publicação.
 3. **Pré-visualizar ranking** — `GET /admin/ranking/:bolaoId/draft`. Draft ao vivo + variação projetada. Não publica.
 4. **Publicar rankings** — `POST /admin/publicacoes`. Evento global; botão "Publicar rodada N" com confirmação (mostra quantos jogos novos entram).
+5. **Gerir usuários** — `PATCH /admin/usuarios/:id` (body `{ ativo?: boolean; role?: Role }`) e `POST /admin/usuarios/:id/reset-senha` (envia e-mail de redefinição). Listagem em `GET /admin/usuarios`.
 
 ### Telas admin — route group `/(admin)/` com guard de role (USER comum redirecionado para `/jogos`)
 - `/(admin)/boloes` — habilitar/desabilitar bolões privados.
 - `/(admin)/placares` — entrada de placar por jogo.
 - `/(admin)/ranking` — pré-visualização por bolão + botão publicar global.
+- `/(admin)/usuarios` — lista com toggle de ativo/inativo, troca de role e ação de resetar senha.
 
 ## Frontend (participante)
 
@@ -154,6 +164,8 @@ Exatamente as quatro das regras (nada além):
 - Draft: variação projetada sem persistir.
 - Bolão desabilitado (não-`PAGO`) não recebe snapshot.
 - `evolucao`: série ordenada por `numero`.
+- `AdminService.atualizarUsuario`: altera `ativo`/`role`; usuário inativo é barrado no login.
+- `AdminService.resetarSenha`: dispara o fluxo de e-mail de redefinição.
 
 ### Frontend (Jest / RTL)
 - Toggle geral/rodada.
@@ -165,12 +177,13 @@ Exatamente as quatro das regras (nada além):
 
 | Ação | Caminho |
 |---|---|
-| Modificar | `apps/backend/prisma/schema.prisma` (+ `Publicacao`, `RankingSnapshot`, `Jogo.publicacaoId`) |
+| Modificar | `apps/backend/prisma/schema.prisma` (+ `Publicacao`, `RankingSnapshot`, `Jogo.publicacaoId`, `Usuario.ativo`) |
 | Criar | `apps/backend/prisma/migrations/<ts>_publicacao_ranking/migration.sql` |
 | Criar | `apps/backend/src/publicacao/` (module, service, controller, spec) |
-| Modificar | `apps/backend/src/admin/admin.service.ts` + `admin.controller.ts` (draft com variação, status do bolão) |
+| Modificar | `apps/backend/src/admin/admin.service.ts` + `admin.controller.ts` (draft com variação, status do bolão, gestão de usuários: ativo/role/reset-senha) |
+| Modificar | `apps/backend/src/auth/*` (login barra usuário inativo) |
 | Modificar | `apps/backend/src/ranking/ranking.service.ts` (leitura por snapshot, endpoint evolução) |
 | Modificar | `apps/frontend/package.json` (+ recharts) |
 | Modificar | `apps/frontend/src/app/(app)/ranking/[bolaoId]/page.tsx` |
 | Criar | `apps/frontend/src/components/RankingEvolucao.tsx` |
-| Criar | `apps/frontend/src/app/(admin)/` (boloes, placares, ranking) |
+| Criar | `apps/frontend/src/app/(admin)/` (boloes, placares, ranking, usuarios) |
