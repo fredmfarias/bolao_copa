@@ -35,3 +35,10 @@ it('não renderiza quando ranking está vazio', () => {
   const { container } = render(<RankingPodium ranking={[]} />);
   expect(container.firstChild).toBeNull();
 });
+
+it('aplica scale-110 apenas no 1º lugar', () => {
+  const { container } = render(<RankingPodium ranking={ranking} />);
+  const scaled = container.querySelectorAll('[class*="scale-110"]');
+  expect(scaled).toHaveLength(1);
+  expect(scaled[0]).toHaveTextContent('Alice');
+});

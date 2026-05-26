@@ -1,9 +1,5 @@
 import type { RankingEntry } from '@/types/api';
 
-const MEDALS = ['🥇', '🥈', '🥉'];
-const HEIGHTS = ['h-24', 'h-16', 'h-12'];
-const ORDER = [1, 0, 2]; // 2nd, 1st, 3rd visually
-
 interface RankingPodiumProps {
   ranking: RankingEntry[];
   myId?: string;
@@ -13,17 +9,22 @@ export function RankingPodium({ ranking, myId }: RankingPodiumProps) {
   const top3 = ranking.slice(0, 3);
   if (top3.length === 0) return null;
 
+  const slots = [
+    { entry: top3[1], medal: '🥈', height: 'h-16', isCenter: false },
+    { entry: top3[0], medal: '🥇', height: 'h-24', isCenter: true  },
+    { entry: top3[2], medal: '🥉', height: 'h-12', isCenter: false },
+  ];
+
   return (
     <div className="flex items-end justify-center gap-3 py-4">
-      {ORDER.map(idx => {
-        const entry = top3[idx];
-        if (!entry) return <div key={idx} className="w-24" />;
+      {slots.map(({ entry, medal, height, isCenter }, i) => {
+        if (!entry) return <div key={i} className="w-24" />;
         const isMe = entry.usuarioId === myId;
 
         return (
           <div key={entry.id} data-my={isMe || undefined}
-            className={`flex flex-col items-center gap-1 ${idx === 0 ? 'scale-110' : ''}`}>
-            <span className="text-2xl">{MEDALS[idx]}</span>
+            className={`flex flex-col items-center gap-1 ${isCenter ? 'scale-110' : ''}`}>
+            <span className="text-2xl">{medal}</span>
             {entry.usuario.avatarUrl ? (
               <img src={entry.usuario.avatarUrl} alt={entry.usuario.nome}
                 className="w-10 h-10 rounded-full border-2 border-trovao-border" />
@@ -37,7 +38,7 @@ export function RankingPodium({ ranking, myId }: RankingPodiumProps) {
               ${isMe ? 'text-trovao-gold' : 'text-white'}`}>
               {entry.usuario.nome}
             </p>
-            <div className={`${HEIGHTS[idx]} w-20 rounded-t-lg flex flex-col items-center justify-end pb-1
+            <div className={`${height} w-20 rounded-t-lg flex flex-col items-center justify-end pb-1
               bg-trovao-surface border border-trovao-border`}>
               <span className={`text-sm font-bold tabular-nums ${isMe ? 'text-trovao-gold' : 'text-white'}`}>
                 {entry.pontuacaoTotal}
