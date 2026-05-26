@@ -28,8 +28,15 @@ export default function JogosPage() {
   const [jogos, setJogos] = useState<Jogo[]>([]);
   const [apostas, setApostas] = useState<Map<string, Aposta>>(new Map());
   const [filtro, setFiltro] = useState<FiltroJogo>('Pendentes');
+  const [fixados, setFixados] = useState<Set<string>>(new Set());
   const [jogoSelecionado, setJogoSelecionado] = useState<Jogo | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Ao trocar de aba, esquece os jogos fixados na aba anterior.
+  function trocarFiltro(novo: FiltroJogo) {
+    setFiltro(novo);
+    setFixados(new Set());
+  }
 
   async function carregar() {
     setLoading(true);
@@ -50,7 +57,9 @@ export default function JogosPage() {
   useEffect(() => { carregar(); }, []);
 
   const jogosFiltrados = ordenarPorFiltro(
-    jogos.filter(j => jogoNoFiltro(getEstadoAposta(j, apostas.get(j.id)), filtro)),
+    jogos.filter(
+      j => jogoNoFiltro(getEstadoAposta(j, apostas.get(j.id)), filtro) || fixados.has(j.id),
+    ),
     filtro,
   );
   const grupos = agruparPorData(jogosFiltrados);
@@ -59,7 +68,7 @@ export default function JogosPage() {
     <div className="space-y-4">
       <h1 className="text-xl font-bold">Jogos</h1>
 
-      <FiltroJogosChips selecionada={filtro} onChange={setFiltro} />
+      <FiltroJogosChips selecionada={filtro} onChange={trocarFiltro} />
 
       {loading ? (
         <PageSkeleton />
@@ -94,7 +103,10 @@ export default function JogosPage() {
           aposta={apostas.get(jogoSelecionado.id)}
           aberto={true}
           onFechar={() => setJogoSelecionado(null)}
-          onSalvo={recarregarApostas}
+          onSalvo={() => {
+            setFixados(prev => new Set(prev).add(jogoSelecionado.id));
+            recarregarApostas();
+          }}
         />
       )}
     </div>

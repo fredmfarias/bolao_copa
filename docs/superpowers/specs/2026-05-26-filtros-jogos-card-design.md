@@ -44,6 +44,10 @@ três estados (Pendentes/Apostados/Encerrados), e "Todos" é a união.
     data permanece; apenas a ordem dos grupos (e dos jogos dentro do grupo) inverte.
 - O prazo é calculado como hoje: `dataHora - MINUTOS_PRAZO_APOSTA min`; encerrado quando
   `Date.now() >= prazo`.
+- **Jogos fixados na aba atual:** ao salvar um palpite, o jogo permanece visível na aba
+  corrente mesmo que mude de estado (ex.: apostar em "Pendentes de aposta" mantém o jogo
+  ali, agora exibindo o palpite), para o usuário acompanhar o que já fez sem trocar de aba.
+  Esse conjunto de jogos fixados é esquecido ao trocar de aba ou navegar para outra página.
 
 **Componente de chips:** `FaseFilterChips` é genérico (recebe `fases`/labels). Será
 renomeado para `FiltroJogosChips` e passará a receber as 4 chaves novas
