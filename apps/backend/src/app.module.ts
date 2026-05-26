@@ -11,6 +11,7 @@ import { ApostaModule } from './aposta/aposta.module';
 import { RankingModule } from './ranking/ranking.module';
 import { NotificacaoModule } from './notificacao/notificacao.module';
 import { AdminModule } from './admin/admin.module';
+import { PublicacaoModule } from './publicacao/publicacao.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { AdminModule } from './admin/admin.module';
     RankingModule,
     NotificacaoModule,
     AdminModule,
+    PublicacaoModule,
   ],
 })
 export class AppModule {}
