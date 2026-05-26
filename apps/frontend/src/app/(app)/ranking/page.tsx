@@ -32,15 +32,19 @@ export default function RankingIndexPage() {
         >
           <span className="text-white font-medium">Global</span>
         </Link>
-        {privados.map(b => (
-          <Link
-            key={b.id}
-            href={`/ranking/${b.id}`}
-            className="block px-4 py-3 rounded-xl bg-trovao-card border border-trovao-border hover:border-trovao-gold transition-colors"
-          >
-            <span className="text-white font-medium">{b.nome}</span>
-          </Link>
-        ))}
+        {privados.length === 0 ? (
+          <p className="text-trovao-muted text-sm px-1">Você não participa de nenhum bolão privado.</p>
+        ) : (
+          privados.map(b => (
+            <Link
+              key={b.id}
+              href={`/ranking/${b.id}`}
+              className="block px-4 py-3 rounded-xl bg-trovao-card border border-trovao-border hover:border-trovao-gold transition-colors"
+            >
+              <span className="text-white font-medium">{b.nome}</span>
+            </Link>
+          ))
+        )}
       </div>
     </div>
   );
