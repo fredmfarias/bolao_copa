@@ -47,15 +47,18 @@ model Usuario {
   role            Role      @default(USER)
   avatarUrl       String?
   emailVerificado Boolean   @default(false)
+  ativo           Boolean   @default(true)
   criadoEm        DateTime  @default(now())
 
-  membros       BolaoMembro[]
-  apostas       Aposta[]
-  rankings      Ranking[]
-  boloesGeridos Bolao[]                   @relation("BolaoCriador")
-  convites      BolaoConvite[]
-  subscriptions NotificacaoSubscription[]
-  configuracoes ConfiguracaoPontuacao[]
+  membros          BolaoMembro[]
+  apostas          Aposta[]
+  rankings         Ranking[]
+  boloesGeridos    Bolao[]                   @relation("BolaoCriador")
+  convites         BolaoConvite[]
+  subscriptions    NotificacaoSubscription[]
+  configuracoes    ConfiguracaoPontuacao[]
+  publicacoes      Publicacao[]
+  rankingSnapshots RankingSnapshot[]
 
   @@map("usuario")
 }
@@ -143,6 +146,8 @@ model Jogo {
   placarCasa         Int?
   placarVisitante    Int?
   pesoPontuacao      Int      @default(1)
+  publicacaoId       String?
+  publicacao         Publicacao? @relation(fields: [publicacaoId], references: [id])
 
   apostas Aposta[]
 
@@ -207,4 +212,42 @@ model NotificacaoSubscription {
   criadoEm  DateTime @default(now())
 
   @@map("notificacao_subscription")
+}
+
+model Publicacao {
+  id             String   @id @default(uuid())
+  numero         Int      @unique
+  publicadoEm    DateTime @default(now())
+  publicadoPorId String
+  publicadoPor   Usuario  @relation(fields: [publicadoPorId], references: [id])
+
+  jogos     Jogo[]
+  snapshots RankingSnapshot[]
+
+  @@map("publicacao")
+}
+
+model RankingSnapshot {
+  id              String     @id @default(uuid())
+  publicacaoId    String
+  publicacao      Publicacao @relation(fields: [publicacaoId], references: [id])
+  bolaoId         String
+  usuarioId       String
+  usuario         Usuario    @relation(fields: [usuarioId], references: [id])
+  posicao         Int
+  posicoesGanhas  Int        @default(0)
+  pontuacaoTotal  Int        @default(0)
+  pontuacaoRodada Int        @default(0)
+
+  acertosPlacarExato    Int @default(0)
+  acertosPlacarVencedor Int @default(0)
+  acertosPlacarPerdedor Int @default(0)
+  acertosEmpate         Int @default(0)
+  acertosGanhador       Int @default(0)
+  acertosNada           Int @default(0)
+  apostasPostadas       Int @default(0)
+
+  @@unique([publicacaoId, bolaoId, usuarioId])
+  @@index([bolaoId, usuarioId])
+  @@map("ranking_snapshot")
 }
