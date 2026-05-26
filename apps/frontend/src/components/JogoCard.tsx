@@ -1,25 +1,14 @@
 import type { Jogo, Aposta } from '@/types/api';
 import { SelecaoAvatar } from '@/components/SelecaoAvatar';
 import { ScoreDisplay } from '@/components/ScoreDisplay';
-import { MINUTOS_PRAZO_APOSTA } from '@bolao/shared';
+import { getEstadoAposta, formatDataAposta, type EstadoAposta } from '@/lib/jogoEstado';
 
-type JogoCardEstado = 'aberto' | 'salvo' | 'incompleto' | 'fechado';
-
-const ESTADO_BORDER: Record<JogoCardEstado, string> = {
+const ESTADO_BORDER: Record<EstadoAposta, string> = {
   aberto:    'border-trovao-border hover:border-trovao-green/40',
   salvo:     'border-trovao-green',
   incompleto:'border-trovao-gold',
   fechado:   'border-trovao-border opacity-60',
 };
-
-function getEstado(jogo: Jogo, aposta?: Aposta): JogoCardEstado {
-  const prazo = new Date(jogo.dataHora).getTime() - MINUTOS_PRAZO_APOSTA * 60 * 1000;
-  const estaFechado = Date.now() >= prazo;
-  if (!estaFechado && !aposta) return 'aberto';
-  if (!estaFechado && aposta)  return 'salvo';
-  if (estaFechado  && aposta)  return 'fechado';
-  return 'incompleto';
-}
 
 function formatHora(iso: string) {
   return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -32,7 +21,8 @@ interface JogoCardProps {
 }
 
 export function JogoCard({ jogo, aposta, onApostar }: JogoCardProps) {
-  const estado = getEstado(jogo, aposta);
+  const estado = getEstadoAposta(jogo, aposta);
+  const temResultado = jogo.placarCasa !== null && jogo.placarVisitante !== null;
 
   return (
     <div className={`bg-trovao-card border rounded-xl p-4 space-y-3 transition-colors ${ESTADO_BORDER[estado]}`}>
@@ -42,7 +32,7 @@ export function JogoCard({ jogo, aposta, onApostar }: JogoCardProps) {
         <span>{formatHora(jogo.dataHora)}</span>
       </div>
 
-      {/* Times */}
+      {/* Times + palpite central */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-col items-center gap-1 flex-1">
           <SelecaoAvatar nome={jogo.selecaoCasa.nome} bandeiraSvg={jogo.selecaoCasa.bandeiraSvg} size="md" />
@@ -50,9 +40,13 @@ export function JogoCard({ jogo, aposta, onApostar }: JogoCardProps) {
         </div>
 
         <div className="flex flex-col items-center gap-0.5">
-          <ScoreDisplay placarCasa={jogo.placarCasa} placarVisitante={jogo.placarVisitante} />
-          {estado === 'aberto' && (
-            <span className="text-trovao-muted text-[10px]">Aposte agora</span>
+          <ScoreDisplay
+            placarCasa={aposta?.placarCasa ?? null}
+            placarVisitante={aposta?.placarVisitante ?? null}
+          />
+          <span className="text-trovao-muted text-[10px] uppercase tracking-wider">Palpite</span>
+          {aposta && (
+            <span className="text-trovao-muted text-[10px]">{formatDataAposta(aposta.atualizadoEm)}</span>
           )}
         </div>
 
@@ -62,25 +56,20 @@ export function JogoCard({ jogo, aposta, onApostar }: JogoCardProps) {
         </div>
       </div>
 
-      {/* Footer por estado */}
-      {(estado === 'salvo' || estado === 'fechado') && aposta && (
+      {/* Rodapé: placar real do jogo */}
+      {temResultado && (
         <div className="border-t border-trovao-border pt-2 flex items-center justify-between text-xs">
-          <span className="text-trovao-muted">Seu palpite:</span>
+          <span className="text-trovao-muted">Placar:</span>
           <span className="text-white font-mono font-semibold">
-            {aposta.placarCasa} × {aposta.placarVisitante}
+            {jogo.placarCasa} × {jogo.placarVisitante}
           </span>
-          {aposta.pontuacao !== null && (
+          {aposta?.pontuacao != null && (
             <span className="text-trovao-gold font-bold">+{aposta.pontuacao} pts</span>
           )}
         </div>
       )}
 
-      {estado === 'incompleto' && (
-        <p className="text-trovao-muted text-xs text-center border-t border-trovao-border pt-2">
-          Prazo encerrado — sem aposta
-        </p>
-      )}
-
+      {/* Botão de aposta */}
       {(estado === 'aberto' || estado === 'salvo') && onApostar && (
         <button
           onClick={onApostar}

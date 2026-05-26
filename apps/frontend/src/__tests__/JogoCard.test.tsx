@@ -8,6 +8,7 @@ const selecao = (nome: string) => ({
 
 const HORA_FUTURA = new Date(Date.now() + 4 * 3600 * 1000).toISOString();
 const HORA_PASSADA = new Date(Date.now() - 2 * 3600 * 1000).toISOString();
+const ATUALIZADO = new Date(2026, 5, 11, 13, 45, 25).toISOString();
 
 const jogoBase: Jogo = {
   id: 'j1', rodada: 1, grupo: 'A', fase: 'GRUPOS',
@@ -19,35 +20,49 @@ const jogoBase: Jogo = {
 const apostaExemplo: Aposta = {
   id: 'a1', jogoId: 'j1',
   placarCasa: 2, placarVisitante: 1, pontuacao: null,
-  jogo: jogoBase,
+  atualizadoEm: ATUALIZADO, jogo: jogoBase,
 };
 
-it('estado aberto — mostra botão Apostar, sem palpite', () => {
+it('aberto — mostra botão Apostar, palpite vazio, sem data', () => {
   render(<JogoCard jogo={{ ...jogoBase, dataHora: HORA_FUTURA }} onApostar={jest.fn()} />);
   expect(screen.getByRole('button', { name: /apostar/i })).toBeInTheDocument();
-  expect(screen.queryByText(/seu palpite/i)).not.toBeInTheDocument();
+  expect(screen.getByText('— : —')).toBeInTheDocument();
+  expect(screen.queryByText('11/06/2026 13:45:25')).not.toBeInTheDocument();
+  expect(screen.queryByText(/aposte agora/i)).not.toBeInTheDocument();
 });
 
-it('estado salvo — mostra palpite e botão Editar', () => {
+it('salvo — palpite central, data/hora da aposta e botão Editar', () => {
   render(
     <JogoCard jogo={{ ...jogoBase, dataHora: HORA_FUTURA }} aposta={apostaExemplo} onApostar={jest.fn()} />
   );
-  expect(screen.getByText('Seu palpite:')).toBeInTheDocument();
+  expect(screen.getByText('Palpite')).toBeInTheDocument();
+  expect(screen.getByText('2 : 1')).toBeInTheDocument();
+  expect(screen.getByText('11/06/2026 13:45:25')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: /editar/i })).toBeInTheDocument();
 });
 
-it('estado incompleto — mostra prazo encerrado, sem botão', () => {
+it('incompleto — sem botão, sem texto "prazo encerrado"', () => {
   render(<JogoCard jogo={{ ...jogoBase, dataHora: HORA_PASSADA }} onApostar={jest.fn()} />);
-  expect(screen.getByText(/prazo encerrado/i)).toBeInTheDocument();
+  expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  expect(screen.queryByText(/prazo encerrado/i)).not.toBeInTheDocument();
+  expect(screen.getByText('— : —')).toBeInTheDocument();
+});
+
+it('fechado com resultado — rodapé "Placar" com placar real e pontuação', () => {
+  const jogoComPlacar = { ...jogoBase, dataHora: HORA_PASSADA, placarCasa: 1, placarVisitante: 1 };
+  const apostaPontuada = { ...apostaExemplo, jogo: jogoComPlacar, pontuacao: 5 };
+  render(<JogoCard jogo={jogoComPlacar} aposta={apostaPontuada} onApostar={jest.fn()} />);
+  expect(screen.getByText('Placar:')).toBeInTheDocument();
+  expect(screen.getByText('1 × 1')).toBeInTheDocument();
+  expect(screen.getByText('+5 pts')).toBeInTheDocument();
   expect(screen.queryByRole('button')).not.toBeInTheDocument();
 });
 
-it('estado fechado — mostra palpite, sem botão', () => {
+it('sem resultado — não mostra rodapé "Placar"', () => {
   render(
-    <JogoCard jogo={{ ...jogoBase, dataHora: HORA_PASSADA }} aposta={apostaExemplo} onApostar={jest.fn()} />
+    <JogoCard jogo={{ ...jogoBase, dataHora: HORA_FUTURA }} aposta={apostaExemplo} onApostar={jest.fn()} />
   );
-  expect(screen.getByText('Seu palpite:')).toBeInTheDocument();
-  expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  expect(screen.queryByText('Placar:')).not.toBeInTheDocument();
 });
 
 it('chama onApostar ao clicar no botão', () => {
