@@ -227,6 +227,12 @@ O fluxo é em duas etapas — **cálculo ao vivo** e **publicação** — para q
 3. `RankingProcessor` calcula os pontos de todos os palpites daquela partida
 4. Resultados são gravados na tabela `Ranking` (draft ao vivo — visível só ao admin)
 
+### Ordenação do ranking
+
+- Apenas usuários **ativos** são rankeados.
+- Todo membro do bolão aparece no ranking; quem não apostou entra com **0 pontos** e fica no fundo (uma aposta não realizada vale 0).
+- Critério de desempate, nesta ordem: pontuação total → placar exato → placar do vencedor correto → empate correto (sem placar exato) → placar do perdedor correto → acertou apenas o vencedor → ordem alfabética crescente do nome.
+
 ### Publicação (evento global, acionado pelo admin)
 
 5. Admin clica em **Publicar rodada** no painel
