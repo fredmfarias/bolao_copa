@@ -1,23 +1,49 @@
 'use client';
 
 import { useState } from 'react';
-import type { RankingEntry } from '@/types/api';
+import type { RankingEntry, EvolucaoPonto } from '@/types/api';
+import { api } from '@/lib/api';
+import { RankingEvolucao } from './RankingEvolucao';
 
 interface RankingRowProps {
   entry: RankingEntry;
   myId?: string;
+  bolaoId: string;
 }
 
-export function RankingRow({ entry, myId }: RankingRowProps) {
+const ACERTOS = [
+  { label: 'Placar exato',                      key: 'acertosPlacarExato'    },
+  { label: 'Placar do vencedor correto',         key: 'acertosPlacarVencedor' },
+  { label: 'Empate correto (sem placar exato)',  key: 'acertosEmpate'         },
+  { label: 'Placar do perdedor correto',         key: 'acertosPlacarPerdedor' },
+  { label: 'Acertou apenas o vencedor',          key: 'acertosGanhador'       },
+  { label: 'Apostas feitas',                     key: 'apostasPostadas'       },
+] as const;
+
+export function RankingRow({ entry, myId, bolaoId }: RankingRowProps) {
   const [expandido, setExpandido] = useState(false);
+  const [evolucao, setEvolucao] = useState<EvolucaoPonto[] | null>(null);
+  const [loadingEv, setLoadingEv] = useState(false);
   const isMe = entry.usuarioId === myId;
+
+  const handleExpand = () => {
+    const abrir = !expandido;
+    setExpandido(abrir);
+    if (abrir && evolucao === null) {
+      setLoadingEv(true);
+      api.get<EvolucaoPonto[]>(`/boloes/${bolaoId}/ranking/evolucao?usuarioId=${entry.usuarioId}`)
+        .then(setEvolucao)
+        .catch(() => setEvolucao([]))
+        .finally(() => setLoadingEv(false));
+    }
+  };
 
   return (
     <div className={`rounded-xl border transition-colors ${
       isMe ? 'border-trovao-gold/50 bg-trovao-gold/5' : 'border-trovao-border bg-trovao-card'
     }`}>
       <button
-        onClick={() => setExpandido(v => !v)}
+        onClick={handleExpand}
         className="w-full flex items-center gap-3 px-4 py-3 text-left"
       >
         <span className="text-trovao-muted text-sm w-7 flex-shrink-0">{entry.posicao}º</span>
@@ -52,18 +78,22 @@ export function RankingRow({ entry, myId }: RankingRowProps) {
       </button>
 
       {expandido && (
-        <div className="px-4 pb-3 grid grid-cols-2 gap-2 border-t border-trovao-border/50 pt-3">
-          {[
-            { label: 'Placar exato',   valor: entry.acertosPlacarExato },
-            { label: 'Vencedor',       valor: entry.acertosPlacarVencedor },
-            { label: 'Empate',         valor: entry.acertosEmpate },
-            { label: 'Apostas feitas', valor: entry.apostasPostadas },
-          ].map(({ label, valor }) => (
-            <div key={label} className="flex justify-between text-xs">
-              <span className="text-trovao-muted">{label}</span>
-              <span className="text-white font-semibold tabular-nums">{valor}</span>
-            </div>
-          ))}
+        <div className="px-4 pb-3 border-t border-trovao-border/50 pt-3 space-y-3">
+          <div className="grid grid-cols-2 gap-2">
+            {ACERTOS.map(({ label, key }) => (
+              <div key={key} className="flex justify-between text-xs">
+                <span className="text-trovao-muted">{label}</span>
+                <span className="text-white font-semibold tabular-nums">{entry[key]}</span>
+              </div>
+            ))}
+          </div>
+
+          {loadingEv && (
+            <p className="text-trovao-muted text-xs text-center py-2">Carregando evolução...</p>
+          )}
+          {!loadingEv && evolucao && evolucao.length > 0 && (
+            <RankingEvolucao dados={evolucao} />
+          )}
         </div>
       )}
     </div>
