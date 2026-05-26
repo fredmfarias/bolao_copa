@@ -27,7 +27,8 @@ regra de negócio não existe hoje no `comparadorRanking`.
 ## Comportamento desejado
 
 - Toda aposta não realizada gera pontuação 0.
-- Todos os membros do bolão aparecem no ranking; quem não apostou fica no **fundo**,
+- Apenas usuários **ativos** (`Usuario.ativo = true`) são rankeados.
+- Todos os membros ativos do bolão aparecem no ranking; quem não apostou fica no **fundo**,
   ordenado pelos critérios de desempate (incluindo alfabético).
 - A posição é recalculada a cada rodada (já ocorre via `recalcularRankingBolao`).
 - Ordem de desempate (decrescente, exceto o último):
@@ -41,13 +42,17 @@ regra de negócio não existe hoje no `comparadorRanking`.
 
 ## Mudanças
 
-### 1. `recalcularRankingBolao` semeia todos os membros (`ranking.service.ts:94`)
+### 1. `recalcularRankingBolao` semeia apenas membros ativos (`ranking.service.ts:94`)
 
-- Buscar `nome` de cada membro do bolão (junto com `usuarioId`).
-- Inicializar o map `porUsuario` com **uma entrada zerada por membro**, carregando o `nome`.
+- Buscar membros do bolão filtrando `usuario: { ativo: true }`, trazendo `usuarioId` e `nome`.
+- Inicializar o map `porUsuario` com **uma entrada zerada por membro ativo**, carregando o `nome`.
 - As apostas pontuadas acumulam por cima das entradas já existentes.
-- Resultado: todo membro recebe linha com posição calculada; não-apostadores ficam
-  com tudo 0 e caem para o fundo.
+- Após os upserts, **remover linhas `Ranking` de membros não-ativos** desse bolão
+  (`deleteMany` onde `usuarioId notIn` o conjunto ativo). Isso garante que um usuário
+  desativado — que já tinha linha criada no join — deixe de aparecer no snapshot, já
+  que `publicacao.service.ts:55` lê todas as linhas do bolão.
+- Resultado: todo membro ativo recebe linha com posição calculada; não-apostadores ficam
+  com tudo 0 e caem para o fundo; inativos somem do ranking.
 
 ### 2. Desempate alfabético final (`comparadorRanking`, `ranking.service.ts:149`)
 
@@ -72,6 +77,7 @@ próximo recálculo.
 - Desempate alfabético entre dois usuários com estatísticas idênticas.
 - Ordem das 6 categorias de desempate preservada.
 - Membro com apostas pontuadas continua somando corretamente sobre a entrada semeada.
+- Usuário inativo não aparece no ranking, e sua linha `Ranking` é removida no recalc.
 
 ## Fora de escopo
 
