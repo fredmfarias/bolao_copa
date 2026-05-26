@@ -1,0 +1,54 @@
+# Infraestrutura de desenvolvimento — apenas dependências (sem backend/frontend).
+#
+# Backend e frontend rodam NATIVAMENTE na máquina (pnpm dev) para hot-reload
+# instantâneo. O Docker sobe só o que não muda durante o desenvolvimento.
+#
+# Uso:
+#   docker compose -f docker-compose.infra.yml up -d      # sobe infra
+#   docker compose -f docker-compose.infra.yml down        # para infra
+#   docker compose -f docker-compose.infra.yml down -v     # zera os dados
+#
+# Portas expostas em localhost:
+#   Postgres: 5432   Redis: 6379   Mailpit SMTP: 1025   Mailpit UI: 8025
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: bolao_trovao
+      POSTGRES_USER: bolao
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bolao -d bolao_trovao"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI
+
+volumes:
+  postgres_data:
+  redis_data:

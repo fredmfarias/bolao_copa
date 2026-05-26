@@ -2,7 +2,14 @@
   "name": "bolao-trovao",
   "private": true,
   "scripts": {
-    "dev": "turbo run dev",
+    "predev": "pnpm --filter @bolao/shared build",
+    "dev": "pnpm --parallel --filter @bolao/backend --filter @bolao/frontend dev",
+    "dev:infra": "docker compose -f docker-compose.infra.yml up -d",
+    "dev:infra:down": "docker compose -f docker-compose.infra.yml down",
+    "setup": "pnpm install && pnpm dev:infra && pnpm --filter @bolao/backend exec prisma generate && pnpm db:migrate && pnpm db:seed",
+    "db:migrate": "pnpm --filter @bolao/backend db:migrate",
+    "db:seed": "pnpm --filter @bolao/backend db:seed",
+    "db:reset": "pnpm --filter @bolao/backend db:reset",
     "build": "turbo run build",
     "test": "turbo run test",
     "lint": "turbo run lint"

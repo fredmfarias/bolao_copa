@@ -38,30 +38,30 @@
 
 ---
 
-## Início rápido
+## Início rápido (desenvolvimento)
 
-### Com Docker (stack completa)
+O fluxo recomendado roda **infra no Docker** (Postgres, Redis, Mailpit) e **backend + frontend nativos** na sua máquina. Assim o hot-reload é instantâneo: salvou o arquivo → a mudança já aparece (o frontend atualiza sozinho via HMR, o backend reinicia em ~1s).
 
 ```bash
-# 1. Clone e instale dependências
+# 1. Clone e prepare o ambiente (instala deps, sobe infra, migra e popula o banco)
 git clone <url-do-repo>
 cd bolao-trovao
-pnpm install
+cp .env.example .env
+pnpm setup
 
-# 2. Suba todos os serviços (migrations rodam automaticamente)
-docker compose up --build -d
-
-# 3. Popule o banco com estádios, seleções e jogos da Copa 2026
-docker exec bolao-trovao-backend-1 sh -c "cd /app/apps/backend && npx prisma db seed"
+# 2. Suba backend e frontend (um único terminal, em paralelo)
+pnpm dev
 ```
 
-Serviços disponíveis após a inicialização:
+Serviços disponíveis:
 
 | Serviço | URL |
 |---|---|
 | Frontend | http://localhost:3000 |
 | Backend API | http://localhost:3001 |
 | Mailpit (e-mails de dev) | http://localhost:8025 |
+| Postgres | localhost:5432 |
+| Redis | localhost:6379 |
 
 > [!NOTE]
 > O seed cria o usuário administrador com credenciais padrão:
@@ -70,26 +70,40 @@ Serviços disponíveis após a inicialização:
 >
 > Troque a senha após o primeiro login. Para criar outros usuários, acesse http://localhost:3000/registrar.
 
-> [!TIP]
-> Para recriar o banco do zero (apaga todos os dados):
-> ```bash
-> docker compose down -v && docker compose up --build -d
-> docker exec bolao-trovao-backend-1 sh -c "cd /app/apps/backend && npx prisma db seed"
-> ```
+### O que rodar após mudar o código
 
-### Desenvolvimento local (sem Docker)
+| Você alterou… | O que fazer |
+|---|---|
+| `apps/frontend/**` | **Nada.** O Next.js aplica via HMR — basta olhar o browser (no máximo F5). |
+| `apps/backend/**` | **Nada.** O NestJS reinicia em modo watch automaticamente (~1s). |
+| `packages/shared/**` | Reinicie o `pnpm dev` (Ctrl+C e rode de novo) — o shared é recompilado no boot. |
+| `prisma/schema.prisma` | `pnpm db:migrate` (cria a migração e regenera o client). |
+| `package.json` (deps) | `pnpm install` e reinicie o `pnpm dev`. |
+
+### Comandos de infra e banco
 
 ```bash
-# 1. Suba apenas a infra
-docker compose up postgres redis mailpit
+pnpm dev:infra        # sobe Postgres + Redis + Mailpit (detached)
+pnpm dev:infra:down   # para a infra (dados persistem em volumes)
+pnpm db:migrate       # aplica/gera migrações Prisma
+pnpm db:seed          # popula o banco com dados da Copa 2026
+pnpm db:reset         # ⚠️ destrói o banco e recria + seed
+```
 
-# 2. Backend (terminal 1)
-cd apps/backend
-pnpm dev
+> [!TIP]
+> Para zerar completamente os dados da infra:
+> ```bash
+> docker compose -f docker-compose.infra.yml down -v
+> pnpm setup
+> ```
 
-# 3. Frontend (terminal 2)
-cd apps/frontend
-pnpm dev
+### Alternativa: stack completa no Docker
+
+Útil só para um smoke test do build de produção (sem hot-reload — exige rebuild a cada mudança):
+
+```bash
+docker compose up --build -d
+docker exec bolao-trovao-backend-1 sh -c "cd /app/apps/backend && npx prisma db seed"
 ```
 
 ---
@@ -120,26 +134,34 @@ cp .env.example .env
 
 ## Scripts
 
-Execute os scripts pela raiz do monorepo via Turborepo:
+Execute os scripts pela raiz do monorepo:
 
 ```bash
-pnpm dev        # inicia backend e frontend em modo watch
-pnpm build      # compila todos os pacotes
-pnpm test       # roda todos os testes
-pnpm lint       # lint em todos os pacotes
+pnpm setup           # primeira vez: install + infra + migrate + seed
+pnpm dev             # inicia backend e frontend nativos em watch (paralelo)
+pnpm dev:infra       # sobe só a infra (Postgres, Redis, Mailpit)
+pnpm dev:infra:down  # para a infra
+pnpm db:migrate      # aplica/gera migrações Prisma
+pnpm db:seed         # popula banco com dados iniciais
+pnpm db:reset        # ⚠️ destrói e recria o banco + seed
+pnpm build           # compila todos os pacotes (Turborepo)
+pnpm test            # roda todos os testes (Turborepo)
+pnpm lint            # lint em todos os pacotes (Turborepo)
 ```
+
+> [!NOTE]
+> `pnpm dev` usa o runner paralelo do pnpm (não o Turborepo) para evitar problemas de spawn do processo `node` em alguns ambientes Windows. `build`, `test` e `lint` continuam via Turborepo.
 
 Ou dentro de cada app:
 
 ```bash
-# Backend
+# Backend — os scripts db:* carregam o .env da raiz via dotenv-cli
 cd apps/backend
-pnpm db:migrate   # aplica migrações Prisma (dev)
-pnpm db:seed      # popula banco com dados iniciais
-pnpm db:reset     # ⚠️ destrói e recria o banco + seed
+pnpm dev          # NestJS em watch (:3001)
 
 # Frontend
 cd apps/frontend
+pnpm dev          # Next.js em watch (:3000)
 pnpm test:watch   # testes em modo interativo
 ```
 

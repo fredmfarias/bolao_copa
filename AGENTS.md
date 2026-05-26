@@ -37,56 +37,68 @@ bolao-trovao/
 │           ├── components/         # Shared UI components
 │           └── __tests__/          # Jest + Testing Library (15 suites)
 └── packages/
-    └── shared/           # @bolao/shared — TypeScript source only, no build step
-        └── src/index.ts  # Shared types/constants
+    └── shared/           # @bolao/shared — types/constants
+        ├── src/index.ts  # Frontend consumes src (Next transpilePackages)
+        └── dist/         # Backend (CommonJS require) consumes built dist — built by `predev`
 ```
 
 ---
 
-## Quick Start (full local stack)
+## Quick Start (recommended dev flow)
+
+Infra runs in Docker; backend + frontend run natively for instant hot-reload (Next HMR + NestJS watch). Editing app code needs no manual rebuild — at most an F5 in the browser.
 
 ```bash
-# 1. Install dependencies
-pnpm install
+# 1. First time: install deps, start infra, migrate + seed
+cp .env.example .env
+pnpm setup
 
-# 2. Start all services (postgres, redis, mailpit, backend, frontend)
-docker compose up --build
-
-# 3. Run DB seed (from another terminal, after backend is healthy)
-cd apps/backend
-$env:TS_NODE_COMPILER_OPTIONS='{"module":"CommonJS"}'
-$env:DATABASE_URL='postgresql://bolao:secret@localhost:5432/bolao_trovao'
-npx ts-node prisma/seed.ts
+# 2. Start backend + frontend natively (single terminal, parallel)
+pnpm dev
 ```
 
 Service URLs:
 - Frontend: http://localhost:3000
 - Backend:  http://localhost:3001
 - Mailpit:  http://localhost:8025 (intercepts all outbound email)
+- Postgres: localhost:5432 · Redis: localhost:6379
 
 Test credentials (created by seed):
 - `fred@bolao.com` / `senha123` — ADMIN role
 - `maria@bolao.com` / `senha123` — USER role
 
----
+### What to re-run after a code change
+- `apps/frontend/**` → nothing (HMR).
+- `apps/backend/**` → nothing (NestJS watch restarts in ~1s).
+- `packages/shared/**` → restart `pnpm dev` (shared is compiled on boot via the `predev` hook; the backend consumes its built `dist`).
+- `prisma/schema.prisma` → `pnpm db:migrate`.
+- new deps → `pnpm install` + restart `pnpm dev`.
 
-## Development (without Docker)
-
-Backend:
+### Key infra/db scripts (root)
 ```bash
-cd apps/backend
-pnpm dev          # NestJS watch mode on :3001
+pnpm dev:infra        # postgres + redis + mailpit (detached)
+pnpm dev:infra:down   # stop infra
+pnpm db:migrate       # prisma migrate dev (loads root .env via dotenv-cli)
+pnpm db:seed          # seed Copa 2026 data
+pnpm db:reset         # destroy + recreate + seed
 ```
 
-Frontend:
-```bash
-cd apps/frontend
-pnpm dev          # Next.js on :3000
-```
+> **`pnpm dev` does NOT use Turborepo.** It uses pnpm's parallel runner
+> (`pnpm --parallel --filter @bolao/backend --filter @bolao/frontend dev`) because
+> the turbo Go binary fails to spawn the nvm4w `node.exe` on this Windows setup
+> (`STATUS_DLL_NOT_FOUND` / `api-ms-win-core-synch-l1-2-0.dll`). `build`/`test`/`lint`
+> still go through turbo.
 
-You still need Postgres and Redis running. The easiest way is to start only the infra services:
+> **Backend `.env` resolution:** `ConfigModule.forRoot({ envFilePath: ['.env', '../../.env'] })`
+> loads the repo-root `.env` when the backend runs from `apps/backend`. The `db:*`
+> scripts wrap Prisma with `dotenv-cli -e ../../.env` for the same reason. Inside
+> Docker, env vars come from compose and take precedence (dotenv never overrides).
+
+### Alternative: full Docker stack
+Only for smoke-testing the production build (no hot-reload):
 ```bash
-docker compose up postgres redis mailpit
+docker compose up --build -d
+docker exec bolao-trovao-backend-1 sh -c "cd /app/apps/backend && npx prisma db seed"
 ```
 
 ---
@@ -123,20 +135,20 @@ pnpm --filter @bolao/backend exec tsc --noEmit
 
 ## Database
 
+Run from the repo root (these wrap Prisma with `dotenv-cli -e ../../.env` so the
+root `.env` is loaded regardless of cwd):
+
 ```bash
-cd apps/backend
+pnpm db:migrate       # prisma migrate dev — apply pending migrations + regen client
+pnpm db:reset         # destroy DB + re-seed (destructive)
+pnpm db:seed          # seed only
+```
 
-# Apply pending migrations (dev)
-npx prisma migrate dev
+Inside `apps/backend`, the equivalents are `pnpm db:migrate` / `pnpm db:deploy` /
+`pnpm db:reset` / `pnpm db:seed`. For Prisma Studio:
 
-# Apply migrations (CI/production, no schema diff)
-npx prisma migrate deploy
-
-# Open Prisma Studio (GUI)
-npx prisma studio
-
-# Reset DB and re-seed (destructive)
-npx prisma migrate reset --force
+```bash
+cd apps/backend && pnpm exec dotenv -e ../../.env -- prisma studio
 ```
 
 **BOLAO_GLOBAL_ID**: `00000000-0000-0000-0000-000000000001` — the global bolão every registered user joins automatically. The seed creates it; if it doesn't exist, registration will fail with a FK violation.
