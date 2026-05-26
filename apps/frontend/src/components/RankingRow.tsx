@@ -36,6 +36,14 @@ export function RankingRow({ entry, myId }: RankingRowProps) {
           {entry.usuario.nome}
         </span>
 
+        {entry.posicoesGanhas !== 0 && (
+          <span className={`text-xs font-semibold tabular-nums ${
+            entry.posicoesGanhas > 0 ? 'text-green-400' : 'text-red-400'
+          }`}>
+            {entry.posicoesGanhas > 0 ? '▲' : '▼'}{Math.abs(entry.posicoesGanhas)}
+          </span>
+        )}
+
         <span className={`text-sm font-bold tabular-nums ${isMe ? 'text-trovao-gold' : 'text-white'}`}>
           {entry.pontuacaoTotal}
         </span>

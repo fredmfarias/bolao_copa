@@ -17,7 +17,7 @@ const jogoBase: Jogo = {
 };
 
 const apostaExemplo: Aposta = {
-  id: 'a1', jogoId: 'j1', bolaoId: 'b1',
+  id: 'a1', jogoId: 'j1',
   placarCasa: 2, placarVisitante: 1, pontuacao: null,
   jogo: jogoBase,
 };
