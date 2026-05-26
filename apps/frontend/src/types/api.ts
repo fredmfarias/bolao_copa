@@ -4,6 +4,7 @@ export interface Usuario {
   email: string;
   avatarUrl: string | null;
   role: 'ADMIN' | 'USER';
+  ativo?: boolean;
   criadoEm: string;
 }
 
@@ -59,13 +60,47 @@ export interface RankingEntry {
   id: string;
   usuarioId: string;
   posicao: number;
+  posicoesGanhas: number;
   pontuacaoTotal: number;
+  pontuacaoRodada: number;
   acertosPlacarExato: number;
   acertosPlacarVencedor: number;
+  acertosPlacarPerdedor: number;
   acertosEmpate: number;
   acertosGanhador: number;
+  acertosNada: number;
   apostasPostadas: number;
   usuario: { id: string; nome: string; avatarUrl: string | null };
+}
+
+export interface PublicacaoResumo {
+  numero: number;
+  publicadoEm: string;
+}
+
+export interface EvolucaoPonto {
+  numero: number;
+  posicao: number;
+}
+
+export interface AdminBolao {
+  id: string;
+  nome: string;
+  descricao: string | null;
+  status: 'ATIVO' | 'PAGO' | 'ARQUIVADO';
+  precoReais: string;
+  maxParticipantes: number;
+  _count: { membros: number };
+}
+
+export interface AdminUsuario {
+  id: string;
+  nome: string;
+  email: string;
+  role: 'ADMIN' | 'USER';
+  ativo: boolean;
+  avatarUrl: string | null;
+  criadoEm: string;
 }
 
 export interface AuthTokens {
