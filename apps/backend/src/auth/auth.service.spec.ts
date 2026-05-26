@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
@@ -53,6 +54,16 @@ describe('AuthService', () => {
     await expect(service.login({ email: 'x@x.com', senha: '12345678' })).rejects.toThrow(
       UnauthorizedException,
     );
+  });
+
+  it('barra usuário inativo no login', async () => {
+    prismaMock.usuario.findUnique.mockResolvedValue({
+      id: 'u1', email: 'a@a.com', senhaHash: 'hash', emailVerificado: true,
+      ativo: false, role: 'USER',
+    });
+    jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
+    await expect(service.login({ email: 'a@a.com', senha: 'x' }))
+      .rejects.toThrow('Sua conta está desativada.');
   });
 
   it('envia e-mail de confirmação com URL /auth/confirmar-email', async () => {

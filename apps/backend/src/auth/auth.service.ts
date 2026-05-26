@@ -47,6 +47,10 @@ export class AuthService {
       throw new UnauthorizedException('Confirme seu e-mail antes de entrar.');
     }
 
+    if (!usuario.ativo) {
+      throw new UnauthorizedException('Sua conta está desativada.');
+    }
+
     return this.gerarTokens(usuario.id, usuario.email, usuario.role);
   }
 
