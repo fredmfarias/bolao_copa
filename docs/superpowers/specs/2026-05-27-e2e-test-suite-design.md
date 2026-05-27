@@ -330,13 +330,15 @@ export const mailpit = {
     return data.HTML || data.Text;
   },
 
-  extractToken(body: string): string {
+  extractConfirmToken(body: string): string {
     const match = body.match(/confirmar-email\?token=([\w.-]+)/);
     if (!match) throw new Error('Token de confirmação não encontrado no e-mail');
     return match[1];
   },
 };
 ```
+
+> O template de confirmação contém apenas o link (assunto "Confirme seu e-mail — Bolão Trovão"); a página `/auth/confirmar-email` chama a API e **redireciona** para `/login?emailConfirmado=true`. O esqueleto abaixo reflete isso.
 
 ### `e2e/pages/login.page.ts`
 
@@ -386,14 +388,14 @@ test.describe('Registro → confirmação de e-mail → login', () => {
 
     // 2. E-mail chega no Mailpit com link de ativação
     const msg = await mailpit.waitForMessageTo(user.email);
-    expect(msg.Subject).toMatch(/confirm/i);
+    expect(msg.Subject).toMatch(/confirme seu e-mail/i);
     const body = await mailpit.getBody(msg.ID);
-    expect(body).toContain(user.nome); // variável do template renderizada
-    const token = mailpit.extractToken(body);
+    expect(body).toContain('/auth/confirmar-email?token=');
+    const token = mailpit.extractConfirmToken(body);
 
-    // 3. Confirma o e-mail navegando no link extraído
+    // 3. Confirma navegando no link → app redireciona ao login com aviso
     await page.goto(`/auth/confirmar-email?token=${token}`);
-    await expect(page.getByText(/e-mail confirmado/i)).toBeVisible();
+    await expect(page).toHaveURL(/\/login\?emailConfirmado=true/);
 
     // 4. Login completa o fluxo ponta-a-ponta
     const login = new LoginPage(page);
