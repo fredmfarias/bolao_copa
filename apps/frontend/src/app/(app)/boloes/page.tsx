@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { api } from '@/lib/api';
 import { useAuth } from '@/components/AuthProvider';
 import { BolaoCard } from '@/components/BolaoCard';
+import { BOLAO_GLOBAL_ID } from '@bolao/shared';
 import type { Bolao } from '@/types/api';
 
 export default function BolaoesPage() {
@@ -50,7 +51,7 @@ export default function BolaoesPage() {
               bolao={b}
               href={`/boloes/${b.id}`}
               favoritoId={user?.bolaoFavoritoId}
-              onFavoritoChange={refresh}
+              onFavoritoChange={b.id !== BOLAO_GLOBAL_ID ? refresh : undefined}
             />
           ))}
         </div>
@@ -72,7 +73,7 @@ export default function BolaoesPage() {
                 bolao={b}
                 href={`/boloes/${b.id}`}
                 favoritoId={user?.bolaoFavoritoId}
-                onFavoritoChange={refresh}
+                onFavoritoChange={b.id !== BOLAO_GLOBAL_ID ? refresh : undefined}
               />
             ))}
           </div>

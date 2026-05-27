@@ -55,7 +55,8 @@ export default function BolaoDetalhePage() {
     <div className="space-y-8">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-xl font-bold">{bolao.nome}</h1>
+          <Link href="/boloes" className="text-trovao-muted text-sm hover:text-white">← Voltar</Link>
+          <h1 className="text-xl font-bold mt-1">{bolao.nome}</h1>
           {bolao.descricao && <p className="text-gray-400 text-sm mt-1">{bolao.descricao}</p>}
         </div>
         <Link href={`/ranking/${id}`}
