@@ -49,7 +49,7 @@ export default function RankingPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">Ranking</h1>
-        <Link href={`/boloes/${bolaoId}`} className="text-trovao-muted text-sm hover:text-white">← Voltar</Link>
+        <Link href="/ranking" className="text-trovao-muted text-sm hover:text-white">← Voltar</Link>
       </div>
 
       {loading ? (
@@ -90,6 +90,13 @@ export default function RankingPage() {
 
           {aba === 'geral' && (
             <RankingPodium ranking={ordenado} myId={user?.id} />
+          )}
+
+          {aba === 'rodada' && (
+            <RankingPodium
+              ranking={ordenado.map(e => ({ ...e, pontuacaoTotal: e.pontuacaoRodada }))}
+              myId={user?.id}
+            />
           )}
 
           <div className="space-y-2 mt-4">
