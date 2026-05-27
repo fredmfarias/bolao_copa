@@ -8,12 +8,19 @@ import { useAuth } from '@/components/AuthProvider';
 import { JogoCard } from '@/components/JogoCard';
 import { ModeradorPanel } from '@/components/ModeradorPanel';
 import { ConvitePanel } from '@/components/ConvitePanel';
-import { MINUTOS_PRAZO_APOSTA } from '@bolao/shared';
+import { prazoEncerrado } from '@/lib/jogoEstado';
 import type { Bolao, Jogo, Aposta } from '@/types/api';
 
-function prazoEncerrado(jogo: Jogo): boolean {
-  const prazo = new Date(new Date(jogo.dataHora).getTime() - MINUTOS_PRAZO_APOSTA * 60 * 1000);
-  return new Date() >= prazo;
+function ordenarJogosEncerrados(jogos: Jogo[]): Jogo[] {
+  return [...jogos]
+    .filter(prazoEncerrado)
+    .sort((a, b) => {
+      const aTemPlacar = a.placarCasa !== null;
+      const bTemPlacar = b.placarCasa !== null;
+      if (aTemPlacar !== bTemPlacar) return aTemPlacar ? 1 : -1;
+      const diff = new Date(a.dataHora).getTime() - new Date(b.dataHora).getTime();
+      return aTemPlacar ? -diff : diff;
+    });
 }
 
 export default function BolaoDetalhePage() {
@@ -42,6 +49,7 @@ export default function BolaoDetalhePage() {
   if (!bolao) return <p className="text-red-400">Bolão não encontrado.</p>;
 
   const isModerador = bolao.membros?.find(m => m.usuarioId === user?.id)?.papel === 'MODERADOR';
+  const jogosEncerrados = ordenarJogosEncerrados(jogos);
 
   return (
     <div className="space-y-8">
@@ -80,21 +88,20 @@ export default function BolaoDetalhePage() {
 
       <div>
         <h2 className="text-sm font-semibold text-gray-400 mb-3">Jogos</h2>
-        <div className="space-y-3">
-          {jogos.map(jogo => (
-            <div key={jogo.id} className="space-y-1">
-              <JogoCard jogo={jogo} aposta={apostas.get(jogo.id)} />
-              {prazoEncerrado(jogo) && (
-                <Link
-                  href={`/boloes/${id}/palpites/${jogo.id}`}
-                  className="block text-center text-xs text-yellow-400 hover:underline py-1"
-                >
-                  Ver palpites
-                </Link>
-              )}
-            </div>
-          ))}
-        </div>
+        {jogosEncerrados.length === 0 ? (
+          <p className="text-trovao-muted text-sm">Nenhum jogo encerrado ainda.</p>
+        ) : (
+          <div className="space-y-3">
+            {jogosEncerrados.map(jogo => (
+              <JogoCard
+                key={jogo.id}
+                jogo={jogo}
+                aposta={apostas.get(jogo.id)}
+                palpitesHref={`/boloes/${id}/palpites/${jogo.id}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
