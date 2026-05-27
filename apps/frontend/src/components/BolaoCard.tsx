@@ -27,10 +27,10 @@ export function BolaoCard({ bolao, href, favoritoId, onFavoritoChange }: BolaoCa
   const [salvando, setSalvando] = useState(false);
   const isFavorito = bolao.id === favoritoId;
 
-  async function confirmarFavorito() {
+  async function confirmar() {
     setSalvando(true);
     try {
-      await api.patch('/usuarios/me/favorito', { bolaoId: bolao.id });
+      await api.patch('/usuarios/me/favorito', { bolaoId: isFavorito ? null : bolao.id });
       setConfirmOpen(false);
       onFavoritoChange?.();
     } finally {
@@ -53,7 +53,7 @@ export function BolaoCard({ bolao, href, favoritoId, onFavoritoChange }: BolaoCa
         {onFavoritoChange && (
           <button
             onClick={() => setConfirmOpen(true)}
-            aria-label={isFavorito ? 'Bolão favorito' : 'Definir como favorito'}
+            aria-label={isFavorito ? 'Remover bolão favorito' : 'Definir como favorito'}
             className="absolute top-4 right-4 text-xl leading-none transition-colors"
           >
             <span className={isFavorito ? 'text-trovao-gold' : 'text-trovao-muted hover:text-trovao-gold'}>
@@ -67,9 +67,11 @@ export function BolaoCard({ bolao, href, favoritoId, onFavoritoChange }: BolaoCa
         <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
           <DialogContent showCloseButton={false}>
             <DialogHeader>
-              <DialogTitle>★ Definir bolão favorito</DialogTitle>
+              <DialogTitle>{isFavorito ? '★ Remover bolão favorito' : '★ Definir bolão favorito'}</DialogTitle>
               <DialogDescription>
-                "{bolao.nome}" será seu bolão padrão nos menus Bolões e Ranking.
+                {isFavorito
+                  ? `"${bolao.nome}" deixará de ser seu bolão padrão nos menus Bolões e Ranking.`
+                  : `"${bolao.nome}" será seu bolão padrão nos menus Bolões e Ranking.`}
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -77,11 +79,11 @@ export function BolaoCard({ bolao, href, favoritoId, onFavoritoChange }: BolaoCa
                 Cancelar
               </DialogClose>
               <Button
-                onClick={confirmarFavorito}
+                onClick={confirmar}
                 disabled={salvando}
                 className="bg-trovao-gold text-trovao-base font-bold hover:bg-trovao-gold/90"
               >
-                {salvando ? 'Salvando...' : 'Confirmar ★'}
+                {salvando ? 'Salvando...' : isFavorito ? 'Remover ★' : 'Confirmar ★'}
               </Button>
             </DialogFooter>
           </DialogContent>
