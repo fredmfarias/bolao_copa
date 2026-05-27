@@ -36,7 +36,7 @@ export default defineConfig({
       url: `http://localhost:${API_PORT}/jogos`,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
-      env: { ...process.env },
+      env: Object.fromEntries(Object.entries(process.env).filter((e): e is [string, string] => e[1] !== undefined)),
     },
     {
       command: `pnpm --filter @bolao/frontend exec next dev -p ${WEB_PORT}`,
@@ -44,7 +44,7 @@ export default defineConfig({
       url: `http://localhost:${WEB_PORT}`,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
-      env: { ...process.env, PORT: WEB_PORT },
+      env: { ...Object.fromEntries(Object.entries(process.env).filter((e): e is [string, string] => e[1] !== undefined)), PORT: WEB_PORT },
     },
   ],
 });
