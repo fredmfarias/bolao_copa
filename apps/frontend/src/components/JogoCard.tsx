@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import type { Jogo, Aposta } from '@/types/api';
 import { SelecaoAvatar } from '@/components/SelecaoAvatar';
 import { ScoreDisplay } from '@/components/ScoreDisplay';
@@ -6,7 +7,7 @@ import { getEstadoAposta, formatDataAposta, type EstadoAposta } from '@/lib/jogo
 const ESTADO_BORDER: Record<EstadoAposta, string> = {
   aberto:    'border-trovao-border hover:border-trovao-green/40',
   salvo:     'border-trovao-green',
-  incompleto:'border-trovao-gold',
+  incompleto:'border-trovao-border opacity-60',
   fechado:   'border-trovao-border opacity-60',
 };
 
@@ -25,20 +26,29 @@ interface JogoCardProps {
   jogo: Jogo;
   aposta?: Aposta;
   onApostar?: () => void;
+  palpitesHref?: string;
 }
 
-export function JogoCard({ jogo, aposta, onApostar }: JogoCardProps) {
+export function JogoCard({ jogo, aposta, onApostar, palpitesHref }: JogoCardProps) {
   const estado = getEstadoAposta(jogo, aposta);
   const temResultado = jogo.placarCasa !== null && jogo.placarVisitante !== null;
 
   return (
     <div className={`bg-trovao-card border rounded-xl p-4 space-y-2 transition-colors ${ESTADO_BORDER[estado]}`}>
-      {/* Header: título + peso + hora */}
+      {/* Header: título + peso + hora + palpites */}
       <div className="flex justify-between items-center gap-2">
         <p className="flex-1 text-xs font-semibold uppercase tracking-wide text-white/90 leading-tight">
           {jogo.selecaoCasa.nome} × {jogo.selecaoVisitante.nome}
         </p>
         <div className="flex items-center gap-2 text-xs text-trovao-muted shrink-0">
+          {palpitesHref && (
+            <Link
+              href={palpitesHref}
+              className="text-trovao-gold text-[10px] font-bold hover:underline shrink-0"
+            >
+              Palpites →
+            </Link>
+          )}
           <span
             title={`Esse jogo tem peso ×${jogo.pesoPontuacao}`}
             className={`cursor-help rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
