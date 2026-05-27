@@ -3,6 +3,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UsuarioService } from './usuario.service';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
+import { UpdateFavoritoDto } from './dto/update-favorito.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('usuarios')
@@ -17,5 +18,10 @@ export class UsuarioController {
   @Patch('me')
   atualizar(@CurrentUser() user: { id: string }, @Body() dto: UpdateUsuarioDto) {
     return this.service.atualizar(user.id, dto);
+  }
+
+  @Patch('me/favorito')
+  atualizarFavorito(@CurrentUser() user: { id: string }, @Body() dto: UpdateFavoritoDto) {
+    return this.service.atualizarFavorito(user.id, dto.bolaoId);
   }
 }
