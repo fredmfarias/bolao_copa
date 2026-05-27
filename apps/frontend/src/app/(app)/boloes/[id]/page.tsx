@@ -53,14 +53,12 @@ export default function BolaoDetalhePage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-start justify-between">
+      <div className="flex items-center justify-between gap-4">
         <div>
-          <Link href="/boloes" className="text-trovao-muted text-sm hover:text-white">← Voltar</Link>
-          <h1 className="text-xl font-bold mt-1">{bolao.nome}</h1>
-          {bolao.descricao && <p className="text-gray-400 text-sm mt-1">{bolao.descricao}</p>}
+          <h1 className="text-xl font-bold">{bolao.nome}</h1>
+          {bolao.descricao && <p className="text-gray-400 text-sm mt-0.5">{bolao.descricao}</p>}
         </div>
-        <Link href={`/ranking/${id}`}
-          className="text-sm text-yellow-400 hover:underline">Ver ranking</Link>
+        <Link href="/boloes" className="text-trovao-muted text-sm hover:text-white shrink-0">← Voltar</Link>
       </div>
 
       {isModerador && (
