@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { api } from '@/lib/api';
@@ -21,12 +21,14 @@ export default function RankingPage() {
   const [publicacoes, setPublicacoes] = useState<PublicacaoResumo[]>([]);
   const [publicacaoSel, setPublicacaoSel] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const rankingGeralRef = useRef<RankingEntry[]>([]);
 
   useEffect(() => {
     Promise.all([
       api.get<RankingEntry[]>(`/boloes/${bolaoId}/ranking`).catch(() => [] as RankingEntry[]),
       api.get<PublicacaoResumo[]>(`/boloes/${bolaoId}/ranking/publicacoes`).catch(() => [] as PublicacaoResumo[]),
     ]).then(([r, pubs]) => {
+      rankingGeralRef.current = r;
       setRanking(r);
       setPublicacoes(pubs);
       setPublicacaoSel(pubs[0]?.numero ?? null);
@@ -35,11 +37,15 @@ export default function RankingPage() {
   }, [bolaoId]);
 
   useEffect(() => {
+    if (aba === 'geral') {
+      setRanking(rankingGeralRef.current);
+      return;
+    }
     if (publicacaoSel === null) return;
     api.get<RankingEntry[]>(`/boloes/${bolaoId}/ranking?publicacao=${publicacaoSel}`)
       .then(setRanking)
       .catch(() => setRanking([]));
-  }, [publicacaoSel, bolaoId]);
+  }, [publicacaoSel, bolaoId, aba]);
 
   const ordenado = aba === 'rodada'
     ? [...ranking].sort((a, b) => b.pontuacaoRodada - a.pontuacaoRodada)
