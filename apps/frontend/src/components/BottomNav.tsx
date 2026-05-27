@@ -5,25 +5,28 @@ import { usePathname } from 'next/navigation';
 import { Home, Users, Trophy, User, ShieldCheck } from 'lucide-react';
 import { useAuth } from '@/components/AuthProvider';
 
-const NAV_ITEMS = [
-  { href: '/jogos',   icon: Home,   label: 'Jogos'   },
-  { href: '/boloes',  icon: Users,  label: 'Bolões'  },
-  { href: '/ranking', icon: Trophy, label: 'Ranking' },
-  { href: '/perfil',  icon: User,   label: 'Perfil'  },
-] as const;
-
 export function BottomNav() {
   const pathname = usePathname();
   const { user } = useAuth();
 
+  const hrefBoloes  = user?.bolaoFavoritoId ? `/boloes/${user.bolaoFavoritoId}`  : '/boloes';
+  const hrefRanking = user?.bolaoFavoritoId ? `/ranking/${user.bolaoFavoritoId}` : '/ranking';
+
+  const NAV_ITEMS = [
+    { href: '/jogos',    baseHref: '/jogos',    icon: Home,   label: 'Jogos'   },
+    { href: hrefBoloes,  baseHref: '/boloes',   icon: Users,  label: 'Bolões'  },
+    { href: hrefRanking, baseHref: '/ranking',  icon: Trophy, label: 'Ranking' },
+    { href: '/perfil',   baseHref: '/perfil',   icon: User,   label: 'Perfil'  },
+  ];
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-trovao-card border-t border-trovao-border z-50">
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
-        {NAV_ITEMS.map(({ href, icon: Icon, label }) => {
-          const active = pathname.startsWith(href);
+        {NAV_ITEMS.map(({ href, baseHref, icon: Icon, label }) => {
+          const active = pathname.startsWith(baseHref);
           return (
             <Link
-              key={href}
+              key={baseHref}
               href={href}
               className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-colors ${
                 active ? 'text-trovao-gold' : 'text-trovao-muted hover:text-white'
