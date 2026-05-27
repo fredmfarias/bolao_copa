@@ -28,15 +28,15 @@ export default function RankingIndexPage() {
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-bold">Ranking</h1>
-      <div className="space-y-3">
+      <div className="grid gap-4 sm:grid-cols-2">
         {global && (
           <BolaoCard
             bolao={{ ...global, nome: 'Global' }}
             href={`/ranking/${BOLAO_GLOBAL_ID}`}
           />
         )}
-        {privados.length === 0 ? (
-          <p className="text-trovao-muted text-sm px-1">Você não participa de nenhum bolão privado.</p>
+        {privados.length === 0 && !global ? (
+          <p className="text-trovao-muted text-sm px-1 col-span-2">Você não participa de nenhum bolão privado.</p>
         ) : (
           privados.map(b => (
             <BolaoCard
