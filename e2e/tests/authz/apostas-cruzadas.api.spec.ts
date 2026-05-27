@@ -40,15 +40,12 @@ test.describe('Authz — apostas entre usuários (API)', () => {
     await b.ctx.dispose();
   });
 
-  test('usuário inativo é bloqueado no login', async () => {
+  test('usuário inativo é bloqueado no login', async ({ anonApi }) => {
     const { user } = await criarUsuarioAutenticado(newUser('inativo'));
     await prisma.usuario.update({ where: { id: user.id }, data: { ativo: false } });
-    const { request } = await import('@playwright/test');
-    const anon = await request.newContext({ baseURL: process.env.NEXT_PUBLIC_API_URL });
-    const res = await anon.post('/auth/login', { data: { email: user.email, senha: 'senha12345' } });
+    const res = await anonApi.post('/auth/login', { data: { email: user.email, senha: 'senha12345' } });
     expect(res.status()).toBe(401); // auth.service.login lança "Sua conta está desativada."
     const body = await res.json();
     expect(body.message).toBe('Sua conta está desativada.');
-    await anon.dispose();
   });
 });

@@ -1,4 +1,4 @@
-import { test, expect, request } from '@playwright/test';
+import { test, expect } from '../../fixtures';
 import { criarUsuarioAutenticado } from '../../api/client';
 import { truncateDynamic, prisma } from '../../support/db';
 import { newUser } from '../../data/factories';
@@ -7,11 +7,9 @@ import { jogoComApostasAbertas } from '../../support/time';
 test.describe('Sessão e concorrência (API)', () => {
   test.beforeAll(async () => { await truncateDynamic(); });
 
-  test('refresh sem cookie válido retorna 401', async () => {
-    const anon = await request.newContext({ baseURL: process.env.NEXT_PUBLIC_API_URL });
-    const res = await anon.post('/auth/refresh');
+  test('refresh sem cookie válido retorna 401', async ({ anonApi }) => {
+    const res = await anonApi.post('/auth/refresh');
     expect(res.status()).toBe(401);
-    await anon.dispose();
   });
 
   test('duplo POST simultâneo de aposta não duplica registro', async () => {

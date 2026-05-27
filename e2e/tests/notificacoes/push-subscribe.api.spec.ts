@@ -37,5 +37,7 @@ test.describe('Push subscribe (API)', () => {
   test('vapid-public-key é público', async ({ anonApi }) => {
     const res = await anonApi.get('/notificacoes/vapid-public-key');
     expect(res.ok()).toBeTruthy();
+    const body = await res.json();
+    expect(body).toHaveProperty('key');
   });
 });

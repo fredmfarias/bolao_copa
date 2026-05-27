@@ -7,9 +7,8 @@ config({ path: resolve(__dirname, '..', '.env.e2e') });
 export const prisma = new PrismaClient();
 
 const GLOBAL_ID = '00000000-0000-0000-0000-000000000001';
-// Fixture accounts that must survive truncation: the seeded admin and the
-// participante created in global-setup (its captured session must stay valid).
-const KEEP_EMAILS = ['admin@bolao.com', 'participante@test.local'];
+// Fixture account that must survive truncation: the seeded admin.
+const KEEP_EMAILS = ['admin@bolao.com'];
 
 // Wipes dynamic data while keeping reference data (selecao, estadio, jogo,
 // bolao global, configuracao_pontuacao) and the fixture accounts.

@@ -2,7 +2,8 @@ import { request, APIRequestContext } from '@playwright/test';
 import { prisma } from '../support/db';
 import { BOLAO_GLOBAL_ID } from '@bolao/shared';
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+const BASE = process.env.NEXT_PUBLIC_API_URL;
+if (!BASE) throw new Error('NEXT_PUBLIC_API_URL não definido — verifique e2e/.env.e2e.');
 
 export interface TestUser {
   id: string;
