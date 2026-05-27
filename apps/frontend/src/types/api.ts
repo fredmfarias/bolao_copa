@@ -6,6 +6,7 @@ export interface Usuario {
   role: 'ADMIN' | 'USER';
   ativo?: boolean;
   criadoEm: string;
+  bolaoFavoritoId?: string | null;
 }
 
 export interface Bolao {

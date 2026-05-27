@@ -4,9 +4,13 @@ import { MINUTOS_PRAZO_APOSTA } from '@bolao/shared';
 export type EstadoAposta = 'aberto' | 'salvo' | 'incompleto' | 'fechado';
 export type FiltroJogo = 'Todos' | 'Pendentes' | 'Apostados' | 'Encerrados';
 
-export function getEstadoAposta(jogo: Jogo, aposta?: Aposta): EstadoAposta {
+export function prazoEncerrado(jogo: Jogo): boolean {
   const prazo = new Date(jogo.dataHora).getTime() - MINUTOS_PRAZO_APOSTA * 60 * 1000;
-  const estaFechado = Date.now() >= prazo;
+  return Date.now() >= prazo;
+}
+
+export function getEstadoAposta(jogo: Jogo, aposta?: Aposta): EstadoAposta {
+  const estaFechado = prazoEncerrado(jogo);
   if (!estaFechado && !aposta) return 'aberto';
   if (!estaFechado && aposta) return 'salvo';
   if (estaFechado && aposta) return 'fechado';
