@@ -31,7 +31,7 @@ export default function RankingIndexPage() {
       <div className="grid gap-4 sm:grid-cols-2">
         {global && (
           <BolaoCard
-            bolao={{ ...global, nome: 'Global' }}
+            bolao={global}
             href={`/ranking/${BOLAO_GLOBAL_ID}`}
           />
         )}

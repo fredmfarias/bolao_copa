@@ -31,6 +31,7 @@ export class BolaoService {
     return this.prisma.bolao.findMany({
       where: { membros: { some: { usuarioId } } },
       include: { _count: { select: { membros: true } } },
+      orderBy: { criadoEm: 'asc' },
     });
   }
 
