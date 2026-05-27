@@ -259,3 +259,30 @@ pnpm test -- --coverage
 cd apps/backend
 pnpm exec tsc --noEmit
 ```
+
+### E2E (Playwright)
+
+Os testes E2E vivem num workspace dedicado (`e2e/`) e rodam contra um banco isolado
+(`bolao_trovao_e2e`) em portas próprias (backend `:3101`, frontend `:3100`) — por isso
+convivem com o `pnpm dev` normal (que usa 3000/3001) sem conflito.
+
+Pré-requisitos: infra no ar (`pnpm dev:infra`) e o banco de teste criado uma vez:
+
+```bash
+docker exec bolao-trovao-postgres-1 psql -U bolao -d postgres -c "CREATE DATABASE bolao_trovao_e2e;"
+```
+
+```bash
+# Suíte completa: reseta+popula o banco e sobe backend+frontend automaticamente
+pnpm --filter @bolao/e2e test
+
+# Um único spec (passa --project corretamente)
+cd e2e && npx playwright test <arquivo> --project=api          # testes de API
+cd e2e && npx playwright test <arquivo> --project=ui-chromium  # testes de UI
+
+# Relatório HTML da última execução
+pnpm --filter @bolao/e2e exec playwright show-report
+```
+
+Os testes validam e-mails via Mailpit e isolam as filas Bull no Redis (DB lógico `/3`),
+sem afetar a stack de desenvolvimento.
