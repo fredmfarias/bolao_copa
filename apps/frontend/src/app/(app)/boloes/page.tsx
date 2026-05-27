@@ -3,9 +3,12 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
+import { useAuth } from '@/components/AuthProvider';
+import { BolaoCard } from '@/components/BolaoCard';
 import type { Bolao } from '@/types/api';
 
 export default function BolaoesPage() {
+  const { user, refresh } = useAuth();
   const [meus, setMeus] = useState<Bolao[]>([]);
   const [busca, setBusca] = useState('');
   const [resultados, setResultados] = useState<Bolao[]>([]);
@@ -25,25 +28,6 @@ export default function BolaoesPage() {
     setResultados(data);
   }
 
-  function BolaoItem({ b }: { b: Bolao }) {
-    return (
-      <Link href={`/boloes/${b.id}`}
-        className="block bg-gray-900 border border-gray-800 rounded-xl p-4 hover:border-yellow-400/50 transition-colors">
-        <div className="flex justify-between items-start">
-          <div>
-            <p className="font-semibold">{b.nome}</p>
-            {b.descricao && <p className="text-sm text-gray-400 mt-0.5">{b.descricao}</p>}
-          </div>
-          <span className={`text-xs px-2 py-0.5 rounded-full ${
-            b.status === 'ATIVO' ? 'bg-green-900 text-green-400' :
-            b.status === 'PAGO' ? 'bg-blue-900 text-blue-400' : 'bg-gray-800 text-gray-500'
-          }`}>{b.status}</span>
-        </div>
-        <p className="text-xs text-gray-500 mt-2">{b._count?.membros ?? 0} / {b.maxParticipantes} participantes</p>
-      </Link>
-    );
-  }
-
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -59,7 +43,17 @@ export default function BolaoesPage() {
       ) : meus.length === 0 ? (
         <p className="text-gray-500 text-center">Você ainda não participa de nenhum bolão privado.</p>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">{meus.map(b => <BolaoItem key={b.id} b={b} />)}</div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {meus.map(b => (
+            <BolaoCard
+              key={b.id}
+              bolao={b}
+              href={`/boloes/${b.id}`}
+              favoritoId={user?.bolaoFavoritoId}
+              onFavoritoChange={refresh}
+            />
+          ))}
+        </div>
       )}
 
       <div className="space-y-4">
@@ -71,7 +65,17 @@ export default function BolaoesPage() {
             className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm">Buscar</button>
         </form>
         {resultados.length > 0 && (
-          <div className="grid gap-3 sm:grid-cols-2">{resultados.map(b => <BolaoItem key={b.id} b={b} />)}</div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {resultados.map(b => (
+              <BolaoCard
+                key={b.id}
+                bolao={b}
+                href={`/boloes/${b.id}`}
+                favoritoId={user?.bolaoFavoritoId}
+                onFavoritoChange={refresh}
+              />
+            ))}
+          </div>
         )}
       </div>
     </div>
