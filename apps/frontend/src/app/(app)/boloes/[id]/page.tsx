@@ -90,6 +90,14 @@ export default function BolaoDetalhePage() {
                 mais {(bolao.membros?.length ?? 0) - membrosVisiveis}...
               </button>
             )}
+            {membrosVisiveis > 5 && (bolao.membros?.length ?? 0) <= membrosVisiveis && (
+              <button
+                onClick={() => setMembrosVisiveis(5)}
+                className="flex items-center gap-1.5 bg-gray-800 rounded-full px-3 py-1 text-xs text-trovao-muted hover:text-white transition-colors"
+              >
+                ocultar
+              </button>
+            )}
           </div>
         </div>
       )}

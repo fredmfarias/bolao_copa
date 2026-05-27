@@ -12,6 +12,7 @@ interface ModeradorPanelProps {
 
 export function ModeradorPanel({ bolaoId, membros, onAtualizado }: ModeradorPanelProps) {
   const [ativo, setAtivo] = useState<string | null>(null);
+  const [visiveis, setVisiveis] = useState(5);
 
   async function acao(path: string, memberId: string) {
     setAtivo(memberId);
@@ -23,10 +24,12 @@ export function ModeradorPanel({ bolaoId, membros, onAtualizado }: ModeradorPane
     }
   }
 
+  const restante = membros.length - visiveis;
+
   return (
     <div className="space-y-2">
       <p className="text-trovao-muted text-xs font-semibold uppercase tracking-wider px-1">Membros</p>
-      {membros.map(m => (
+      {membros.slice(0, visiveis).map(m => (
         <div key={m.id} className="flex items-center gap-3 px-4 py-3 bg-trovao-card border border-trovao-border rounded-xl">
           {m.usuario.avatarUrl ? (
             <img src={m.usuario.avatarUrl} alt={m.usuario.nome} className="w-8 h-8 rounded-full flex-shrink-0" />
@@ -60,6 +63,18 @@ export function ModeradorPanel({ bolaoId, membros, onAtualizado }: ModeradorPane
           </div>
         </div>
       ))}
+      {restante > 0 && (
+        <button onClick={() => setVisiveis(v => v + 10)}
+          className="w-full text-xs text-trovao-muted hover:text-white transition-colors py-1">
+          mais {restante}...
+        </button>
+      )}
+      {visiveis > 5 && restante <= 0 && (
+        <button onClick={() => setVisiveis(5)}
+          className="w-full text-xs text-trovao-muted hover:text-white transition-colors py-1">
+          ocultar
+        </button>
+      )}
     </div>
   );
 }
