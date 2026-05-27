@@ -30,6 +30,7 @@ export default function BolaoDetalhePage() {
   const [jogos, setJogos] = useState<Jogo[]>([]);
   const [apostas, setApostas] = useState<Map<string, Aposta>>(new Map());
   const [loading, setLoading] = useState(true);
+  const [membrosVisiveis, setMembrosVisiveis] = useState(5);
 
   async function carregar() {
     const [b, js, as_] = await Promise.all([
@@ -50,7 +51,6 @@ export default function BolaoDetalhePage() {
 
   const isModerador = bolao.membros?.find(m => m.usuarioId === user?.id)?.papel === 'MODERADOR';
   const jogosEncerrados = ordenarJogosEncerrados(jogos);
-  const [membrosVisiveis, setMembrosVisiveis] = useState(5);
 
   return (
     <div className="space-y-8">
