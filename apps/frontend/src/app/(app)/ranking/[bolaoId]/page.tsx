@@ -67,32 +67,33 @@ export default function RankingPage() {
         />
       ) : (
         <>
-          <div className="flex gap-2">
-            <button onClick={() => setAba('geral')}
-              className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                aba === 'geral' ? 'bg-trovao-gold text-trovao-base border-trovao-gold'
-                  : 'bg-trovao-surface text-trovao-muted border-trovao-border'}`}>
-              Geral
-            </button>
-            <button onClick={() => setAba('rodada')}
-              className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                aba === 'rodada' ? 'bg-trovao-gold text-trovao-base border-trovao-gold'
-                  : 'bg-trovao-surface text-trovao-muted border-trovao-border'}`}>
-              Rodada
-            </button>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex gap-2">
+              <button onClick={() => setAba('geral')}
+                className={`px-3 py-1 rounded-full text-xs font-medium border ${
+                  aba === 'geral' ? 'bg-trovao-gold text-trovao-base border-trovao-gold'
+                    : 'bg-trovao-surface text-trovao-muted border-trovao-border'}`}>
+                Geral
+              </button>
+              <button onClick={() => setAba('rodada')}
+                className={`px-3 py-1 rounded-full text-xs font-medium border ${
+                  aba === 'rodada' ? 'bg-trovao-gold text-trovao-base border-trovao-gold'
+                    : 'bg-trovao-surface text-trovao-muted border-trovao-border'}`}>
+                Rodada
+              </button>
+            </div>
+            {aba === 'rodada' && publicacoes.length > 0 && (
+              <select
+                value={publicacaoSel ?? ''}
+                onChange={(e) => setPublicacaoSel(Number(e.target.value))}
+                className="bg-trovao-surface border border-trovao-border rounded-lg text-sm px-2 py-1 text-white"
+              >
+                {publicacoes.map((p) => (
+                  <option key={p.numero} value={p.numero}>Rodada {p.numero}</option>
+                ))}
+              </select>
+            )}
           </div>
-
-          {aba === 'rodada' && publicacoes.length > 0 && (
-            <select
-              value={publicacaoSel ?? ''}
-              onChange={(e) => setPublicacaoSel(Number(e.target.value))}
-              className="bg-trovao-surface border border-trovao-border rounded-lg text-sm px-2 py-1 text-white"
-            >
-              {publicacoes.map((p) => (
-                <option key={p.numero} value={p.numero}>Rodada {p.numero}</option>
-              ))}
-            </select>
-          )}
 
           {aba === 'geral' && (
             <RankingPodium ranking={ordenado} myId={user?.id} />
