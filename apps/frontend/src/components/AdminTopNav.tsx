@@ -15,9 +15,6 @@ export function AdminTopNav() {
   return (
     <nav className="bg-trovao-card border-b border-trovao-border px-4">
       <div className="max-w-2xl mx-auto flex items-center gap-1 h-12">
-        <Link href="/jogos" className="text-trovao-muted text-xs hover:text-white mr-2">
-          ← App
-        </Link>
         <span className="text-trovao-gold font-bold text-sm mr-4">Admin</span>
         {NAV.map(({ href, label }) => (
           <Link key={href} href={href}
@@ -29,6 +26,9 @@ export function AdminTopNav() {
             {label}
           </Link>
         ))}
+        <Link href="/jogos" className="ml-auto text-trovao-muted text-xs hover:text-white">
+          ← App
+        </Link>
       </div>
     </nav>
   );
