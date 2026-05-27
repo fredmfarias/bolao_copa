@@ -49,6 +49,8 @@ model Usuario {
   emailVerificado Boolean   @default(false)
   ativo           Boolean   @default(true)
   criadoEm        DateTime  @default(now())
+  bolaoFavoritoId String?
+  bolaoFavorito   Bolao?    @relation("UsuarioBolaoFavorito", fields: [bolaoFavoritoId], references: [id])
 
   membros          BolaoMembro[]
   apostas          Aposta[]
@@ -75,9 +77,10 @@ model Bolao {
   criadoPor        Usuario     @relation("BolaoCriador", fields: [criadoPorId], references: [id])
   criadoEm        DateTime    @default(now())
 
-  membros  BolaoMembro[]
-  convites BolaoConvite[]
-  rankings Ranking[]
+  membros       BolaoMembro[]
+  convites      BolaoConvite[]
+  rankings      Ranking[]
+  favoritadoPor Usuario[]      @relation("UsuarioBolaoFavorito")
 
   @@map("bolao")
 }
