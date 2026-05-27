@@ -13,7 +13,9 @@
     "db:migrate": "dotenv -e ../../.env -- prisma migrate dev",
     "db:deploy": "dotenv -e ../../.env -- prisma migrate deploy",
     "db:seed": "dotenv -e ../../.env -- ts-node prisma/seed.ts",
-    "db:reset": "dotenv -e ../../.env -- prisma migrate reset --force"
+    "db:reset": "dotenv -e ../../.env -- prisma migrate reset --force",
+    "db:seed:dev": "dotenv -e ../../.env -- ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed-dev.ts",
+    "db:dev:reset": "pnpm db:reset && pnpm db:seed:dev"
   },
   "dependencies": {
     "@bolao/shared": "workspace:*",
