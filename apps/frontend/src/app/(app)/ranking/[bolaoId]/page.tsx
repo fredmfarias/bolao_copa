@@ -9,7 +9,7 @@ import { RankingPodium } from '@/components/RankingPodium';
 import { RankingRow } from '@/components/RankingRow';
 import { PageSkeleton } from '@/components/PageSkeleton';
 import { EmptyState } from '@/components/EmptyState';
-import type { RankingEntry, PublicacaoResumo } from '@/types/api';
+import type { Bolao, RankingEntry, PublicacaoResumo } from '@/types/api';
 
 type Aba = 'geral' | 'rodada';
 
@@ -17,6 +17,7 @@ export default function RankingPage() {
   const { bolaoId } = useParams<{ bolaoId: string }>();
   const { user } = useAuth();
   const [aba, setAba] = useState<Aba>('geral');
+  const [bolaoNome, setBolaoNome] = useState<string>('');
   const [ranking, setRanking] = useState<RankingEntry[]>([]);
   const [publicacoes, setPublicacoes] = useState<PublicacaoResumo[]>([]);
   const [publicacaoSel, setPublicacaoSel] = useState<number | null>(null);
@@ -27,11 +28,13 @@ export default function RankingPage() {
     Promise.all([
       api.get<RankingEntry[]>(`/boloes/${bolaoId}/ranking`).catch(() => [] as RankingEntry[]),
       api.get<PublicacaoResumo[]>(`/boloes/${bolaoId}/ranking/publicacoes`).catch(() => [] as PublicacaoResumo[]),
-    ]).then(([r, pubs]) => {
+      api.get<Bolao>(`/boloes/${bolaoId}`).catch(() => null),
+    ]).then(([r, pubs, bolao]) => {
       rankingGeralRef.current = r;
       setRanking(r);
       setPublicacoes(pubs);
       setPublicacaoSel(pubs[0]?.numero ?? null);
+      if (bolao) setBolaoNome(bolao.nome);
       setLoading(false);
     });
   }, [bolaoId]);
@@ -53,9 +56,12 @@ export default function RankingPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Ranking</h1>
-        <Link href="/ranking" className="text-trovao-muted text-sm hover:text-white">← Voltar</Link>
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-bold">Ranking</h1>
+          {bolaoNome && <p className="text-gray-400 text-sm mt-0.5">{bolaoNome}</p>}
+        </div>
+        <Link href="/ranking" className="text-trovao-muted text-sm hover:text-white shrink-0">← Voltar</Link>
       </div>
 
       {loading ? (
