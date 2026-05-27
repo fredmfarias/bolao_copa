@@ -10,9 +10,12 @@ interface ModeradorPanelProps {
   onAtualizado: () => void;
 }
 
+const MEMBROS_INICIAIS = 3;
+const MEMBROS_PASSO = 10;
+
 export function ModeradorPanel({ bolaoId, membros, onAtualizado }: ModeradorPanelProps) {
   const [ativo, setAtivo] = useState<string | null>(null);
-  const [visiveis, setVisiveis] = useState(5);
+  const [visiveis, setVisiveis] = useState(MEMBROS_INICIAIS);
 
   async function acao(path: string, memberId: string) {
     setAtivo(memberId);
@@ -64,13 +67,13 @@ export function ModeradorPanel({ bolaoId, membros, onAtualizado }: ModeradorPane
         </div>
       ))}
       {restante > 0 && (
-        <button onClick={() => setVisiveis(v => v + 10)}
+        <button onClick={() => setVisiveis(v => v + MEMBROS_PASSO)}
           className="w-full text-xs text-trovao-muted hover:text-white transition-colors py-1">
           mais {restante}...
         </button>
       )}
-      {visiveis > 5 && restante <= 0 && (
-        <button onClick={() => setVisiveis(5)}
+      {visiveis > MEMBROS_INICIAIS && restante <= 0 && (
+        <button onClick={() => setVisiveis(MEMBROS_INICIAIS)}
           className="w-full text-xs text-trovao-muted hover:text-white transition-colors py-1">
           ocultar
         </button>

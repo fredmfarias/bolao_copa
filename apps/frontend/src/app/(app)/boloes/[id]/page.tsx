@@ -23,6 +23,9 @@ function ordenarJogosEncerrados(jogos: Jogo[]): Jogo[] {
     });
 }
 
+const MEMBROS_INICIAIS = 5;
+const MEMBROS_PASSO = 10;
+
 export default function BolaoDetalhePage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
@@ -30,7 +33,7 @@ export default function BolaoDetalhePage() {
   const [jogos, setJogos] = useState<Jogo[]>([]);
   const [apostas, setApostas] = useState<Map<string, Aposta>>(new Map());
   const [loading, setLoading] = useState(true);
-  const [membrosVisiveis, setMembrosVisiveis] = useState(5);
+  const [membrosVisiveis, setMembrosVisiveis] = useState(MEMBROS_INICIAIS);
 
   async function carregar() {
     const [b, js, as_] = await Promise.all([
@@ -84,15 +87,15 @@ export default function BolaoDetalhePage() {
             ))}
             {(bolao.membros?.length ?? 0) > membrosVisiveis && (
               <button
-                onClick={() => setMembrosVisiveis(v => v + 10)}
+                onClick={() => setMembrosVisiveis(v => v + MEMBROS_PASSO)}
                 className="flex items-center gap-1.5 bg-gray-800 rounded-full px-3 py-1 text-xs text-trovao-muted hover:text-white transition-colors"
               >
                 mais {(bolao.membros?.length ?? 0) - membrosVisiveis}...
               </button>
             )}
-            {membrosVisiveis > 5 && (bolao.membros?.length ?? 0) <= membrosVisiveis && (
+            {membrosVisiveis > MEMBROS_INICIAIS && (bolao.membros?.length ?? 0) <= membrosVisiveis && (
               <button
-                onClick={() => setMembrosVisiveis(5)}
+                onClick={() => setMembrosVisiveis(MEMBROS_INICIAIS)}
                 className="flex items-center gap-1.5 bg-gray-800 rounded-full px-3 py-1 text-xs text-trovao-muted hover:text-white transition-colors"
               >
                 ocultar
