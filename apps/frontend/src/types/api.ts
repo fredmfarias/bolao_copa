@@ -13,7 +13,7 @@ export interface Bolao {
   id: string;
   nome: string;
   descricao: string | null;
-  status: 'ATIVO' | 'PAGO' | 'ARQUIVADO';
+  status: 'ATIVO' | 'INATIVO';
   escopo: 'GRUPOS' | 'ELIMINATORIAS' | 'AMBOS';
   maxParticipantes: number;
   precoReais: string;
@@ -89,7 +89,7 @@ export interface AdminBolao {
   id: string;
   nome: string;
   descricao: string | null;
-  status: 'ATIVO' | 'PAGO' | 'ARQUIVADO';
+  status: 'ATIVO' | 'INATIVO';
   precoReais: string;
   maxParticipantes: number;
   _count: { membros: number };

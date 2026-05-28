@@ -49,7 +49,7 @@ export default function AdminBoloesPage() {
   }
 
   async function alternar(b: AdminBolao) {
-    const novo = b.status === 'PAGO' ? 'ATIVO' : 'PAGO';
+    const novo = b.status === 'ATIVO' ? 'INATIVO' : 'ATIVO';
     await api.patch(`/boloes/${b.id}/status`, { status: novo }).catch(() => {});
     carregar();
   }
@@ -123,10 +123,10 @@ export default function AdminBoloesPage() {
               </div>
               <button onClick={() => alternar(b)}
                 className={`px-3 py-1 rounded-full text-xs font-medium border flex-shrink-0 ${
-                  b.status === 'PAGO'
+                  b.status === 'ATIVO'
                     ? 'bg-trovao-green/10 text-trovao-green border-trovao-green/40'
                     : 'bg-trovao-surface text-trovao-muted border-trovao-border hover:border-trovao-gold'}`}>
-                {b.status === 'PAGO' ? 'Habilitado' : 'Habilitar'}
+                {b.status === 'ATIVO' ? 'Ativo' : 'Inativo'}
               </button>
             </div>
           ))}
