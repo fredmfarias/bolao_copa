@@ -108,3 +108,10 @@ export interface AdminUsuario {
 export interface AuthTokens {
   accessToken: string;
 }
+
+export interface UserSearchResult {
+  id: string;
+  nome: string;
+  email: string;
+  avatarUrl: string | null;
+}
