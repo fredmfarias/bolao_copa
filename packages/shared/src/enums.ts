@@ -5,8 +5,7 @@ export enum Role {
 
 export enum BolaoStatus {
   ATIVO = 'ATIVO',
-  PAGO = 'PAGO',
-  ARQUIVADO = 'ARQUIVADO',
+  INATIVO = 'INATIVO',
 }
 
 export enum BolaoEscopo {
