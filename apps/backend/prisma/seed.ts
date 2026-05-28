@@ -28,7 +28,7 @@ async function main() {
       id: BOLAO_GLOBAL_ID,
       nome: 'Bolão Global — Copa 2026',
       descricao: 'Bolão público. Todos os participantes entram automaticamente.',
-      status: BolaoStatus.PAGO,
+      status: BolaoStatus.ATIVO,
       escopo: BolaoEscopo.AMBOS,
       maxParticipantes: 99999,
       precoReais: 0,

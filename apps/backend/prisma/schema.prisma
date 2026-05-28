@@ -14,8 +14,7 @@ enum Role {
 
 enum BolaoStatus {
   ATIVO
-  PAGO
-  ARQUIVADO
+  INATIVO
 }
 
 enum BolaoEscopo {
