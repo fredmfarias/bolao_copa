@@ -76,7 +76,7 @@ export class NotificacaoService {
     const membros = await this.prisma.bolaoMembro.findMany({
       where: {
         bolao: {
-          status: { in: ['ATIVO', 'PAGO'] },
+          status: 'ATIVO',
           escopo: { in: ['AMBOS', jogo.fase === 'GRUPOS' ? 'GRUPOS' : 'ELIMINATORIAS'] },
         },
       },
