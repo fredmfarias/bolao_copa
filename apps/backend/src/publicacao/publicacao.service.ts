@@ -45,7 +45,7 @@ export class PublicacaoService {
     }
 
     const boloes = await this.prisma.bolao.findMany({
-      where: { status: 'PAGO' },
+      where: { status: 'ATIVO' },
       select: { id: true },
     });
 

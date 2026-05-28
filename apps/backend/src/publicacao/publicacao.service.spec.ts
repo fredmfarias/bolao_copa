@@ -97,12 +97,12 @@ describe('PublicacaoService.publicar', () => {
     );
   });
 
-  it('só recalcula bolões habilitados (status PAGO)', async () => {
+  it('só recalcula bolões ativos', async () => {
     setupBase();
     prismaMock.rankingSnapshot.findMany.mockResolvedValue([]);
     await service.publicar('admin-1');
     expect(prismaMock.bolao.findMany).toHaveBeenCalledWith({
-      where: { status: 'PAGO' }, select: { id: true },
+      where: { status: 'ATIVO' }, select: { id: true },
     });
     expect(rankingMock.recalcularRankingBolao).toHaveBeenCalledWith('b1');
   });
