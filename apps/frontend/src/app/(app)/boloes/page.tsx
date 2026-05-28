@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { api } from '@/lib/api';
 import { useAuth } from '@/components/AuthProvider';
 import { BolaoCard } from '@/components/BolaoCard';
@@ -33,10 +32,6 @@ export default function BolaoesPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">Meus Bolões</h1>
-        <Link href="/boloes/novo"
-          className="bg-yellow-400 text-gray-900 font-bold px-4 py-2 rounded-lg text-sm hover:bg-yellow-300">
-          + Criar bolão
-        </Link>
       </div>
 
       {loading ? (

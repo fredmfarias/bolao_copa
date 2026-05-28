@@ -93,4 +93,31 @@ describe('AdminService', () => {
       expect(r).toEqual({ message: 'E-mail de redefinição enviado.' });
     });
   });
+
+  describe('buscarUsuarios', () => {
+    it('retorna usuários cujo nome ou email contém o termo (máx 10)', async () => {
+      prismaMock.usuario.findMany.mockResolvedValue([
+        { id: 'u1', nome: 'Alice', email: 'alice@x.com', avatarUrl: null },
+      ]);
+      const r = await service.buscarUsuarios('ali');
+      expect(prismaMock.usuario.findMany).toHaveBeenCalledWith({
+        where: {
+          OR: [
+            { nome: { contains: 'ali', mode: 'insensitive' } },
+            { email: { contains: 'ali', mode: 'insensitive' } },
+          ],
+        },
+        select: { id: true, nome: true, email: true, avatarUrl: true },
+        take: 10,
+      });
+      expect(r).toHaveLength(1);
+      expect(r[0].nome).toBe('Alice');
+    });
+
+    it('retorna [] para query vazia', async () => {
+      const r = await service.buscarUsuarios('');
+      expect(r).toEqual([]);
+      expect(prismaMock.usuario.findMany).not.toHaveBeenCalled();
+    });
+  });
 });

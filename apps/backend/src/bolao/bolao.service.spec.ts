@@ -1,14 +1,15 @@
 import { Test } from '@nestjs/testing';
 import { BolaoService } from './bolao.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { BadRequestException, ForbiddenException } from '@nestjs/common';
-import { BolaoEscopo } from '@bolao/shared';
+import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { BolaoEscopo, BolaoMembroPapel } from '@bolao/shared';
 
 const prismaMock = {
   bolao: { create: jest.fn(), findUnique: jest.fn(), update: jest.fn(), findMany: jest.fn() },
   bolaoMembro: { create: jest.fn(), findUnique: jest.fn(), delete: jest.fn(), update: jest.fn(), count: jest.fn(), deleteMany: jest.fn() },
   bolaoConvite: { findUnique: jest.fn(), create: jest.fn() },
   ranking: { create: jest.fn(), deleteMany: jest.fn() },
+  usuario: { findUnique: jest.fn() },
 };
 
 describe('BolaoService', () => {
@@ -24,18 +25,53 @@ describe('BolaoService', () => {
 
   it('criar lança BadRequestException se maxParticipantes não é múltiplo de 10', async () => {
     await expect(
-      service.criar('user-1', { nome: 'Test', escopo: BolaoEscopo.AMBOS, maxParticipantes: 15 }),
+      service.criar('admin-1', { nome: 'Test', escopo: BolaoEscopo.AMBOS, maxParticipantes: 15, moderadorId: 'mod-1' }),
     ).rejects.toThrow(BadRequestException);
   });
 
   it('criar calcula precoReais = maxParticipantes × 1', async () => {
+    prismaMock.usuario.findUnique.mockResolvedValue({ id: 'mod-1' });
     prismaMock.bolao.create.mockResolvedValue({ id: 'b1', maxParticipantes: 20, precoReais: 20 });
     prismaMock.bolaoMembro.create.mockResolvedValue({});
     prismaMock.ranking.create.mockResolvedValue({});
-    await service.criar('user-1', { nome: 'Test', escopo: BolaoEscopo.AMBOS, maxParticipantes: 20 });
+    await service.criar('admin-1', { nome: 'Test', escopo: BolaoEscopo.AMBOS, maxParticipantes: 20, moderadorId: 'mod-1' });
     expect(prismaMock.bolao.create).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ precoReais: 20 }) }),
     );
+  });
+
+  it('criar usa moderadorId como membro MODERADOR, não adminId', async () => {
+    prismaMock.usuario.findUnique.mockResolvedValue({ id: 'mod-1' });
+    prismaMock.bolao.create.mockResolvedValue({ id: 'b1', maxParticipantes: 10, precoReais: 10 });
+    prismaMock.bolaoMembro.create.mockResolvedValue({});
+    prismaMock.ranking.create.mockResolvedValue({});
+    await service.criar('admin-1', { nome: 'Test', escopo: BolaoEscopo.AMBOS, maxParticipantes: 10, moderadorId: 'mod-1' });
+    expect(prismaMock.bolaoMembro.create).toHaveBeenCalledWith({
+      data: { bolaoId: 'b1', usuarioId: 'mod-1', papel: BolaoMembroPapel.MODERADOR },
+    });
+    expect(prismaMock.ranking.create).toHaveBeenCalledWith({
+      data: { bolaoId: 'b1', usuarioId: 'mod-1' },
+    });
+  });
+
+  it('criar não insere admin como membro nem no ranking', async () => {
+    prismaMock.usuario.findUnique.mockResolvedValue({ id: 'mod-1' });
+    prismaMock.bolao.create.mockResolvedValue({ id: 'b1', maxParticipantes: 10, precoReais: 10 });
+    prismaMock.bolaoMembro.create.mockResolvedValue({});
+    prismaMock.ranking.create.mockResolvedValue({});
+    await service.criar('admin-1', { nome: 'Test', escopo: BolaoEscopo.AMBOS, maxParticipantes: 10, moderadorId: 'mod-1' });
+    expect(prismaMock.bolaoMembro.create).toHaveBeenCalledTimes(1);
+    expect(prismaMock.ranking.create).toHaveBeenCalledTimes(1);
+    expect(prismaMock.bolaoMembro.create).not.toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ usuarioId: 'admin-1' }) }),
+    );
+  });
+
+  it('criar lança NotFoundException se moderadorId não existe', async () => {
+    prismaMock.usuario.findUnique.mockResolvedValue(null);
+    await expect(
+      service.criar('admin-1', { nome: 'Test', escopo: BolaoEscopo.AMBOS, maxParticipantes: 10, moderadorId: 'non-existent' }),
+    ).rejects.toThrow(NotFoundException);
   });
 
   it('entrarViaConvite lança BadRequestException se convite expirado', async () => {

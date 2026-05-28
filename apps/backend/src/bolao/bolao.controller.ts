@@ -25,6 +25,8 @@ export class ConvitePublicoController {
 export class BolaoController {
   constructor(private service: BolaoService, private apostaService: ApostaService) {}
 
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
   @Post()
   criar(@CurrentUser() user: { id: string }, @Body() dto: CreateBolaoDto) {
     return this.service.criar(user.id, dto);
