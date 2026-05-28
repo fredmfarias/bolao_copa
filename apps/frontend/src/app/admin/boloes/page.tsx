@@ -5,7 +5,6 @@ import { api } from '@/lib/api';
 import { PageSkeleton } from '@/components/PageSkeleton';
 import { EmptyState } from '@/components/EmptyState';
 import { UserSearchInput } from '@/components/UserSearchInput';
-import { BolaoEscopo } from '@bolao/shared';
 import type { AdminBolao } from '@/types/api';
 
 export default function AdminBoloesPage() {
@@ -13,7 +12,7 @@ export default function AdminBoloesPage() {
   const [loading, setLoading] = useState(true);
   const [criando, setCriando] = useState(false);
   const [form, setForm] = useState({
-    nome: '', descricao: '', escopo: BolaoEscopo.AMBOS, maxParticipantes: 10,
+    nome: '', descricao: '', maxParticipantes: 10,
   });
   const [moderador, setModerador] = useState<{ id: string; nome: string } | null>(null);
   const [erro, setErro] = useState('');
@@ -38,7 +37,7 @@ export default function AdminBoloesPage() {
     try {
       await api.post('/boloes', { ...form, moderadorId: moderador.id });
       setCriando(false);
-      setForm({ nome: '', descricao: '', escopo: BolaoEscopo.AMBOS, maxParticipantes: 10 });
+      setForm({ nome: '', descricao: '', maxParticipantes: 10 });
       setModerador(null);
       carregar();
     } catch (err: unknown) {
@@ -62,7 +61,7 @@ export default function AdminBoloesPage() {
           onClick={() => {
             setCriando(v => !v);
             setErro('');
-            setForm({ nome: '', descricao: '', escopo: BolaoEscopo.AMBOS, maxParticipantes: 10 });
+            setForm({ nome: '', descricao: '', maxParticipantes: 10 });
             setModerador(null);
           }}
           className="bg-yellow-400 text-gray-900 font-bold px-4 py-2 rounded-lg text-sm hover:bg-yellow-300">
@@ -83,13 +82,6 @@ export default function AdminBoloesPage() {
             <label className="block text-xs text-gray-400 mb-1">Descrição (opcional)</label>
             <textarea value={form.descricao} onChange={e => set('descricao', e.target.value)} rows={2}
               className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-yellow-400" />
-          </div>
-          <div>
-            <label className="block text-xs text-gray-400 mb-1">Escopo</label>
-            <select value={form.escopo} onChange={e => set('escopo', e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm">
-              {Object.values(BolaoEscopo).map(v => <option key={v} value={v}>{v}</option>)}
-            </select>
           </div>
           <div>
             <label className="block text-xs text-gray-400 mb-1">Máx. participantes (múltiplo de 10)</label>

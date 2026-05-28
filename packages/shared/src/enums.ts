@@ -8,12 +8,6 @@ export enum BolaoStatus {
   INATIVO = 'INATIVO',
 }
 
-export enum BolaoEscopo {
-  GRUPOS = 'GRUPOS',
-  ELIMINATORIAS = 'ELIMINATORIAS',
-  AMBOS = 'AMBOS',
-}
-
 export enum JogoFase {
   GRUPOS = 'GRUPOS',
   OITAVAS = 'OITAVAS',

@@ -22,7 +22,7 @@ export class BolaoService {
     if (!moderador) throw new NotFoundException('Moderador não encontrado.');
 
     const bolao = await this.prisma.bolao.create({
-      data: { ...bolaoData, precoReais, criadoPorId: adminId },
+      data: { ...bolaoData, precoReais, criadoPorId: adminId, escopo: 'AMBOS' },
     });
     await this.prisma.bolaoMembro.create({
       data: { bolaoId: bolao.id, usuarioId: moderadorId, papel: BolaoMembroPapel.MODERADOR },

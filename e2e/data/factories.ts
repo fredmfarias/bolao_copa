@@ -12,5 +12,5 @@ export function newUser(prefix = 'user') {
 
 export function newBolao() {
   const id = nanoid(6);
-  return { nome: `Bolão ${id}`, escopo: 'AMBOS' as const, maxParticipantes: 10 };
+  return { nome: `Bolão ${id}`, maxParticipantes: 10 };
 }

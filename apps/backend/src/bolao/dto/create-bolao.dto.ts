@@ -1,5 +1,4 @@
-import { IsString, IsEnum, IsInt, Min, IsOptional, IsUUID } from 'class-validator';
-import { BolaoEscopo } from '@bolao/shared';
+import { IsString, IsInt, Min, IsOptional, IsUUID } from 'class-validator';
 
 export class CreateBolaoDto {
   @IsString()
@@ -7,9 +6,6 @@ export class CreateBolaoDto {
 
   @IsOptional() @IsString()
   descricao?: string;
-
-  @IsEnum(BolaoEscopo)
-  escopo: BolaoEscopo;
 
   @IsInt() @Min(10)
   maxParticipantes: number;

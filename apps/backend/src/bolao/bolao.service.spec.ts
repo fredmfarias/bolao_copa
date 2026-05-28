@@ -2,7 +2,7 @@ import { Test } from '@nestjs/testing';
 import { BolaoService } from './bolao.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
-import { BolaoEscopo, BolaoMembroPapel } from '@bolao/shared';
+import { BolaoMembroPapel } from '@bolao/shared';
 
 const prismaMock = {
   bolao: { create: jest.fn(), findUnique: jest.fn(), update: jest.fn(), findMany: jest.fn() },
@@ -25,7 +25,7 @@ describe('BolaoService', () => {
 
   it('criar lança BadRequestException se maxParticipantes não é múltiplo de 10', async () => {
     await expect(
-      service.criar('admin-1', { nome: 'Test', escopo: BolaoEscopo.AMBOS, maxParticipantes: 15, moderadorId: 'mod-1' }),
+      service.criar('admin-1', { nome: 'Test', maxParticipantes: 15, moderadorId: 'mod-1' }),
     ).rejects.toThrow(BadRequestException);
   });
 
@@ -34,7 +34,7 @@ describe('BolaoService', () => {
     prismaMock.bolao.create.mockResolvedValue({ id: 'b1', maxParticipantes: 20, precoReais: 20 });
     prismaMock.bolaoMembro.create.mockResolvedValue({});
     prismaMock.ranking.create.mockResolvedValue({});
-    await service.criar('admin-1', { nome: 'Test', escopo: BolaoEscopo.AMBOS, maxParticipantes: 20, moderadorId: 'mod-1' });
+    await service.criar('admin-1', { nome: 'Test', maxParticipantes: 20, moderadorId: 'mod-1' });
     expect(prismaMock.bolao.create).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ precoReais: 20 }) }),
     );
@@ -45,7 +45,7 @@ describe('BolaoService', () => {
     prismaMock.bolao.create.mockResolvedValue({ id: 'b1', maxParticipantes: 10, precoReais: 10 });
     prismaMock.bolaoMembro.create.mockResolvedValue({});
     prismaMock.ranking.create.mockResolvedValue({});
-    await service.criar('admin-1', { nome: 'Test', escopo: BolaoEscopo.AMBOS, maxParticipantes: 10, moderadorId: 'mod-1' });
+    await service.criar('admin-1', { nome: 'Test', maxParticipantes: 10, moderadorId: 'mod-1' });
     expect(prismaMock.bolaoMembro.create).toHaveBeenCalledWith({
       data: { bolaoId: 'b1', usuarioId: 'mod-1', papel: BolaoMembroPapel.MODERADOR },
     });
@@ -59,7 +59,7 @@ describe('BolaoService', () => {
     prismaMock.bolao.create.mockResolvedValue({ id: 'b1', maxParticipantes: 10, precoReais: 10 });
     prismaMock.bolaoMembro.create.mockResolvedValue({});
     prismaMock.ranking.create.mockResolvedValue({});
-    await service.criar('admin-1', { nome: 'Test', escopo: BolaoEscopo.AMBOS, maxParticipantes: 10, moderadorId: 'mod-1' });
+    await service.criar('admin-1', { nome: 'Test', maxParticipantes: 10, moderadorId: 'mod-1' });
     expect(prismaMock.bolaoMembro.create).toHaveBeenCalledTimes(1);
     expect(prismaMock.ranking.create).toHaveBeenCalledTimes(1);
     expect(prismaMock.bolaoMembro.create).not.toHaveBeenCalledWith(
@@ -70,7 +70,7 @@ describe('BolaoService', () => {
   it('criar lança NotFoundException se moderadorId não existe', async () => {
     prismaMock.usuario.findUnique.mockResolvedValue(null);
     await expect(
-      service.criar('admin-1', { nome: 'Test', escopo: BolaoEscopo.AMBOS, maxParticipantes: 10, moderadorId: 'non-existent' }),
+      service.criar('admin-1', { nome: 'Test', maxParticipantes: 10, moderadorId: 'non-existent' }),
     ).rejects.toThrow(NotFoundException);
   });
 

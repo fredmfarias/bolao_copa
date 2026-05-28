@@ -14,7 +14,6 @@ export interface Bolao {
   nome: string;
   descricao: string | null;
   status: 'ATIVO' | 'INATIVO';
-  escopo: 'GRUPOS' | 'ELIMINATORIAS' | 'AMBOS';
   maxParticipantes: number;
   precoReais: string;
   _count?: { membros: number };
