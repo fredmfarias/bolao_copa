@@ -11,19 +11,20 @@ import { BolaoMembroPapel, BolaoStatus, BOLAO_GLOBAL_ID } from '@bolao/shared';
 export class BolaoService {
   constructor(private prisma: PrismaService) {}
 
-  async criar(usuarioId: string, dto: CreateBolaoDto) {
+  async criar(adminId: string, dto: CreateBolaoDto) {
     if (dto.maxParticipantes % 10 !== 0) {
       throw new BadRequestException('maxParticipantes deve ser múltiplo de 10.');
     }
     const precoReais = dto.maxParticipantes * 1;
+    const { moderadorId, ...bolaoData } = dto;
 
     const bolao = await this.prisma.bolao.create({
-      data: { ...dto, precoReais, criadoPorId: usuarioId },
+      data: { ...bolaoData, precoReais, criadoPorId: adminId },
     });
     await this.prisma.bolaoMembro.create({
-      data: { bolaoId: bolao.id, usuarioId, papel: BolaoMembroPapel.MODERADOR },
+      data: { bolaoId: bolao.id, usuarioId: moderadorId, papel: BolaoMembroPapel.MODERADOR },
     });
-    await this.prisma.ranking.create({ data: { bolaoId: bolao.id, usuarioId } });
+    await this.prisma.ranking.create({ data: { bolaoId: bolao.id, usuarioId: moderadorId } });
     return bolao;
   }
 

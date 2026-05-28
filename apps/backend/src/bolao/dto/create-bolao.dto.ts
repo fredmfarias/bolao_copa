@@ -13,4 +13,7 @@ export class CreateBolaoDto {
 
   @IsInt() @Min(10)
   maxParticipantes: number;
+
+  @IsString()
+  moderadorId: string;
 }
