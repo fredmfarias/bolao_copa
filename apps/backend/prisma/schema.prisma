@@ -17,12 +17,6 @@ enum BolaoStatus {
   INATIVO
 }
 
-enum BolaoEscopo {
-  GRUPOS
-  ELIMINATORIAS
-  AMBOS
-}
-
 enum JogoFase {
   GRUPOS
   OITAVAS
@@ -69,7 +63,6 @@ model Bolao {
   nome             String
   descricao        String?
   status           BolaoStatus @default(ATIVO)
-  escopo           BolaoEscopo
   maxParticipantes Int
   precoReais       Decimal     @db.Decimal(10, 2)
   criadoPorId      String

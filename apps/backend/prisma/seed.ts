@@ -1,4 +1,4 @@
-import { PrismaClient, BolaoStatus, BolaoEscopo, Role, JogoFase } from '@prisma/client';
+import { PrismaClient, BolaoStatus, Role, JogoFase } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -29,7 +29,6 @@ async function main() {
       nome: 'Bolão Global — Copa 2026',
       descricao: 'Bolão público. Todos os participantes entram automaticamente.',
       status: BolaoStatus.ATIVO,
-      escopo: BolaoEscopo.AMBOS,
       maxParticipantes: 99999,
       precoReais: 0,
       criadoPorId: ADMIN_ID,

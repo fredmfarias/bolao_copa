@@ -1,4 +1,4 @@
-import { PrismaClient, BolaoStatus, BolaoEscopo, Role, BolaoMembroPapel } from '@prisma/client';
+import { PrismaClient, BolaoStatus, Role, BolaoMembroPapel } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -98,7 +98,6 @@ async function createBoloes(): Promise<string[]> {
       {
         nome: 'Bolão dos Grupos A',
         descricao: 'Fase de grupos — Chave A',
-        escopo: BolaoEscopo.GRUPOS,
         maxParticipantes: 20,
         precoReais: 10,
         status: BolaoStatus.ATIVO,
@@ -107,7 +106,6 @@ async function createBoloes(): Promise<string[]> {
       {
         nome: 'Bolão dos Grupos B',
         descricao: 'Fase de grupos — Chave B',
-        escopo: BolaoEscopo.GRUPOS,
         maxParticipantes: 20,
         precoReais: 20,
         status: BolaoStatus.ATIVO,
@@ -116,7 +114,6 @@ async function createBoloes(): Promise<string[]> {
       {
         nome: 'Bolão Eliminatórias 1',
         descricao: 'Fase eliminatória, grupo 1',
-        escopo: BolaoEscopo.ELIMINATORIAS,
         maxParticipantes: 15,
         precoReais: 30,
         status: BolaoStatus.ATIVO,
@@ -125,7 +122,6 @@ async function createBoloes(): Promise<string[]> {
       {
         nome: 'Bolão Eliminatórias 2',
         descricao: 'Fase eliminatória, grupo 2',
-        escopo: BolaoEscopo.ELIMINATORIAS,
         maxParticipantes: 15,
         precoReais: 50,
         status: BolaoStatus.ATIVO,
@@ -134,7 +130,6 @@ async function createBoloes(): Promise<string[]> {
       {
         nome: 'Bolão Completo Alpha',
         descricao: 'Copa inteira — sem taxa de entrada',
-        escopo: BolaoEscopo.AMBOS,
         maxParticipantes: 25,
         precoReais: 0,
         status: BolaoStatus.ATIVO,
@@ -143,7 +138,6 @@ async function createBoloes(): Promise<string[]> {
       {
         nome: 'Bolão Completo Beta',
         descricao: 'Copa inteira — taxa reduzida',
-        escopo: BolaoEscopo.AMBOS,
         maxParticipantes: 25,
         precoReais: 15,
         status: BolaoStatus.ATIVO,

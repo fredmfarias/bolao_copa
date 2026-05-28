@@ -2,10 +2,7 @@
 CREATE TYPE "Role" AS ENUM ('ADMIN', 'USER');
 
 -- CreateEnum
-CREATE TYPE "BolaoStatus" AS ENUM ('ATIVO', 'PAGO', 'ARQUIVADO');
-
--- CreateEnum
-CREATE TYPE "BolaoEscopo" AS ENUM ('GRUPOS', 'ELIMINATORIAS', 'AMBOS');
+CREATE TYPE "BolaoStatus" AS ENUM ('ATIVO', 'INATIVO');
 
 -- CreateEnum
 CREATE TYPE "JogoFase" AS ENUM ('GRUPOS', 'OITAVAS', 'QUARTAS', 'SEMIS', 'TERCEIRO_LUGAR', 'FINAL');
@@ -23,7 +20,9 @@ CREATE TABLE "usuario" (
     "role" "Role" NOT NULL DEFAULT 'USER',
     "avatarUrl" TEXT,
     "emailVerificado" BOOLEAN NOT NULL DEFAULT false,
+    "ativo" BOOLEAN NOT NULL DEFAULT true,
     "criadoEm" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "bolaoFavoritoId" TEXT,
 
     CONSTRAINT "usuario_pkey" PRIMARY KEY ("id")
 );
@@ -34,7 +33,6 @@ CREATE TABLE "bolao" (
     "nome" TEXT NOT NULL,
     "descricao" TEXT,
     "status" "BolaoStatus" NOT NULL DEFAULT 'ATIVO',
-    "escopo" "BolaoEscopo" NOT NULL,
     "maxParticipantes" INTEGER NOT NULL,
     "precoReais" DECIMAL(10,2) NOT NULL,
     "criadoPorId" TEXT NOT NULL,
@@ -87,6 +85,16 @@ CREATE TABLE "estadio" (
 );
 
 -- CreateTable
+CREATE TABLE "publicacao" (
+    "id" TEXT NOT NULL,
+    "numero" INTEGER NOT NULL,
+    "publicadoEm" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "publicadoPorId" TEXT NOT NULL,
+
+    CONSTRAINT "publicacao_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "jogo" (
     "id" TEXT NOT NULL,
     "selecaoCasaId" TEXT NOT NULL,
@@ -99,6 +107,7 @@ CREATE TABLE "jogo" (
     "placarCasa" INTEGER,
     "placarVisitante" INTEGER,
     "pesoPontuacao" INTEGER NOT NULL DEFAULT 1,
+    "publicacaoId" TEXT,
 
     CONSTRAINT "jogo_pkey" PRIMARY KEY ("id")
 );
@@ -108,7 +117,6 @@ CREATE TABLE "aposta" (
     "id" TEXT NOT NULL,
     "usuarioId" TEXT NOT NULL,
     "jogoId" TEXT NOT NULL,
-    "bolaoId" TEXT NOT NULL,
     "placarCasa" INTEGER NOT NULL,
     "placarVisitante" INTEGER NOT NULL,
     "pontuacao" INTEGER,
@@ -160,6 +168,27 @@ CREATE TABLE "notificacao_subscription" (
     CONSTRAINT "notificacao_subscription_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "ranking_snapshot" (
+    "id" TEXT NOT NULL,
+    "publicacaoId" TEXT NOT NULL,
+    "bolaoId" TEXT NOT NULL,
+    "usuarioId" TEXT NOT NULL,
+    "posicao" INTEGER NOT NULL,
+    "posicoesGanhas" INTEGER NOT NULL DEFAULT 0,
+    "pontuacaoTotal" INTEGER NOT NULL DEFAULT 0,
+    "pontuacaoRodada" INTEGER NOT NULL DEFAULT 0,
+    "acertosPlacarExato" INTEGER NOT NULL DEFAULT 0,
+    "acertosPlacarVencedor" INTEGER NOT NULL DEFAULT 0,
+    "acertosPlacarPerdedor" INTEGER NOT NULL DEFAULT 0,
+    "acertosEmpate" INTEGER NOT NULL DEFAULT 0,
+    "acertosGanhador" INTEGER NOT NULL DEFAULT 0,
+    "acertosNada" INTEGER NOT NULL DEFAULT 0,
+    "apostasPostadas" INTEGER NOT NULL DEFAULT 0,
+
+    CONSTRAINT "ranking_snapshot_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "usuario_email_key" ON "usuario"("email");
 
@@ -179,7 +208,10 @@ CREATE UNIQUE INDEX "selecao_codigo_key" ON "selecao"("codigo");
 CREATE UNIQUE INDEX "estadio_nome_key" ON "estadio"("nome");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "aposta_usuarioId_jogoId_bolaoId_key" ON "aposta"("usuarioId", "jogoId", "bolaoId");
+CREATE UNIQUE INDEX "publicacao_numero_key" ON "publicacao"("numero");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "aposta_usuarioId_jogoId_key" ON "aposta"("usuarioId", "jogoId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ranking_bolaoId_usuarioId_key" ON "ranking"("bolaoId", "usuarioId");
@@ -189,6 +221,15 @@ CREATE UNIQUE INDEX "configuracao_pontuacao_nivel_key" ON "configuracao_pontuaca
 
 -- CreateIndex
 CREATE UNIQUE INDEX "notificacao_subscription_endpoint_key" ON "notificacao_subscription"("endpoint");
+
+-- CreateIndex
+CREATE INDEX "ranking_snapshot_bolaoId_usuarioId_idx" ON "ranking_snapshot"("bolaoId", "usuarioId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ranking_snapshot_publicacaoId_bolaoId_usuarioId_key" ON "ranking_snapshot"("publicacaoId", "bolaoId", "usuarioId");
+
+-- AddForeignKey
+ALTER TABLE "usuario" ADD CONSTRAINT "usuario_bolaoFavoritoId_fkey" FOREIGN KEY ("bolaoFavoritoId") REFERENCES "bolao"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "bolao" ADD CONSTRAINT "bolao_criadoPorId_fkey" FOREIGN KEY ("criadoPorId") REFERENCES "usuario"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -215,13 +256,13 @@ ALTER TABLE "jogo" ADD CONSTRAINT "jogo_selecaoVisitanteId_fkey" FOREIGN KEY ("s
 ALTER TABLE "jogo" ADD CONSTRAINT "jogo_estadioId_fkey" FOREIGN KEY ("estadioId") REFERENCES "estadio"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "jogo" ADD CONSTRAINT "jogo_publicacaoId_fkey" FOREIGN KEY ("publicacaoId") REFERENCES "publicacao"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "aposta" ADD CONSTRAINT "aposta_usuarioId_fkey" FOREIGN KEY ("usuarioId") REFERENCES "usuario"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "aposta" ADD CONSTRAINT "aposta_jogoId_fkey" FOREIGN KEY ("jogoId") REFERENCES "jogo"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "aposta" ADD CONSTRAINT "aposta_bolaoId_fkey" FOREIGN KEY ("bolaoId") REFERENCES "bolao"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ranking" ADD CONSTRAINT "ranking_bolaoId_fkey" FOREIGN KEY ("bolaoId") REFERENCES "bolao"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -234,3 +275,12 @@ ALTER TABLE "configuracao_pontuacao" ADD CONSTRAINT "configuracao_pontuacao_atua
 
 -- AddForeignKey
 ALTER TABLE "notificacao_subscription" ADD CONSTRAINT "notificacao_subscription_usuarioId_fkey" FOREIGN KEY ("usuarioId") REFERENCES "usuario"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "publicacao" ADD CONSTRAINT "publicacao_publicadoPorId_fkey" FOREIGN KEY ("publicadoPorId") REFERENCES "usuario"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ranking_snapshot" ADD CONSTRAINT "ranking_snapshot_publicacaoId_fkey" FOREIGN KEY ("publicacaoId") REFERENCES "publicacao"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ranking_snapshot" ADD CONSTRAINT "ranking_snapshot_usuarioId_fkey" FOREIGN KEY ("usuarioId") REFERENCES "usuario"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

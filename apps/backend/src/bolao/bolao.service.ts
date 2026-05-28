@@ -22,7 +22,7 @@ export class BolaoService {
     if (!moderador) throw new NotFoundException('Moderador não encontrado.');
 
     const bolao = await this.prisma.bolao.create({
-      data: { ...bolaoData, precoReais, criadoPorId: adminId, escopo: 'AMBOS' },
+      data: { ...bolaoData, precoReais, criadoPorId: adminId },
     });
     await this.prisma.bolaoMembro.create({
       data: { bolaoId: bolao.id, usuarioId: moderadorId, papel: BolaoMembroPapel.MODERADOR },
@@ -42,7 +42,7 @@ export class BolaoService {
   async buscarPorNome(nome: string) {
     return this.prisma.bolao.findMany({
       where: { nome: { contains: nome, mode: 'insensitive' }, status: BolaoStatus.ATIVO },
-      select: { id: true, nome: true, descricao: true, escopo: true, _count: { select: { membros: true } } },
+      select: { id: true, nome: true, descricao: true, _count: { select: { membros: true } } },
     });
   }
 
