@@ -71,6 +71,19 @@ export class AdminService {
     });
   }
 
+  async buscarUsuarios(q: string) {
+    return this.prisma.usuario.findMany({
+      where: {
+        OR: [
+          { nome: { contains: q, mode: 'insensitive' } },
+          { email: { contains: q, mode: 'insensitive' } },
+        ],
+      },
+      select: { id: true, nome: true, email: true, avatarUrl: true },
+      take: 10,
+    });
+  }
+
   async resetarSenha(id: string) {
     const usuario = await this.prisma.usuario.findUnique({ where: { id } });
     if (!usuario) throw new NotFoundException('Usuário não encontrado.');

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Param, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Body, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -24,6 +24,11 @@ export class AdminController {
   @Get('usuarios')
   listarUsuarios() {
     return this.service.listarUsuarios();
+  }
+
+  @Get('usuarios/buscar')
+  buscarUsuarios(@Query('q') q: string) {
+    return this.service.buscarUsuarios(q ?? '');
   }
 
   @Patch('usuarios/:id')
