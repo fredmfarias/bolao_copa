@@ -59,7 +59,12 @@ export default function AdminBoloesPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">Bolões</h1>
         <button
-          onClick={() => { setCriando(v => !v); setErro(''); }}
+          onClick={() => {
+            setCriando(v => !v);
+            setErro('');
+            setForm({ nome: '', descricao: '', escopo: BolaoEscopo.AMBOS, maxParticipantes: 10 });
+            setModerador(null);
+          }}
           className="bg-yellow-400 text-gray-900 font-bold px-4 py-2 rounded-lg text-sm hover:bg-yellow-300">
           {criando ? 'Cancelar' : '+ Criar bolão'}
         </button>
