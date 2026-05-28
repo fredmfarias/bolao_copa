@@ -32,6 +32,10 @@ export function UserSearchInput({ value, onChange }: Props) {
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [query, value]);
 
+  useEffect(() => {
+    if (!value) setQuery('');
+  }, [value]);
+
   function selecionar(u: UserSearchResult) {
     onChange({ id: u.id, nome: u.nome });
     setQuery(u.nome);
@@ -52,6 +56,7 @@ export function UserSearchInput({ value, onChange }: Props) {
         <input
           value={query}
           onChange={e => { setQuery(e.target.value); if (value) onChange(null); }}
+          onBlur={() => setTimeout(() => setAberto(false), 150)}
           placeholder="Buscar por nome ou e-mail..."
           className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-yellow-400"
         />
