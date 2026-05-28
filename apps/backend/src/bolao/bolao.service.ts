@@ -18,6 +18,9 @@ export class BolaoService {
     const precoReais = dto.maxParticipantes * 1;
     const { moderadorId, ...bolaoData } = dto;
 
+    const moderador = await this.prisma.usuario.findUnique({ where: { id: moderadorId } });
+    if (!moderador) throw new NotFoundException('Moderador não encontrado.');
+
     const bolao = await this.prisma.bolao.create({
       data: { ...bolaoData, precoReais, criadoPorId: adminId },
     });
