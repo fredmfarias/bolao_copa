@@ -1,5 +1,5 @@
 import { test, expect } from '../../fixtures';
-import { criarUsuarioAutenticado } from '../../api/client';
+import { criarUsuarioAutenticado, adminContext } from '../../api/client';
 import { truncateDynamic } from '../../support/db';
 import { newUser, newBolao } from '../../data/factories';
 import { BolaoMembroPapel } from '@bolao/shared';
@@ -9,12 +9,13 @@ test.describe('Bolão + convite (API)', () => {
 
   test('criador vira MODERADOR e segundo usuário entra via convite', async () => {
     const dono = await criarUsuarioAutenticado(newUser('dono'));
-    const bolaoData = newBolao();
+    const admin = await adminContext();
 
-    // Cria bolão
-    const criar = await dono.ctx.post('/boloes', { data: bolaoData });
+    // Admin cria o bolão e designa dono como moderador
+    const criar = await admin.post('/boloes', { data: { ...newBolao(), moderadorId: dono.user.id } });
     expect(criar.ok()).toBeTruthy();
     const bolao = await criar.json();
+    await admin.dispose();
 
     // Gera convite (moderador)
     const conviteRes = await dono.ctx.post(`/boloes/${bolao.id}/convite`, { data: {} });

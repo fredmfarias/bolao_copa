@@ -12,7 +12,5 @@ function run(cmd: string) {
   execSync(cmd, { cwd: backend, stdio: 'inherit', env });
 }
 
-// Applies all migrations to the e2e DB (creates it if absent), then seeds.
-run('pnpm exec prisma migrate deploy');
-run('pnpm exec prisma db seed');
+run('pnpm exec prisma migrate reset --force');
 console.log('e2e database ready.');
