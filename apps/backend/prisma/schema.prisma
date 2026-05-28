@@ -19,6 +19,7 @@ enum BolaoStatus {
 
 enum JogoFase {
   GRUPOS
+  SEGUNDA_FASE
   OITAVAS
   QUARTAS
   SEMIS

@@ -10,6 +10,7 @@ export enum BolaoStatus {
 
 export enum JogoFase {
   GRUPOS = 'GRUPOS',
+  SEGUNDA_FASE = 'SEGUNDA_FASE',
   OITAVAS = 'OITAVAS',
   QUARTAS = 'QUARTAS',
   SEMIS = 'SEMIS',
@@ -23,6 +24,7 @@ export enum BolaoMembroPapel {
 }
 
 export const FASES_ELIMINATORIAS: JogoFase[] = [
+  JogoFase.SEGUNDA_FASE,
   JogoFase.OITAVAS,
   JogoFase.QUARTAS,
   JogoFase.SEMIS,
