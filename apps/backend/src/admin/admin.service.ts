@@ -72,6 +72,7 @@ export class AdminService {
   }
 
   async buscarUsuarios(q: string) {
+    if (!q.trim()) return [];
     return this.prisma.usuario.findMany({
       where: {
         OR: [

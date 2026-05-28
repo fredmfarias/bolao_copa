@@ -113,5 +113,11 @@ describe('AdminService', () => {
       expect(r).toHaveLength(1);
       expect(r[0].nome).toBe('Alice');
     });
+
+    it('retorna [] para query vazia', async () => {
+      const r = await service.buscarUsuarios('');
+      expect(r).toEqual([]);
+      expect(prismaMock.usuario.findMany).not.toHaveBeenCalled();
+    });
   });
 });
