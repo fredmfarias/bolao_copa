@@ -140,4 +140,17 @@ export class AdminService {
 
     return { id: usuario.id, nome: usuario.nome, email: usuario.email };
   }
+
+  async adicionarUsuarioBolao(bolaoId: string, usuarioId: string) {
+    const usuario = await this.prisma.usuario.findUnique({ where: { id: usuarioId } });
+    if (!usuario) throw new NotFoundException('Usuário não encontrado.');
+
+    const membro = await this.prisma.bolaoMembro.findUnique({
+      where: { bolaoId_usuarioId: { bolaoId, usuarioId } },
+    });
+    if (membro) throw new ConflictException('Usuário já é membro deste bolão.');
+
+    await this.bolao.adicionarMembro(bolaoId, usuarioId);
+    return { message: 'Usuário adicionado ao bolão.' };
+  }
 }

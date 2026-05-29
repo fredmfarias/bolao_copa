@@ -54,4 +54,12 @@ export class AdminController {
   criarUsuario(@Body() dto: CreateUsuarioAdminDto) {
     return this.service.criarUsuario(dto);
   }
+
+  @Post('boloes/:bolaoId/membros')
+  adicionarUsuarioBolao(
+    @Param('bolaoId') bolaoId: string,
+    @Body('usuarioId') usuarioId: string,
+  ) {
+    return this.service.adicionarUsuarioBolao(bolaoId, usuarioId);
+  }
 }

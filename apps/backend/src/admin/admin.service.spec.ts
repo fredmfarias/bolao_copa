@@ -182,4 +182,35 @@ describe('AdminService', () => {
       expect(bolaoServiceMock.adicionarMembro).not.toHaveBeenCalled();
     });
   });
+
+  describe('adicionarUsuarioBolao', () => {
+    beforeEach(() => {
+      prismaMock.usuario.findUnique.mockReset();
+      prismaMock.bolaoMembro.findUnique.mockReset();
+      bolaoServiceMock.adicionarMembro.mockClear();
+    });
+
+    it('lança NotFoundException se usuário não existe', async () => {
+      prismaMock.usuario.findUnique.mockResolvedValue(null);
+      await expect(
+        service.adicionarUsuarioBolao('b1', 'u-fantasma'),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('lança ConflictException se já é membro', async () => {
+      prismaMock.usuario.findUnique.mockResolvedValue({ id: 'u1', ativo: true });
+      prismaMock.bolaoMembro.findUnique.mockResolvedValue({ bolaoId: 'b1', usuarioId: 'u1' });
+      await expect(
+        service.adicionarUsuarioBolao('b1', 'u1'),
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('chama bolao.adicionarMembro quando válido', async () => {
+      prismaMock.usuario.findUnique.mockResolvedValue({ id: 'u1', ativo: true });
+      prismaMock.bolaoMembro.findUnique.mockResolvedValue(null);
+      bolaoServiceMock.adicionarMembro.mockResolvedValue({});
+      await service.adicionarUsuarioBolao('b1', 'u1');
+      expect(bolaoServiceMock.adicionarMembro).toHaveBeenCalledWith('b1', 'u1');
+    });
+  });
 });
