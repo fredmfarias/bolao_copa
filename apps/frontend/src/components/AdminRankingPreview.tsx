@@ -2,33 +2,47 @@
 
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
-import type { RankingEntry } from '@/types/api';
+import { AdminPublicarDialog } from '@/components/AdminPublicarDialog';
+import type { JogoPendente, RankingEntry } from '@/types/api';
 
-interface AdminRankingPreviewProps {
-  bolaoId: string;
-}
+interface Props { bolaoId: string }
 
-export function AdminRankingPreview({ bolaoId }: AdminRankingPreviewProps) {
-  const [ranking, setRanking] = useState<RankingEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [publicando, setPublicando] = useState(false);
-  const [publicado, setPublicado] = useState(false);
-  const [erro, setErro] = useState('');
+export function AdminRankingPreview({ bolaoId }: Props) {
+  const [ranking, setRanking]   = useState<RankingEntry[]>([]);
+  const [pendentes, setPendentes] = useState<JogoPendente[] | null>(null);
+  const [loading, setLoading]   = useState(true);
+  const [confirmando, setConfirmando] = useState(false);
+  const [publicando, setPublicando]   = useState(false);
+  const [publicado, setPublicado]     = useState(false);
+  const [erro, setErro]               = useState('');
 
-  useEffect(() => {
-    api.get<RankingEntry[]>(`/admin/ranking/${bolaoId}/draft`)
-      .then(setRanking)
-      .catch(() => setRanking([]))
-      .finally(() => setLoading(false));
-  }, [bolaoId]);
+  async function carregar() {
+    setLoading(true);
+    try {
+      const [r, p] = await Promise.all([
+        api.get<RankingEntry[]>(`/admin/ranking/${bolaoId}/draft`),
+        api.get<JogoPendente[]>(`/admin/publicacoes/pendente`),
+      ]);
+      setRanking(r);
+      setPendentes(p);
+    } catch {
+      setRanking([]);
+      setPendentes([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { carregar(); }, [bolaoId]);
 
   async function publicar() {
     setPublicando(true);
     setErro('');
     try {
-      // Publicação é global: fecha a rodada para todos os bolões habilitados.
       await api.post('/admin/publicacoes');
       setPublicado(true);
+      setConfirmando(false);
+      carregar();
     } catch (err: unknown) {
       setErro(err instanceof Error ? err.message : 'Erro ao publicar.');
     } finally {
@@ -38,17 +52,29 @@ export function AdminRankingPreview({ bolaoId }: AdminRankingPreviewProps) {
 
   if (loading) return <p className="text-trovao-muted text-sm">Carregando draft...</p>;
 
+  const qtdPendentes = pendentes?.length ?? 0;
+
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-2">
         <p className="text-trovao-muted text-xs">{ranking.length} participantes</p>
         {publicado ? (
           <span className="text-trovao-green text-xs font-semibold">Publicado</span>
         ) : (
-          <button onClick={publicar} disabled={publicando}
-            className="px-3 py-1.5 bg-trovao-gold text-trovao-base text-xs font-bold rounded-lg disabled:opacity-50">
-            {publicando ? 'Publicando...' : 'Publicar rodada (global)'}
-          </button>
+          <div className="flex flex-col items-end gap-0.5">
+            <button
+              onClick={() => setConfirmando(true)}
+              disabled={publicando || qtdPendentes === 0}
+              className="px-3 py-1.5 bg-trovao-gold text-trovao-base text-xs font-bold rounded-lg disabled:opacity-50"
+            >
+              Publicar rodada (global)
+            </button>
+            <p className="text-trovao-muted text-[10px]">
+              {qtdPendentes === 0
+                ? 'Nenhum jogo com placar pendente de publicação'
+                : `${qtdPendentes} jogo${qtdPendentes === 1 ? '' : 's'} prontos para publicar`}
+            </p>
+          </div>
         )}
       </div>
       {erro && <p className="text-trovao-red text-xs">{erro}</p>}
@@ -68,6 +94,14 @@ export function AdminRankingPreview({ bolaoId }: AdminRankingPreviewProps) {
           </div>
         ))}
       </div>
+
+      <AdminPublicarDialog
+        open={confirmando}
+        jogos={pendentes ?? []}
+        publicando={publicando}
+        onCancel={() => setConfirmando(false)}
+        onConfirm={publicar}
+      />
     </div>
   );
 }
