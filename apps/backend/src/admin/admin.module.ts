@@ -5,9 +5,10 @@ import { AdminService } from './admin.service';
 import { RankingModule } from '../ranking/ranking.module';
 import { MailerModule } from '../mailer/mailer.module';
 import { PublicacaoModule } from '../publicacao/publicacao.module';
+import { BolaoModule } from '../bolao/bolao.module';
 
 @Module({
-  imports: [RankingModule, JwtModule, MailerModule, PublicacaoModule],
+  imports: [RankingModule, JwtModule, MailerModule, PublicacaoModule, BolaoModule],
   controllers: [AdminController],
   providers: [AdminService],
 })

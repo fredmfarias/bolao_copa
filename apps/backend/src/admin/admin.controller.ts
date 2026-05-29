@@ -4,6 +4,7 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { AdminService } from './admin.service';
 import { Role } from '@bolao/shared';
+import { CreateUsuarioAdminDto } from './dto/create-usuario-admin.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.ADMIN)
@@ -47,5 +48,10 @@ export class AdminController {
   @Post('usuarios/:id/reset-senha')
   resetarSenha(@Param('id') id: string) {
     return this.service.resetarSenha(id);
+  }
+
+  @Post('usuarios')
+  criarUsuario(@Body() dto: CreateUsuarioAdminDto) {
+    return this.service.criarUsuario(dto);
   }
 }

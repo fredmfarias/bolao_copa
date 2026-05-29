@@ -5,14 +5,19 @@ import { RankingService } from '../ranking/ranking.service';
 import { PublicacaoService } from '../publicacao/publicacao.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, ConflictException } from '@nestjs/common';
+import { BolaoService } from '../bolao/bolao.service';
+import * as bcrypt from 'bcrypt';
+
+const bolaoServiceMock = { adicionarMembro: jest.fn() };
 
 const prismaMock = {
   bolao: { findUnique: jest.fn(), findMany: jest.fn() },
-  ranking: { findMany: jest.fn() },
+  ranking: { findMany: jest.fn(), create: jest.fn() },
   publicacao: { findFirst: jest.fn() },
   rankingSnapshot: { findMany: jest.fn() },
-  usuario: { findMany: jest.fn(), update: jest.fn(), findUnique: jest.fn() },
+  usuario: { findMany: jest.fn(), update: jest.fn(), findUnique: jest.fn(), create: jest.fn() },
+  bolaoMembro: { create: jest.fn(), findUnique: jest.fn() },
 };
 const rankingMock = { recalcularRankingBolao: jest.fn() };
 const publicacaoMock = { listarJogosPendentes: jest.fn() };
@@ -28,6 +33,7 @@ describe('AdminService', () => {
         { provide: PrismaService, useValue: prismaMock },
         { provide: RankingService, useValue: rankingMock },
         { provide: PublicacaoService, useValue: publicacaoMock },
+        { provide: BolaoService, useValue: bolaoServiceMock },
         { provide: JwtService, useValue: { signAsync: jest.fn().mockResolvedValue('token') } },
         { provide: ConfigService, useValue: { get: jest.fn().mockReturnValue('x') } },
         { provide: 'MAILER', useValue: mailerMock },
@@ -130,6 +136,50 @@ describe('AdminService', () => {
       const r = await service.buscarUsuarios('');
       expect(r).toEqual([]);
       expect(prismaMock.usuario.findMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('criarUsuario', () => {
+    beforeEach(() => {
+      prismaMock.usuario.findUnique.mockResolvedValue(null);
+      prismaMock.usuario.create.mockResolvedValue({ id: 'novo-1', nome: 'X', email: 'x@x.com' });
+      prismaMock.bolaoMembro.create.mockResolvedValue({});
+      prismaMock.ranking.create.mockResolvedValue({});
+      bolaoServiceMock.adicionarMembro.mockResolvedValue({});
+      jest.spyOn(bcrypt, 'hash').mockResolvedValue('hash' as never);
+    });
+
+    it('cria usuário com emailVerificado=true e entra no bolão global', async () => {
+      await service.criarUsuario({ nome: 'X', email: 'x@x.com', senhaTemp: '12345678' });
+      expect(prismaMock.usuario.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({ nome: 'X', email: 'x@x.com', emailVerificado: true, senhaHash: 'hash' }),
+      });
+      expect(prismaMock.bolaoMembro.create).toHaveBeenCalledWith({
+        data: { bolaoId: '00000000-0000-0000-0000-000000000001', usuarioId: 'novo-1' },
+      });
+    });
+
+    it('lança ConflictException se e-mail já existe', async () => {
+      prismaMock.usuario.findUnique.mockResolvedValue({ id: 'existe' });
+      await expect(
+        service.criarUsuario({ nome: 'X', email: 'x@x.com', senhaTemp: '12345678' }),
+      ).rejects.toThrow(ConflictException);
+      expect(prismaMock.usuario.create).not.toHaveBeenCalled();
+    });
+
+    it('com bolaoId, chama adicionarMembro para o bolão extra', async () => {
+      await service.criarUsuario({
+        nome: 'X', email: 'x@x.com', senhaTemp: '12345678', bolaoId: 'bolao-extra',
+      });
+      expect(bolaoServiceMock.adicionarMembro).toHaveBeenCalledWith('bolao-extra', 'novo-1');
+    });
+
+    it('com bolaoId igual ao global, NÃO chama adicionarMembro (evita duplicação)', async () => {
+      await service.criarUsuario({
+        nome: 'X', email: 'x@x.com', senhaTemp: '12345678',
+        bolaoId: '00000000-0000-0000-0000-000000000001',
+      });
+      expect(bolaoServiceMock.adicionarMembro).not.toHaveBeenCalled();
     });
   });
 });

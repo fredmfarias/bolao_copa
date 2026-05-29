@@ -1,9 +1,13 @@
-import { Injectable, NotFoundException, Inject } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, Inject } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { RankingService } from '../ranking/ranking.service';
 import { PublicacaoService } from '../publicacao/publicacao.service';
+import { BolaoService } from '../bolao/bolao.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { CreateUsuarioAdminDto } from './dto/create-usuario-admin.dto';
+import { BOLAO_GLOBAL_ID } from '@bolao/shared';
 
 @Injectable()
 export class AdminService {
@@ -11,6 +15,7 @@ export class AdminService {
     private prisma: PrismaService,
     private ranking: RankingService,
     private publicacao: PublicacaoService,
+    private bolao: BolaoService,
     private jwt: JwtService,
     private config: ConfigService,
     @Inject('MAILER') private mailer: any,
@@ -106,5 +111,33 @@ export class AdminService {
       html: `<p>Um administrador solicitou a redefinição da sua senha. Clique: <a href="${url}">${url}</a></p>`,
     });
     return { message: 'E-mail de redefinição enviado.' };
+  }
+
+  async criarUsuario(dto: CreateUsuarioAdminDto) {
+    const existe = await this.prisma.usuario.findUnique({ where: { email: dto.email } });
+    if (existe) throw new ConflictException('E-mail já cadastrado.');
+
+    const senhaHash = await bcrypt.hash(dto.senhaTemp, 12);
+    const usuario = await this.prisma.usuario.create({
+      data: {
+        nome: dto.nome,
+        email: dto.email,
+        senhaHash,
+        emailVerificado: true,
+      },
+    });
+
+    await this.prisma.bolaoMembro.create({
+      data: { bolaoId: BOLAO_GLOBAL_ID, usuarioId: usuario.id },
+    });
+    await this.prisma.ranking.create({
+      data: { bolaoId: BOLAO_GLOBAL_ID, usuarioId: usuario.id },
+    });
+
+    if (dto.bolaoId && dto.bolaoId !== BOLAO_GLOBAL_ID) {
+      await this.bolao.adicionarMembro(dto.bolaoId, usuario.id);
+    }
+
+    return { id: usuario.id, nome: usuario.nome, email: usuario.email };
   }
 }
