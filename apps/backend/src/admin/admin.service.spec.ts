@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import { AdminService } from './admin.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RankingService } from '../ranking/ranking.service';
+import { PublicacaoService } from '../publicacao/publicacao.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { NotFoundException } from '@nestjs/common';
@@ -12,9 +13,9 @@ const prismaMock = {
   publicacao: { findFirst: jest.fn() },
   rankingSnapshot: { findMany: jest.fn() },
   usuario: { findMany: jest.fn(), update: jest.fn(), findUnique: jest.fn() },
-  jogo: { findMany: jest.fn() },
 };
 const rankingMock = { recalcularRankingBolao: jest.fn() };
+const publicacaoMock = { listarJogosPendentes: jest.fn() };
 const mailerMock = { sendMail: jest.fn() };
 
 describe('AdminService', () => {
@@ -26,6 +27,7 @@ describe('AdminService', () => {
         AdminService,
         { provide: PrismaService, useValue: prismaMock },
         { provide: RankingService, useValue: rankingMock },
+        { provide: PublicacaoService, useValue: publicacaoMock },
         { provide: JwtService, useValue: { signAsync: jest.fn().mockResolvedValue('token') } },
         { provide: ConfigService, useValue: { get: jest.fn().mockReturnValue('x') } },
         { provide: 'MAILER', useValue: mailerMock },
@@ -68,30 +70,11 @@ describe('AdminService', () => {
   });
 
   describe('listarPublicacaoPendente', () => {
-    it('retorna jogos com placar preenchido e sem publicação, ordenados por dataHora', async () => {
-      const jogos = [
-        { id: 'j1', dataHora: new Date('2026-06-11T16:00:00Z') },
-        { id: 'j2', dataHora: new Date('2026-06-11T20:00:00Z') },
-      ];
-      prismaMock.jogo.findMany.mockResolvedValue(jogos);
+    it('delega para publicacao.listarJogosPendentes', async () => {
+      publicacaoMock.listarJogosPendentes.mockResolvedValue([{ id: 'j1' }]);
       const r = await service.listarPublicacaoPendente();
-      expect(r).toBe(jogos);
-      expect(prismaMock.jogo.findMany).toHaveBeenCalledWith({
-        where: { placarCasa: { not: null }, publicacaoId: null },
-        orderBy: { dataHora: 'asc' },
-        select: expect.objectContaining({
-          id: true, dataHora: true, rodada: true, fase: true,
-          pesoPontuacao: true, placarCasa: true, placarVisitante: true,
-          selecaoCasa: expect.any(Object),
-          selecaoVisitante: expect.any(Object),
-        }),
-      });
-    });
-
-    it('retorna lista vazia quando nada está pendente', async () => {
-      prismaMock.jogo.findMany.mockResolvedValue([]);
-      const r = await service.listarPublicacaoPendente();
-      expect(r).toEqual([]);
+      expect(r).toEqual([{ id: 'j1' }]);
+      expect(publicacaoMock.listarJogosPendentes).toHaveBeenCalled();
     });
   });
 

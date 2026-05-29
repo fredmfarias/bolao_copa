@@ -7,5 +7,6 @@ import { RankingModule } from '../ranking/ranking.module';
   imports: [RankingModule],
   controllers: [PublicacaoController],
   providers: [PublicacaoService],
+  exports: [PublicacaoService],
 })
 export class PublicacaoModule {}

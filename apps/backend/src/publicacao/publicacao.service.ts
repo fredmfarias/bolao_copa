@@ -9,6 +9,19 @@ export class PublicacaoService {
     private ranking: RankingService,
   ) {}
 
+  async listarJogosPendentes() {
+    return this.prisma.jogo.findMany({
+      where: { placarCasa: { not: null }, publicacaoId: null },
+      orderBy: { dataHora: 'asc' },
+      select: {
+        id: true, dataHora: true, rodada: true, fase: true,
+        pesoPontuacao: true, placarCasa: true, placarVisitante: true,
+        selecaoCasa:      { select: { nome: true, codigo: true, bandeiraSvg: true } },
+        selecaoVisitante: { select: { nome: true, codigo: true, bandeiraSvg: true } },
+      },
+    });
+  }
+
   async publicar(usuarioId: string) {
     const ultima = await this.prisma.publicacao.findFirst({
       orderBy: { numero: 'desc' },
@@ -20,15 +33,15 @@ export class PublicacaoService {
     });
 
     // Jogos encerrados (com placar) ainda não publicados entram nesta rodada.
+    const pendentes = await this.listarJogosPendentes();
+    const idsPendentes = pendentes.map((j) => j.id);
+
     await this.prisma.jogo.updateMany({
-      where: { placarCasa: { not: null }, publicacaoId: null },
+      where: { id: { in: idsPendentes } },
       data: { publicacaoId: publicacao.id },
     });
 
-    const jogosRodada = await this.prisma.jogo.findMany({
-      where: { publicacaoId: publicacao.id },
-      select: { id: true },
-    });
+    const jogosRodada = pendentes.map((j) => ({ id: j.id }));
     const jogoIds = jogosRodada.map((j) => j.id);
 
     // Pontos da rodada por usuário (apostas global, valem para todos os bolões).

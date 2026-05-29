@@ -14,6 +14,32 @@ const prismaMock = {
 };
 const rankingMock = { recalcularRankingBolao: jest.fn() };
 
+describe('PublicacaoService.listarJogosPendentes', () => {
+  let service: PublicacaoService;
+
+  beforeEach(async () => {
+    const module = await Test.createTestingModule({
+      providers: [
+        PublicacaoService,
+        { provide: PrismaService, useValue: prismaMock },
+        { provide: RankingService, useValue: rankingMock },
+      ],
+    }).compile();
+    service = module.get(PublicacaoService);
+    jest.clearAllMocks();
+  });
+
+  it('retorna jogos com placar e sem publicacao, ordenados por dataHora', async () => {
+    prismaMock.jogo.findMany.mockResolvedValue([{ id: 'j1' }]);
+    const r = await service.listarJogosPendentes();
+    expect(r).toEqual([{ id: 'j1' }]);
+    expect(prismaMock.jogo.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: { placarCasa: { not: null }, publicacaoId: null },
+      orderBy: { dataHora: 'asc' },
+    }));
+  });
+});
+
 describe('PublicacaoService.publicar', () => {
   let service: PublicacaoService;
 
@@ -54,7 +80,7 @@ describe('PublicacaoService.publicar', () => {
       expect.objectContaining({ data: { numero: 3, publicadoPorId: 'admin-1' } }),
     );
     expect(prismaMock.jogo.updateMany).toHaveBeenCalledWith({
-      where: { placarCasa: { not: null }, publicacaoId: null },
+      where: { id: { in: ['j1'] } },
       data: { publicacaoId: 'pub-3' },
     });
   });

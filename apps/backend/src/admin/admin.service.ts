@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RankingService } from '../ranking/ranking.service';
+import { PublicacaoService } from '../publicacao/publicacao.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 
@@ -9,6 +10,7 @@ export class AdminService {
   constructor(
     private prisma: PrismaService,
     private ranking: RankingService,
+    private publicacao: PublicacaoService,
     private jwt: JwtService,
     private config: ConfigService,
     @Inject('MAILER') private mailer: any,
@@ -86,16 +88,7 @@ export class AdminService {
   }
 
   async listarPublicacaoPendente() {
-    return this.prisma.jogo.findMany({
-      where: { placarCasa: { not: null }, publicacaoId: null },
-      orderBy: { dataHora: 'asc' },
-      select: {
-        id: true, dataHora: true, rodada: true, fase: true,
-        pesoPontuacao: true, placarCasa: true, placarVisitante: true,
-        selecaoCasa:      { select: { nome: true, codigo: true, bandeiraSvg: true } },
-        selecaoVisitante: { select: { nome: true, codigo: true, bandeiraSvg: true } },
-      },
-    });
+    return this.publicacao.listarJogosPendentes();
   }
 
   async resetarSenha(id: string) {
