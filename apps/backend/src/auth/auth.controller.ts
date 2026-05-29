@@ -93,6 +93,11 @@ export class AuthController {
     });
 
     if (!usuario) {
+      const status = await this.inscricaoWindow.getStatus();
+      if (!status.abertas) {
+        return res.redirect(`${process.env.APP_URL}/login?erro=cadastros-encerrados`);
+      }
+
       usuario = await this.prisma.usuario.create({
         data: {
           nome: profile.nome, email: profile.email,
