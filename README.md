@@ -15,6 +15,7 @@
 - **Notificações push** — alertas via Web Push (PWA) quando partidas começam ou terminam
 - **Login social** — autenticação com Google OAuth ou e-mail/senha
 - **Painel administrativo** — habilitar/desabilitar bolões, gerenciar placares, pré-visualizar ranking (draft ao vivo), publicar rankings globalmente (com modal de confirmação listando os jogos da rodada) e gerir usuários com busca por nome/email (ativar/desativar, resetar senha)
+- **Janela de inscrição** — cadastros e ingresso em bolões fecham 2h antes do primeiro jogo da Copa. Após esse horário, apenas o admin pode criar contas (em `/admin/usuarios`) e adicionar usuários a bolões.
 
 ---
 
