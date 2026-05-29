@@ -3,13 +3,17 @@ import {
   ForbiddenException, ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { InscricaoWindowService } from '../inscricao-window/inscricao-window.service';
 import { CreateBolaoDto } from './dto/create-bolao.dto';
 import { UpdateBolaoStatusDto } from './dto/update-bolao-status.dto';
 import { BolaoMembroPapel, BolaoStatus, BOLAO_GLOBAL_ID } from '@bolao/shared';
 
 @Injectable()
 export class BolaoService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private inscricaoWindow: InscricaoWindowService,
+  ) {}
 
   async criar(adminId: string, dto: CreateBolaoDto) {
     if (dto.maxParticipantes % 10 !== 0) {
@@ -61,13 +65,14 @@ export class BolaoService {
     return this.prisma.bolaoConvite.create({ data: { bolaoId, criadoPorId, expiraEm } });
   }
 
-  async entrarViaConvite(usuarioId: string, token: string) {
+  async entrarViaConvite(user: { id: string; role: string }, token: string) {
+    await this.inscricaoWindow.assertAberta(user);
     const convite = await this.prisma.bolaoConvite.findUnique({ where: { token } });
     if (!convite) throw new BadRequestException('Convite inválido.');
     if (convite.expiraEm && convite.expiraEm < new Date()) {
       throw new BadRequestException('Convite expirado.');
     }
-    return this.adicionarMembro(convite.bolaoId, usuarioId);
+    return this.adicionarMembro(convite.bolaoId, user.id);
   }
 
   async solicitarEntrada(bolaoId: string, usuarioId: string) {
@@ -78,7 +83,8 @@ export class BolaoService {
     return { message: 'Solicitação registrada. Aguarde aprovação do moderador.' };
   }
 
-  async aprovarMembro(bolaoId: string, usuarioId: string) {
+  async aprovarMembro(user: { id: string; role: string }, bolaoId: string, usuarioId: string) {
+    await this.inscricaoWindow.assertAberta(user);
     return this.adicionarMembro(bolaoId, usuarioId);
   }
 
@@ -120,7 +126,7 @@ export class BolaoService {
     };
   }
 
-  private async adicionarMembro(bolaoId: string, usuarioId: string) {
+  async adicionarMembro(bolaoId: string, usuarioId: string) {
     const bolao = await this.prisma.bolao.findUnique({ where: { id: bolaoId } });
     if (!bolao) throw new NotFoundException('Bolão não encontrado.');
 

@@ -3,6 +3,7 @@ import { BolaoService } from './bolao.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { BolaoMembroPapel } from '@bolao/shared';
+import { InscricaoWindowService } from '../inscricao-window/inscricao-window.service';
 
 const prismaMock = {
   bolao: { create: jest.fn(), findUnique: jest.fn(), update: jest.fn(), findMany: jest.fn() },
@@ -12,15 +13,22 @@ const prismaMock = {
   usuario: { findUnique: jest.fn() },
 };
 
+const inscricaoMock = { assertAberta: jest.fn() };
+
 describe('BolaoService', () => {
   let service: BolaoService;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
-      providers: [BolaoService, { provide: PrismaService, useValue: prismaMock }],
+      providers: [
+        BolaoService,
+        { provide: PrismaService, useValue: prismaMock },
+        { provide: InscricaoWindowService, useValue: inscricaoMock },
+      ],
     }).compile();
     service = module.get(BolaoService);
     jest.clearAllMocks();
+    inscricaoMock.assertAberta.mockResolvedValue(undefined);
   });
 
   it('criar lança BadRequestException se maxParticipantes não é múltiplo de 10', async () => {
@@ -79,8 +87,32 @@ describe('BolaoService', () => {
       bolaoId: 'b1',
       expiraEm: new Date(Date.now() - 1000),
     });
-    await expect(service.entrarViaConvite('user-1', 'token-expirado')).rejects.toThrow(
-      BadRequestException,
-    );
+    await expect(
+      service.entrarViaConvite({ id: 'user-1', role: 'USER' }, 'token-expirado'),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  it('entrarViaConvite lança ForbiddenException quando janela fechada', async () => {
+    inscricaoMock.assertAberta.mockRejectedValueOnce(new ForbiddenException('Inscrições encerradas.'));
+    await expect(
+      service.entrarViaConvite({ id: 'u1', role: 'USER' }, 'token-valido'),
+    ).rejects.toThrow(ForbiddenException);
+  });
+
+  it('entrarViaConvite passa quando admin', async () => {
+    prismaMock.bolaoConvite.findUnique.mockResolvedValue({ bolaoId: 'b1', expiraEm: null });
+    prismaMock.bolao.findUnique.mockResolvedValue({ id: 'b1', maxParticipantes: 10 });
+    prismaMock.bolaoMembro.count.mockResolvedValue(0);
+    prismaMock.bolaoMembro.create.mockResolvedValue({});
+    prismaMock.ranking.create.mockResolvedValue({});
+    await service.entrarViaConvite({ id: 'admin-1', role: 'ADMIN' }, 'token-valido');
+    expect(inscricaoMock.assertAberta).toHaveBeenCalledWith({ id: 'admin-1', role: 'ADMIN' });
+  });
+
+  it('aprovarMembro lança ForbiddenException quando janela fechada', async () => {
+    inscricaoMock.assertAberta.mockRejectedValueOnce(new ForbiddenException('Inscrições encerradas.'));
+    await expect(
+      service.aprovarMembro({ id: 'mod-1', role: 'USER' }, 'b1', 'u1'),
+    ).rejects.toThrow(ForbiddenException);
   });
 });

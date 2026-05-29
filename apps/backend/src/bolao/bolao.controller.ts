@@ -58,8 +58,8 @@ export class BolaoController {
   }
 
   @Post('entrar/:token')
-  entrarViaConvite(@CurrentUser() user: { id: string }, @Param('token') token: string) {
-    return this.service.entrarViaConvite(user.id, token);
+  entrarViaConvite(@CurrentUser() user: { id: string; role: string }, @Param('token') token: string) {
+    return this.service.entrarViaConvite(user, token);
   }
 
   @Post(':bolaoId/solicitar')
@@ -69,8 +69,12 @@ export class BolaoController {
 
   @UseGuards(BolaoModeradorGuard)
   @Post(':bolaoId/aprovar/:usuarioId')
-  aprovar(@Param('bolaoId') bolaoId: string, @Param('usuarioId') usuarioId: string) {
-    return this.service.aprovarMembro(bolaoId, usuarioId);
+  aprovar(
+    @CurrentUser() user: { id: string; role: string },
+    @Param('bolaoId') bolaoId: string,
+    @Param('usuarioId') usuarioId: string,
+  ) {
+    return this.service.aprovarMembro(user, bolaoId, usuarioId);
   }
 
   @UseGuards(BolaoModeradorGuard)
