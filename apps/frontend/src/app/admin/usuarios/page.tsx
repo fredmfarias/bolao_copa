@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '@/lib/api';
 import { AdminUsuarioRow } from '@/components/AdminUsuarioRow';
+import { AdminCriarUsuarioDialog } from '@/components/AdminCriarUsuarioDialog';
 import { PageSkeleton } from '@/components/PageSkeleton';
 import type { Usuario } from '@/types/api';
 
@@ -14,6 +15,7 @@ export default function AdminUsuariosPage() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading]   = useState(true);
   const [query, setQuery]       = useState('');
+  const [criarOpen, setCriarOpen] = useState(false);
 
   async function carregar() {
     setLoading(true);
@@ -34,7 +36,15 @@ export default function AdminUsuariosPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold">Usuários</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold">Usuários</h1>
+        <button
+          onClick={() => setCriarOpen(true)}
+          className="text-sm px-3 py-2 rounded-lg bg-trovao-gold text-trovao-bg font-semibold hover:bg-yellow-300"
+        >
+          + Novo usuário
+        </button>
+      </div>
 
       <div className="space-y-2">
         <div className="relative">
@@ -79,6 +89,12 @@ export default function AdminUsuariosPage() {
           ))}
         </div>
       )}
+
+      <AdminCriarUsuarioDialog
+        open={criarOpen}
+        onOpenChange={setCriarOpen}
+        onCriado={carregar}
+      />
     </div>
   );
 }
