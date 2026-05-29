@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { api } from '@/lib/api';
+import { AdminAdicionarBolaoDialog } from '@/components/AdminAdicionarBolaoDialog';
 import type { Usuario } from '@/types/api';
 
 interface AdminUsuarioRowProps {
@@ -12,6 +13,7 @@ interface AdminUsuarioRowProps {
 export function AdminUsuarioRow({ usuario, onAtualizado }: AdminUsuarioRowProps) {
   const [atualizando, setAtualizando] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [bolaoOpen, setBolaoOpen] = useState(false);
   const ativo = usuario.ativo ?? true;
 
   async function patch(data: { role?: 'ADMIN' | 'USER'; ativo?: boolean }) {
@@ -82,9 +84,22 @@ export function AdminUsuarioRow({ usuario, onAtualizado }: AdminUsuarioRowProps)
         >
           Reset senha
         </button>
+        <button
+          onClick={() => setBolaoOpen(true)}
+          disabled={atualizando}
+          className="text-xs px-2 py-1 rounded-lg border border-trovao-border text-trovao-muted hover:text-white hover:border-trovao-gold disabled:opacity-50 transition-colors"
+        >
+          + Bolão
+        </button>
       </div>
 
       {msg && <p className="text-trovao-green text-xs">{msg}</p>}
+
+      <AdminAdicionarBolaoDialog
+        open={bolaoOpen}
+        usuarioId={usuario.id}
+        onOpenChange={setBolaoOpen}
+      />
     </div>
   );
 }
