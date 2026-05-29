@@ -114,3 +114,29 @@ export interface UserSearchResult {
   email: string;
   avatarUrl: string | null;
 }
+
+export interface JogoPendente {
+  id: string;
+  dataHora: string;
+  rodada: number;
+  fase: string;
+  pesoPontuacao: number;
+  placarCasa: number;
+  placarVisitante: number;
+  selecaoCasa:      { nome: string; codigo: string; bandeiraSvg: string };
+  selecaoVisitante: { nome: string; codigo: string; bandeiraSvg: string };
+}
+
+export interface RodadaPalpiteItem {
+  jogo: {
+    id: string;
+    dataHora: string;
+    pesoPontuacao: number;
+    placarCasa: number;
+    placarVisitante: number;
+    selecaoCasa:      { nome: string; codigo: string; bandeiraSvg: string };
+    selecaoVisitante: { nome: string; codigo: string; bandeiraSvg: string };
+  };
+  palpite: { placarCasa: number; placarVisitante: number } | null;
+  pontuacao: number;
+}
