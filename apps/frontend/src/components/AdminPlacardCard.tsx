@@ -10,12 +10,16 @@ interface AdminPlacardCardProps {
 }
 
 export function AdminPlacardCard({ jogo, onSalvo }: AdminPlacardCardProps) {
-  const [casa, setCasa] = useState(jogo.placarCasa ?? 0);
-  const [visitante, setVisitante] = useState(jogo.placarVisitante ?? 0);
+  const publicado = jogo.placarCasa !== null;
+  const [casa, setCasa] = useState<number | null>(jogo.placarCasa);
+  const [visitante, setVisitante] = useState<number | null>(jogo.placarVisitante);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState('');
 
+  const podeSalvar = casa !== null && visitante !== null;
+
   async function salvar() {
+    if (!podeSalvar) return;
     setSalvando(true);
     setErro('');
     try {
@@ -28,22 +32,36 @@ export function AdminPlacardCard({ jogo, onSalvo }: AdminPlacardCardProps) {
     }
   }
 
-  function stepper(value: number, onChange: (v: number) => void) {
+  function stepper(value: number | null, onChange: (v: number | null) => void) {
+    const incrementar = () => onChange(value === null ? 0 : value + 1);
+    const decrementar = () => {
+      if (value === null) return;
+      onChange(value === 0 ? null : value - 1);
+    };
     return (
       <div className="flex flex-col items-center gap-1">
-        <button onClick={() => onChange(value + 1)} aria-label="+"
+        <button onClick={incrementar} aria-label="+"
           className="w-9 h-9 bg-trovao-surface rounded-lg text-trovao-gold text-lg font-bold hover:bg-trovao-border">+</button>
-        <span className="text-white text-xl font-bold tabular-nums w-9 text-center">{value}</span>
-        <button onClick={() => onChange(Math.max(0, value - 1))} aria-label="−"
+        <span className="text-white text-xl font-bold tabular-nums w-9 text-center">
+          {value === null ? '-' : value}
+        </span>
+        <button onClick={decrementar} aria-label="−"
           className="w-9 h-9 bg-trovao-surface rounded-lg text-trovao-muted text-lg hover:bg-trovao-border">−</button>
       </div>
     );
   }
 
   return (
-    <div className="bg-trovao-card border border-trovao-border rounded-xl p-4 space-y-3">
-      <div className="text-xs text-trovao-muted text-center">
-        {jogo.fase}{jogo.grupo ? ` · Grupo ${jogo.grupo}` : ''} · R{jogo.rodada}
+    <div className={`bg-trovao-card border rounded-xl p-4 space-y-3 ${publicado ? 'border-trovao-green' : 'border-trovao-border'}`}>
+      <div className="flex items-center justify-center gap-2">
+        <span className="text-xs text-trovao-muted">
+          {jogo.fase}{jogo.grupo ? ` · Grupo ${jogo.grupo}` : ''} · R{jogo.rodada}
+        </span>
+        {publicado && (
+          <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-trovao-green/10 text-trovao-green border border-trovao-green/40">
+            Publicado
+          </span>
+        )}
       </div>
 
       <div className="flex items-center justify-center gap-4">
@@ -58,9 +76,9 @@ export function AdminPlacardCard({ jogo, onSalvo }: AdminPlacardCardProps) {
 
       {erro && <p className="text-trovao-red text-xs text-center">{erro}</p>}
 
-      <button onClick={salvar} disabled={salvando}
+      <button onClick={salvar} disabled={salvando || !podeSalvar}
         className="w-full py-2 bg-trovao-gold text-trovao-base font-bold rounded-lg text-sm disabled:opacity-50">
-        {salvando ? 'Salvando...' : 'Salvar Placar'}
+        {salvando ? 'Salvando...' : publicado ? 'Atualizar Placar' : 'Salvar Placar'}
       </button>
     </div>
   );
