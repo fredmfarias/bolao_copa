@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { BOLAO_GLOBAL_ID } from '@bolao/shared';
+import { InscricaoWindowService } from '../inscricao-window/inscricao-window.service';
 
 @Injectable()
 export class AuthService {
@@ -14,9 +15,12 @@ export class AuthService {
     private jwt: JwtService,
     private config: ConfigService,
     @Inject('MAILER') private mailer: any,
+    private inscricaoWindow: InscricaoWindowService,
   ) {}
 
   async registrar(dto: RegisterDto) {
+    await this.inscricaoWindow.assertAberta();
+
     const existe = await this.prisma.usuario.findUnique({ where: { email: dto.email } });
     if (existe) throw new ConflictException('E-mail já cadastrado.');
 

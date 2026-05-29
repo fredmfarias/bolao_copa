@@ -4,7 +4,8 @@ import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import { InscricaoWindowService } from '../inscricao-window/inscricao-window.service';
 
 const prismaMock = {
   usuario: { findUnique: jest.fn(), create: jest.fn() },
@@ -13,6 +14,7 @@ const prismaMock = {
 };
 
 const mailerMock = { sendMail: jest.fn() };
+const inscricaoMock = { assertAberta: jest.fn() };
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -25,10 +27,12 @@ describe('AuthService', () => {
         { provide: JwtService, useValue: { signAsync: jest.fn().mockResolvedValue('token') } },
         { provide: ConfigService, useValue: { get: jest.fn().mockReturnValue('secret') } },
         { provide: 'MAILER', useValue: mailerMock },
+        { provide: InscricaoWindowService, useValue: inscricaoMock },
       ],
     }).compile();
     service = module.get<AuthService>(AuthService);
     jest.clearAllMocks();
+    inscricaoMock.assertAberta.mockResolvedValue(undefined);
   });
 
   it('registrar lança ConflictException se e-mail já existe', async () => {
@@ -47,6 +51,14 @@ describe('AuthService', () => {
         data: expect.objectContaining({ bolaoId: '00000000-0000-0000-0000-000000000001' }),
       }),
     );
+  });
+
+  it('registrar lança ForbiddenException quando janela está fechada', async () => {
+    inscricaoMock.assertAberta.mockRejectedValueOnce(new ForbiddenException('Inscrições encerradas.'));
+    await expect(
+      service.registrar({ nome: 'Test', email: 'c@c.com', senha: '12345678' }),
+    ).rejects.toThrow(ForbiddenException);
+    expect(prismaMock.usuario.create).not.toHaveBeenCalled();
   });
 
   it('login lança UnauthorizedException se e-mail não existe', async () => {
