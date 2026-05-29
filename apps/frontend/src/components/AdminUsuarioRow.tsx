@@ -99,6 +99,7 @@ export function AdminUsuarioRow({ usuario, onAtualizado }: AdminUsuarioRowProps)
         open={bolaoOpen}
         usuarioId={usuario.id}
         onOpenChange={setBolaoOpen}
+        onAdicionado={onAtualizado}
       />
     </div>
   );

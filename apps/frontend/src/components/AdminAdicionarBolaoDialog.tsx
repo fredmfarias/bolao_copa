@@ -10,9 +10,10 @@ interface Props {
   open: boolean;
   usuarioId: string;
   onOpenChange: (open: boolean) => void;
+  onAdicionado: () => void;
 }
 
-export function AdminAdicionarBolaoDialog({ open, usuarioId, onOpenChange }: Props) {
+export function AdminAdicionarBolaoDialog({ open, usuarioId, onOpenChange, onAdicionado }: Props) {
   const [busca, setBusca] = useState('');
   const [opcoes, setOpcoes] = useState<BolaoOpcao[]>([]);
   const [bolaoId, setBolaoId] = useState<string | null>(null);
@@ -36,6 +37,7 @@ export function AdminAdicionarBolaoDialog({ open, usuarioId, onOpenChange }: Pro
     setLoading(true);
     try {
       await api.post(`/admin/boloes/${bolaoId}/membros`, { usuarioId });
+      onAdicionado();
       onOpenChange(false);
       setBusca(''); setBolaoId(null); setOpcoes([]);
     } catch (err: any) {

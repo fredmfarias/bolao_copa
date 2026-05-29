@@ -17,7 +17,8 @@ beforeEach(() => {
 });
 
 it('submete POST /admin/boloes/:id/membros após selecionar bolão', async () => {
-  render(<AdminAdicionarBolaoDialog open usuarioId="u1" onOpenChange={jest.fn()} />);
+  const onAdicionado = jest.fn();
+  render(<AdminAdicionarBolaoDialog open usuarioId="u1" onOpenChange={jest.fn()} onAdicionado={onAdicionado} />);
 
   fireEvent.change(screen.getByPlaceholderText(/buscar/i), { target: { value: 'Liga' } });
   await waitFor(() => expect(screen.getByText('Liga Trovão')).toBeInTheDocument());
@@ -27,5 +28,6 @@ it('submete POST /admin/boloes/:id/membros após selecionar bolão', async () =>
 
   await waitFor(() => {
     expect(mockPost).toHaveBeenCalledWith('/admin/boloes/b1/membros', { usuarioId: 'u1' });
+    expect(onAdicionado).toHaveBeenCalled();
   });
 });
