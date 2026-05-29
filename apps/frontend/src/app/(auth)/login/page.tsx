@@ -4,6 +4,7 @@ import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
+import { useInscricaoStatus } from '@/hooks/useInscricaoStatus';
 
 function LoginForm() {
   const { login } = useAuth();
@@ -11,6 +12,8 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect') ?? '/jogos';
   const emailConfirmado = searchParams.get('emailConfirmado');
+  const erroQuery = searchParams.get('erro');
+  const { abertas } = useInscricaoStatus();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
@@ -34,6 +37,11 @@ function LoginForm() {
     <div className="min-h-screen flex items-center justify-center">
       <div className="w-full max-w-sm bg-gray-900 rounded-xl p-8 space-y-6">
         <h1 className="text-2xl font-bold text-center text-yellow-400">⚡ Bolão Trovão</h1>
+        {erroQuery === 'cadastros-encerrados' && (
+          <p className="text-red-400 text-sm text-center">
+            Cadastros encerrados a 2h do início da Copa. Procure o administrador para se cadastrar.
+          </p>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           {erro && <p className="text-red-400 text-sm text-center">{erro}</p>}
           {emailConfirmado && (
@@ -58,7 +66,11 @@ function LoginForm() {
         </form>
         <div className="text-center space-y-2 text-sm text-gray-400">
           <Link href="/esqueceu-senha" className="hover:text-white block">Esqueceu a senha?</Link>
-          <Link href="/registrar" className="hover:text-white block">Criar conta</Link>
+          {abertas ? (
+            <Link href="/registrar" className="hover:text-white block">Criar conta</Link>
+          ) : (
+            <span className="block text-gray-600 cursor-not-allowed">Cadastros encerrados</span>
+          )}
           <a href={`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/auth/google`}
             className="block bg-gray-800 border border-gray-700 rounded-lg py-2 hover:bg-gray-700 text-center">
             Entrar com Google
