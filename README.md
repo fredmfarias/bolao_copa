@@ -9,12 +9,12 @@
 - **Grupos (Bolões)** — crie grupos privados com código de convite ou participe do bolão global automático
 - **Palpites** — envie previsões de placar com prazo de 60 min antes do apito inicial; re-envios substituem o palpite anterior
 - **Pontuação automática** — placar exato, acerto de vencedor, empate e outros níveis de acerto computados assincronamente via fila Redis
-- **Ranking por publicação** — participantes veem um snapshot congelado publicado pelo admin; dois modos: **Geral** (acumulado) e **Rodada** (pontos da publicação)
+- **Ranking por publicação** — participantes veem um snapshot congelado publicado pelo admin; dois modos: **Geral** (acumulado) e **Rodada** (seletor por data da publicação, ranking reordenado pela pontuação da rodada e lista de palpites do usuário no expand)
 - **Variação de posição** — seta colorida indicando quantas posições o participante subiu ou caiu em relação à publicação anterior
 - **Gráfico de evolução** — line chart com a trajetória de posição do participante ao longo das rodadas
 - **Notificações push** — alertas via Web Push (PWA) quando partidas começam ou terminam
 - **Login social** — autenticação com Google OAuth ou e-mail/senha
-- **Painel administrativo** — habilitar/desabilitar bolões, gerenciar placares, pré-visualizar ranking (draft ao vivo), publicar rankings globalmente e gerir usuários (ativar/desativar, resetar senha)
+- **Painel administrativo** — habilitar/desabilitar bolões, gerenciar placares, pré-visualizar ranking (draft ao vivo), publicar rankings globalmente (com modal de confirmação listando os jogos da rodada) e gerir usuários com busca por nome/email (ativar/desativar, resetar senha)
 
 ---
 
@@ -239,6 +239,8 @@ O fluxo é em duas etapas — **cálculo ao vivo** e **publicação** — para q
 6. Um único evento (`POST /admin/publicacoes`) marca todos os jogos com placar preenchido como pertencentes à nova publicação (rodada N)
 7. Para cada bolão habilitado × participante é gravado um `RankingSnapshot` com posição, pontuação total, pontos da rodada e variação vs publicação anterior
 8. Participantes passam a ver o snapshot congelado; correções de placar posteriores só aparecem na próxima publicação
+
+> O botão "Publicar rodada" no admin só fica habilitado quando há jogo com placar preenchido e ainda sem publicação. A confirmação prévia exibe os jogos e placares que entrarão na rodada.
 
 > [!IMPORTANT]
 > O Redis é um componente **crítico** do sistema. Sem ele, o Bull não consegue processar as filas e os rankings não são atualizados. Certifique-se de que `REDIS_HOST` aponta para o serviço correto (dentro do Docker, use o nome do serviço `redis`).
