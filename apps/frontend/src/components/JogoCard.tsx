@@ -5,10 +5,16 @@ import { ScoreDisplay } from '@/components/ScoreDisplay';
 import { getEstadoAposta, formatDataAposta, type EstadoAposta } from '@/lib/jogoEstado';
 
 const ESTADO_BORDER: Record<EstadoAposta, string> = {
-  aberto:    'border-trovao-border hover:border-trovao-green/40',
-  salvo:     'border-trovao-green',
-  incompleto:'border-trovao-border opacity-60',
-  fechado:   'border-trovao-border opacity-60',
+  aberto:        'border-trovao-border hover:border-trovao-green/40',
+  salvo:         'border-trovao-green',
+  aguardando:    'border-trovao-border opacity-85',
+  finalizado:    'border-trovao-border',
+  'sem-palpite': 'border-trovao-border opacity-85',
+};
+
+const ESTADO_BADGE: Partial<Record<EstadoAposta, string>> = {
+  aguardando:    'Aguardando placar',
+  'sem-palpite': 'Sem palpite',
 };
 
 const PESO_BADGE: Record<number, string> = {
@@ -33,8 +39,13 @@ export function JogoCard({ jogo, aposta, onApostar, palpitesHref }: JogoCardProp
   const estado = getEstadoAposta(jogo, aposta);
   const temResultado = jogo.placarCasa !== null && jogo.placarVisitante !== null;
 
+  const borderClass = estado === 'finalizado' && (aposta?.pontuacao ?? 0) > 0
+    ? 'border-trovao-green/40'
+    : ESTADO_BORDER[estado];
+  const badge = ESTADO_BADGE[estado];
+
   return (
-    <div className={`bg-trovao-card border rounded-xl p-4 space-y-2 transition-colors ${ESTADO_BORDER[estado]}`}>
+    <div className={`bg-trovao-card border rounded-xl p-4 space-y-2 transition-colors ${borderClass}`}>
       {/* Header: título + peso + hora + palpites */}
       <div className="flex justify-between items-center gap-2">
         <p className="flex-1 text-xs font-semibold uppercase tracking-wide text-white/90 leading-tight">
@@ -42,22 +53,24 @@ export function JogoCard({ jogo, aposta, onApostar, palpitesHref }: JogoCardProp
         </p>
         <div className="flex items-center gap-2 text-xs text-trovao-muted shrink-0">
           {palpitesHref && (
-            <Link
-              href={palpitesHref}
-              className="text-trovao-gold text-[10px] font-bold hover:underline shrink-0"
-            >
+            <Link href={palpitesHref}
+              className="text-trovao-gold text-[10px] font-bold hover:underline shrink-0">
               Palpites →
             </Link>
           )}
-          <span
-            title={`Esse jogo tem peso ×${jogo.pesoPontuacao}`}
+          <span title={`Esse jogo tem peso ×${jogo.pesoPontuacao}`}
             className={`cursor-help rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
               PESO_BADGE[jogo.pesoPontuacao] ?? PESO_BADGE[4]
-            }`}
-          >
+            }`}>
             ×{jogo.pesoPontuacao}
           </span>
-          <span>{formatHora(jogo.dataHora)}</span>
+          {badge ? (
+            <span className="rounded-full bg-trovao-surface px-2 py-0.5 text-[10px] font-semibold text-trovao-muted">
+              {badge}
+            </span>
+          ) : (
+            <span>{formatHora(jogo.dataHora)}</span>
+          )}
         </div>
       </div>
 
@@ -100,7 +113,7 @@ export function JogoCard({ jogo, aposta, onApostar, palpitesHref }: JogoCardProp
       {(temResultado || aposta?.pontuacao != null) && (
         <div className="border-t border-trovao-border pt-2 flex items-center justify-between text-xs">
           <span className="text-trovao-muted">Placar:</span>
-          <span className="text-white font-mono font-semibold">
+          <span className="text-white font-mono font-semibold text-sm">
             {temResultado ? `${jogo.placarCasa} × ${jogo.placarVisitante}` : '—'}
           </span>
           {aposta?.pontuacao != null && (

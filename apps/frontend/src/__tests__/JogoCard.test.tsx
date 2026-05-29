@@ -41,21 +41,35 @@ it('salvo — palpite central, data/hora da aposta e botão Editar', () => {
   expect(screen.getByRole('button', { name: /editar/i })).toBeInTheDocument();
 });
 
-it('incompleto — sem botão, sem texto "prazo encerrado"', () => {
+it('sem-palpite — badge "Sem palpite" e card atenuado', () => {
   render(<JogoCard jogo={{ ...jogoBase, dataHora: HORA_PASSADA }} onApostar={jest.fn()} />);
+  expect(screen.getByText(/sem palpite/i)).toBeInTheDocument();
   expect(screen.queryByRole('button')).not.toBeInTheDocument();
-  expect(screen.queryByText(/prazo encerrado/i)).not.toBeInTheDocument();
-  expect(screen.getByText('— : —')).toBeInTheDocument();
 });
 
-it('fechado com resultado — rodapé "Placar" com placar real e pontuação', () => {
+it('aguardando — badge "Aguardando placar" quando há aposta mas não há placar', () => {
+  const jogo = { ...jogoBase, dataHora: HORA_PASSADA };
+  render(<JogoCard jogo={jogo} aposta={{ ...apostaExemplo, jogo }} onApostar={jest.fn()} />);
+  expect(screen.getByText(/aguardando placar/i)).toBeInTheDocument();
+});
+
+it('finalizado — rodapé "Placar" com placar real e pontuação, opacidade 100%', () => {
   const jogoComPlacar = { ...jogoBase, dataHora: HORA_PASSADA, placarCasa: 1, placarVisitante: 1 };
   const apostaPontuada = { ...apostaExemplo, jogo: jogoComPlacar, pontuacao: 5 };
-  render(<JogoCard jogo={jogoComPlacar} aposta={apostaPontuada} onApostar={jest.fn()} />);
+  const { container } = render(<JogoCard jogo={jogoComPlacar} aposta={apostaPontuada} onApostar={jest.fn()} />);
   expect(screen.getByText('Placar:')).toBeInTheDocument();
   expect(screen.getByText('1 × 1')).toBeInTheDocument();
   expect(screen.getByText('+5 pts')).toBeInTheDocument();
-  expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  const card = container.firstChild as HTMLElement;
+  expect(card.className).not.toMatch(/opacity-60|opacity-85/);
+});
+
+it('finalizado com acerto — borda verde-clara', () => {
+  const jogoComPlacar = { ...jogoBase, dataHora: HORA_PASSADA, placarCasa: 1, placarVisitante: 1 };
+  const apostaPontuada = { ...apostaExemplo, jogo: jogoComPlacar, pontuacao: 5 };
+  const { container } = render(<JogoCard jogo={jogoComPlacar} aposta={apostaPontuada} onApostar={jest.fn()} />);
+  const card = container.firstChild as HTMLElement;
+  expect(card.className).toMatch(/trovao-green/);
 });
 
 it('sem resultado — não mostra rodapé "Placar"', () => {

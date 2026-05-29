@@ -1,7 +1,9 @@
 import type { Jogo, Aposta } from '@/types/api';
 import { MINUTOS_PRAZO_APOSTA } from '@bolao/shared';
 
-export type EstadoAposta = 'aberto' | 'salvo' | 'incompleto' | 'fechado';
+export type EstadoAposta =
+  | 'aberto' | 'salvo' | 'aguardando' | 'finalizado' | 'sem-palpite';
+
 export type FiltroJogo = 'Todos' | 'Pendentes' | 'Apostados' | 'Encerrados';
 
 export function prazoEncerrado(jogo: Jogo): boolean {
@@ -10,23 +12,21 @@ export function prazoEncerrado(jogo: Jogo): boolean {
 }
 
 export function getEstadoAposta(jogo: Jogo, aposta?: Aposta): EstadoAposta {
-  const estaFechado = prazoEncerrado(jogo);
-  if (!estaFechado && !aposta) return 'aberto';
-  if (!estaFechado && aposta) return 'salvo';
-  if (estaFechado && aposta) return 'fechado';
-  return 'incompleto';
+  const prazo = prazoEncerrado(jogo);
+  const temPlacar = jogo.placarCasa !== null && jogo.placarVisitante !== null;
+  if (!prazo && !aposta) return 'aberto';
+  if (!prazo && aposta)  return 'salvo';
+  if (!aposta)           return 'sem-palpite';
+  if (temPlacar)         return 'finalizado';
+  return 'aguardando';
 }
 
 export function jogoNoFiltro(estado: EstadoAposta, filtro: FiltroJogo): boolean {
   switch (filtro) {
-    case 'Todos':
-      return true;
-    case 'Pendentes':
-      return estado === 'aberto';
-    case 'Apostados':
-      return estado === 'salvo';
-    case 'Encerrados':
-      return estado === 'fechado' || estado === 'incompleto';
+    case 'Todos':      return true;
+    case 'Pendentes':  return estado === 'aberto';
+    case 'Apostados':  return estado === 'salvo';
+    case 'Encerrados': return estado === 'aguardando' || estado === 'finalizado' || estado === 'sem-palpite';
   }
 }
 
