@@ -22,7 +22,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   projects: [
-    { name: 'api', testMatch: /tests[\\/](authz|aposta|ranking|notificacoes|bolao|resiliencia)[\\/].*\.api\.spec\.ts/ },
+    { name: 'api', testMatch: /tests[\\/](auth|authz|aposta|ranking|notificacoes|bolao|resiliencia)[\\/].*\.api\.spec\.ts/ },
     {
       name: 'ui-chromium',
       use: { ...devices['Desktop Chrome'] },
