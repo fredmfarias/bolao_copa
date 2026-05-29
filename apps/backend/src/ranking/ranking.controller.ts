@@ -26,4 +26,13 @@ export class RankingController {
   ) {
     return this.service.evolucao(bolaoId, usuarioId ?? user.id);
   }
+
+  @Get('publicacoes/:numero/usuarios/:usuarioId/apostas')
+  palpitesDaRodada(
+    @Param('bolaoId') bolaoId: string,
+    @Param('numero') numero: string,
+    @Param('usuarioId') usuarioId: string,
+  ) {
+    return this.service.palpitesDaRodada(bolaoId, Number(numero), usuarioId);
+  }
 }

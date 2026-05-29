@@ -43,6 +43,8 @@ describe('RankingService leitura de snapshot', () => {
   const prismaMock = {
     publicacao: { findFirst: jest.fn(), findUnique: jest.fn(), findMany: jest.fn() },
     rankingSnapshot: { findMany: jest.fn() },
+    jogo: { findMany: jest.fn() },
+    aposta: { findMany: jest.fn() },
   };
   let service: RankingService;
 
@@ -111,6 +113,59 @@ describe('RankingService leitura de snapshot', () => {
       expect(prismaMock.rankingSnapshot.findMany).toHaveBeenCalledWith(
         expect.objectContaining({ where: { bolaoId: 'b1', usuarioId: 'u1' } }),
       );
+    });
+  });
+
+  describe('palpitesDaRodada', () => {
+    it('retorna jogos da publicação com palpites (ou null) e pontuação', async () => {
+      prismaMock.publicacao.findUnique.mockResolvedValue({ id: 'pub-3', numero: 3 });
+      prismaMock.jogo.findMany.mockResolvedValue([
+        {
+          id: 'j1', dataHora: new Date('2026-06-11T16:00:00Z'),
+          pesoPontuacao: 2, placarCasa: 2, placarVisitante: 1,
+          selecaoCasa:      { nome: 'Brasil',    codigo: 'BRA', bandeiraSvg: '<svg></svg>' },
+          selecaoVisitante: { nome: 'Argentina', codigo: 'ARG', bandeiraSvg: '<svg></svg>' },
+        },
+        {
+          id: 'j2', dataHora: new Date('2026-06-11T20:00:00Z'),
+          pesoPontuacao: 1, placarCasa: 0, placarVisitante: 0,
+          selecaoCasa:      { nome: 'Espanha', codigo: 'ESP', bandeiraSvg: '<svg></svg>' },
+          selecaoVisitante: { nome: 'Portugal', codigo: 'POR', bandeiraSvg: '<svg></svg>' },
+        },
+      ]);
+      prismaMock.aposta.findMany.mockResolvedValue([
+        { jogoId: 'j1', placarCasa: 2, placarVisitante: 1, pontuacao: 12 },
+        // j2 sem aposta
+      ]);
+
+      const r = await service.palpitesDaRodada('b1', 3, 'u1');
+      expect(prismaMock.publicacao.findUnique).toHaveBeenCalledWith({ where: { numero: 3 } });
+      expect(prismaMock.jogo.findMany).toHaveBeenCalledWith(expect.objectContaining({
+        where: { publicacaoId: 'pub-3' },
+        orderBy: { dataHora: 'asc' },
+      }));
+      expect(prismaMock.aposta.findMany).toHaveBeenCalledWith({
+        where: { usuarioId: 'u1', jogoId: { in: ['j1', 'j2'] } },
+        select: { jogoId: true, placarCasa: true, placarVisitante: true, pontuacao: true },
+      });
+      expect(r).toEqual([
+        {
+          jogo: expect.objectContaining({ id: 'j1', pesoPontuacao: 2 }),
+          palpite: { placarCasa: 2, placarVisitante: 1 },
+          pontuacao: 12,
+        },
+        {
+          jogo: expect.objectContaining({ id: 'j2' }),
+          palpite: null,
+          pontuacao: 0,
+        },
+      ]);
+    });
+
+    it('retorna lista vazia se publicação não existe', async () => {
+      prismaMock.publicacao.findUnique.mockResolvedValue(null);
+      const r = await service.palpitesDaRodada('b1', 99, 'u1');
+      expect(r).toEqual([]);
     });
   });
 });

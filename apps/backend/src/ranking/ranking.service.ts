@@ -91,6 +91,39 @@ export class RankingService {
     return snapshots.map((s) => ({ numero: s.publicacao.numero, posicao: s.posicao }));
   }
 
+  async palpitesDaRodada(bolaoId: string, numero: number, usuarioId: string) {
+    // bolaoId é mantido para autorização futura/symmetry; visibilidade segue padrão das apostas.
+    const publicacao = await this.prisma.publicacao.findUnique({ where: { numero } });
+    if (!publicacao) return [];
+
+    const jogos = await this.prisma.jogo.findMany({
+      where: { publicacaoId: publicacao.id },
+      orderBy: { dataHora: 'asc' },
+      select: {
+        id: true, dataHora: true, pesoPontuacao: true,
+        placarCasa: true, placarVisitante: true,
+        selecaoCasa:      { select: { nome: true, codigo: true, bandeiraSvg: true } },
+        selecaoVisitante: { select: { nome: true, codigo: true, bandeiraSvg: true } },
+      },
+    });
+    if (jogos.length === 0) return [];
+
+    const apostas = await this.prisma.aposta.findMany({
+      where: { usuarioId, jogoId: { in: jogos.map((j) => j.id) } },
+      select: { jogoId: true, placarCasa: true, placarVisitante: true, pontuacao: true },
+    });
+    const apostaPorJogo = new Map(apostas.map((a) => [a.jogoId, a]));
+
+    return jogos.map((jogo) => {
+      const a = apostaPorJogo.get(jogo.id);
+      return {
+        jogo,
+        palpite: a ? { placarCasa: a.placarCasa, placarVisitante: a.placarVisitante } : null,
+        pontuacao: a?.pontuacao ?? 0,
+      };
+    });
+  }
+
   async recalcularRankingBolao(bolaoId: string) {
     const membros = await this.prisma.bolaoMembro.findMany({
       where: { bolaoId, usuario: { ativo: true } },
