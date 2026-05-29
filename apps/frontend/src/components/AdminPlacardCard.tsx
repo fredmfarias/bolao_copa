@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { api } from '@/lib/api';
+import { SelecaoAvatar } from '@/components/SelecaoAvatar';
 import type { Jogo } from '@/types/api';
 
 interface AdminPlacardCardProps {
@@ -64,14 +65,28 @@ export function AdminPlacardCard({ jogo, onSalvo }: AdminPlacardCardProps) {
         )}
       </div>
 
-      <div className="flex items-center justify-center gap-4">
-        <p className="text-white text-sm font-semibold w-16 text-right">{jogo.selecaoCasa.codigo}</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-white/90 text-center leading-tight">
+        {jogo.selecaoCasa.nome} × {jogo.selecaoVisitante.nome}
+      </p>
+
+      <div className="flex items-center justify-center gap-3">
+        <div className="flex flex-col items-center gap-1 w-20">
+          <div className="rounded-md bg-trovao-surface p-1 ring-1 ring-trovao-border">
+            <SelecaoAvatar nome={jogo.selecaoCasa.nome} bandeiraSvg={jogo.selecaoCasa.bandeiraSvg} size="lg" shape="rect" />
+          </div>
+          <p className="text-xs font-semibold text-white">{jogo.selecaoCasa.codigo}</p>
+        </div>
         <div className="flex items-center gap-3">
           {stepper(casa, setCasa)}
           <span className="text-trovao-muted text-lg">×</span>
           {stepper(visitante, setVisitante)}
         </div>
-        <p className="text-white text-sm font-semibold w-16">{jogo.selecaoVisitante.codigo}</p>
+        <div className="flex flex-col items-center gap-1 w-20">
+          <div className="rounded-md bg-trovao-surface p-1 ring-1 ring-trovao-border">
+            <SelecaoAvatar nome={jogo.selecaoVisitante.nome} bandeiraSvg={jogo.selecaoVisitante.bandeiraSvg} size="lg" shape="rect" />
+          </div>
+          <p className="text-xs font-semibold text-white">{jogo.selecaoVisitante.codigo}</p>
+        </div>
       </div>
 
       {erro && <p className="text-trovao-red text-xs text-center">{erro}</p>}

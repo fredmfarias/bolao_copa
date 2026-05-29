@@ -19,10 +19,13 @@ const jogoPublicado: Jogo = { ...jogo, placarCasa: 2, placarVisitante: 1 };
 
 beforeEach(() => mockPatch.mockClear());
 
-it('exibe nomes das seleções', () => {
+it('exibe bandeira, nome e código das seleções', () => {
   render(<AdminPlacardCard jogo={jogo} onSalvo={jest.fn()} />);
   expect(screen.getByText('BRA')).toBeInTheDocument();
   expect(screen.getByText('ARG')).toBeInTheDocument();
+  expect(screen.getByText('Brasil × Argentina')).toBeInTheDocument();
+  expect(screen.getByAltText('Brasil')).toBeInTheDocument();
+  expect(screen.getByAltText('Argentina')).toBeInTheDocument();
 });
 
 it('mostra "-" em cada placar quando ainda não publicado', () => {
