@@ -1,40 +1,58 @@
 'use client';
 
 import { useState } from 'react';
-import type { RankingEntry, EvolucaoPonto } from '@/types/api';
+import type { RankingEntry, EvolucaoPonto, RodadaPalpiteItem } from '@/types/api';
 import { api } from '@/lib/api';
 import { RankingEvolucao } from './RankingEvolucao';
+import { RankingPalpitesRodada } from './RankingPalpitesRodada';
 
 interface RankingRowProps {
   entry: RankingEntry;
   myId?: string;
   bolaoId: string;
+  posicaoRodada?: number;
+  publicacaoNumero?: number;
 }
 
 const ACERTOS = [
-  { label: 'Placar exato',                      key: 'acertosPlacarExato'    },
+  { label: 'Placar exato',                       key: 'acertosPlacarExato'    },
   { label: 'Placar do vencedor correto',         key: 'acertosPlacarVencedor' },
   { label: 'Empate correto (sem placar exato)',  key: 'acertosEmpate'         },
   { label: 'Placar do perdedor correto',         key: 'acertosPlacarPerdedor' },
   { label: 'Acertou apenas o vencedor',          key: 'acertosGanhador'       },
-  { label: 'Apostas feitas',                     key: 'apostasPostadas'       },
+  { label: 'Acertou nada',                       key: 'acertosNada'           },
 ] as const;
 
-export function RankingRow({ entry, myId, bolaoId }: RankingRowProps) {
+export function RankingRow({ entry, myId, bolaoId, posicaoRodada, publicacaoNumero }: RankingRowProps) {
   const [expandido, setExpandido] = useState(false);
   const [evolucao, setEvolucao] = useState<EvolucaoPonto[] | null>(null);
-  const [loadingEv, setLoadingEv] = useState(false);
+  const [palpites, setPalpites] = useState<RodadaPalpiteItem[] | null>(null);
+  const [loading, setLoading] = useState(false);
   const isMe = entry.usuarioId === myId;
+  const modoRodada = publicacaoNumero !== undefined;
 
   const handleExpand = () => {
     const abrir = !expandido;
     setExpandido(abrir);
-    if (abrir && evolucao === null) {
-      setLoadingEv(true);
+    if (!abrir) return;
+
+    if (modoRodada && palpites === null) {
+      setLoading(true);
+      api.get<RodadaPalpiteItem[]>(
+        `/boloes/${bolaoId}/ranking/publicacoes/${publicacaoNumero}/usuarios/${entry.usuarioId}/apostas`,
+      )
+        .then(setPalpites)
+        .catch(() => setPalpites([]))
+        .finally(() => setLoading(false));
+      return;
+    }
+
+    if (!modoRodada && evolucao === null) {
+      setLoading(true);
       api.get<EvolucaoPonto[]>(`/boloes/${bolaoId}/ranking/evolucao?usuarioId=${entry.usuarioId}`)
         .then(setEvolucao)
         .catch(() => setEvolucao([]))
-        .finally(() => setLoadingEv(false));
+        .finally(() => setLoading(false));
     }
   };
 
@@ -42,11 +60,13 @@ export function RankingRow({ entry, myId, bolaoId }: RankingRowProps) {
     <div className={`rounded-xl border transition-colors ${
       isMe ? 'border-trovao-gold/50 bg-trovao-gold/5' : 'border-trovao-border bg-trovao-card'
     }`}>
-      <button
-        onClick={handleExpand}
-        className="w-full flex items-center gap-3 px-4 py-3 text-left"
-      >
-        <span className="text-trovao-muted text-sm w-7 flex-shrink-0">{entry.posicao}º</span>
+      <button onClick={handleExpand} className="w-full flex items-center gap-3 px-4 py-3 text-left">
+        <span className="text-trovao-muted text-sm w-7 flex-shrink-0">
+          {posicaoRodada !== undefined ? `${posicaoRodada}º` : `${entry.posicao}º`}
+        </span>
+        {posicaoRodada !== undefined && (
+          <span className="text-trovao-muted text-[10px] flex-shrink-0">(P {entry.posicao}º)</span>
+        )}
 
         {entry.usuario.avatarUrl ? (
           <img src={entry.usuario.avatarUrl} alt={entry.usuario.nome}
@@ -79,20 +99,24 @@ export function RankingRow({ entry, myId, bolaoId }: RankingRowProps) {
 
       {expandido && (
         <div className="px-4 pb-3 border-t border-trovao-border/50 pt-3 space-y-3">
-          <div className="grid grid-cols-2 gap-2">
-            {ACERTOS.map(({ label, key }) => (
-              <div key={key} className="flex justify-between text-xs">
-                <span className="text-trovao-muted">{label}</span>
-                <span className="text-white font-semibold tabular-nums">{entry[key]}</span>
+          {modoRodada ? (
+            <>
+              {loading && <p className="text-trovao-muted text-xs text-center py-2">Carregando palpites...</p>}
+              {!loading && palpites && <RankingPalpitesRodada items={palpites} />}
+            </>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-2">
+                {ACERTOS.map(({ label, key }) => (
+                  <div key={key} className="flex justify-between text-xs">
+                    <span className="text-trovao-muted">{label}</span>
+                    <span className="text-white font-semibold tabular-nums">{entry[key]}</span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-
-          {loadingEv && (
-            <p className="text-trovao-muted text-xs text-center py-2">Carregando evolução...</p>
-          )}
-          {!loadingEv && evolucao && evolucao.length > 0 && (
-            <RankingEvolucao dados={evolucao} />
+              {loading && <p className="text-trovao-muted text-xs text-center py-2">Carregando evolução...</p>}
+              {!loading && evolucao && evolucao.length > 0 && <RankingEvolucao dados={evolucao} />}
+            </>
           )}
         </div>
       )}
