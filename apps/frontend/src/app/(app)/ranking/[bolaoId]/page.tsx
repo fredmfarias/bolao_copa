@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { api } from '@/lib/api';
@@ -9,6 +9,7 @@ import { RankingPodium } from '@/components/RankingPodium';
 import { RankingRow } from '@/components/RankingRow';
 import { PageSkeleton } from '@/components/PageSkeleton';
 import { EmptyState } from '@/components/EmptyState';
+import { formatDataPublicacao } from '@/lib/dataFormat';
 import type { Bolao, RankingEntry, PublicacaoResumo } from '@/types/api';
 
 type Aba = 'geral' | 'rodada';
@@ -50,9 +51,16 @@ export default function RankingPage() {
       .catch(() => setRanking([]));
   }, [publicacaoSel, bolaoId, aba]);
 
-  const ordenado = aba === 'rodada'
-    ? [...ranking].sort((a, b) => b.pontuacaoRodada - a.pontuacaoRodada)
-    : ranking;
+  const ordenadoRodada = useMemo(() => {
+    if (aba !== 'rodada') return [];
+    return [...ranking]
+      .sort((a, b) => {
+        if (b.pontuacaoRodada !== a.pontuacaoRodada) return b.pontuacaoRodada - a.pontuacaoRodada;
+        if (b.pontuacaoTotal !== a.pontuacaoTotal) return b.pontuacaoTotal - a.pontuacaoTotal;
+        return a.usuario.nome.localeCompare(b.usuario.nome);
+      })
+      .map((entry, idx) => ({ entry, posicaoRodada: idx + 1 }));
+  }, [aba, ranking]);
 
   return (
     <div className="space-y-4">
@@ -89,40 +97,49 @@ export default function RankingPage() {
               </button>
             </div>
             {aba === 'rodada' && publicacoes.length > 0 && (
-              <select
-                value={publicacaoSel ?? ''}
-                onChange={(e) => setPublicacaoSel(Number(e.target.value))}
-                className="bg-trovao-surface border border-trovao-border rounded-lg text-sm px-2 py-1 text-white"
-              >
-                {publicacoes.map((p) => (
-                  <option key={p.numero} value={p.numero}>Rodada {p.numero}</option>
-                ))}
-              </select>
+              <div className="flex flex-col items-end gap-0.5">
+                <select
+                  value={publicacaoSel ?? ''}
+                  onChange={(e) => setPublicacaoSel(Number(e.target.value))}
+                  className="bg-trovao-surface border border-trovao-border rounded-lg text-sm px-2 py-1 text-white"
+                >
+                  {publicacoes.map((p) => (
+                    <option key={p.numero} value={p.numero}>{formatDataPublicacao(p.publicadoEm)}</option>
+                  ))}
+                </select>
+                <p className="text-trovao-muted text-[10px] leading-tight">
+                  Data da publicação · pode diferir da data dos jogos
+                </p>
+              </div>
             )}
           </div>
 
           {aba === 'geral' && (
-            <RankingPodium ranking={ordenado} myId={user?.id} />
+            <RankingPodium ranking={ranking} myId={user?.id} />
           )}
 
           {aba === 'rodada' && (
             <RankingPodium
-              ranking={ordenado.map(e => ({ ...e, pontuacaoTotal: e.pontuacaoRodada }))}
+              ranking={ordenadoRodada.map(({ entry }) => ({ ...entry, pontuacaoTotal: entry.pontuacaoRodada }))}
               myId={user?.id}
             />
           )}
 
           <div className="space-y-2 mt-4">
-            {ordenado.map((entry) => (
-              <RankingRow
-                key={entry.id}
-                entry={aba === 'rodada'
-                  ? { ...entry, pontuacaoTotal: entry.pontuacaoRodada, posicoesGanhas: 0 }
-                  : entry}
-                myId={user?.id}
-                bolaoId={bolaoId}
-              />
-            ))}
+            {aba === 'geral'
+              ? ranking.map((entry) => (
+                  <RankingRow key={entry.id} entry={entry} myId={user?.id} bolaoId={bolaoId} />
+                ))
+              : ordenadoRodada.map(({ entry, posicaoRodada }) => (
+                  <RankingRow
+                    key={entry.id}
+                    entry={{ ...entry, pontuacaoTotal: entry.pontuacaoRodada, posicoesGanhas: 0 }}
+                    myId={user?.id}
+                    bolaoId={bolaoId}
+                    posicaoRodada={posicaoRodada}
+                    publicacaoNumero={publicacaoSel ?? undefined}
+                  />
+                ))}
           </div>
         </>
       )}
