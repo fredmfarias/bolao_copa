@@ -39,7 +39,7 @@ async function main() {
     { nivel: 1, descricao: 'Placar exato',                       pontos: 10 },
     { nivel: 2, descricao: 'Placar do vencedor correto',         pontos: 6  },
     { nivel: 3, descricao: 'Empate correto (sem placar exato)',  pontos: 5  },
-    { nivel: 4, descricao: 'Placar do perdedor correto',         pontos: 3  },
+    { nivel: 4, descricao: 'Placar do perdedor correto',         pontos: 4  },
     { nivel: 5, descricao: 'Acertou apenas o vencedor',          pontos: 2  },
   ];
   for (const n of niveis) {
