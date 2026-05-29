@@ -6,6 +6,7 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { InscricaoWindowService } from '../inscricao-window/inscricao-window.service';
 import { BOLAO_GLOBAL_ID } from '@bolao/shared';
 
 const REFRESH_COOKIE = {
@@ -17,7 +18,20 @@ const REFRESH_COOKIE = {
 
 @Controller('auth')
 export class AuthController {
-  constructor(private auth: AuthService, private prisma: PrismaService) {}
+  constructor(
+    private auth: AuthService,
+    private prisma: PrismaService,
+    private inscricaoWindow: InscricaoWindowService,
+  ) {}
+
+  @Get('inscricoes/status')
+  async statusInscricoes() {
+    const status = await this.inscricaoWindow.getStatus();
+    return {
+      abertas: status.abertas,
+      dataCorte: status.dataCorte?.toISOString() ?? null,
+    };
+  }
 
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('registrar')
