@@ -85,6 +85,19 @@ export class AdminService {
     });
   }
 
+  async listarPublicacaoPendente() {
+    return this.prisma.jogo.findMany({
+      where: { placarCasa: { not: null }, publicacaoId: null },
+      orderBy: { dataHora: 'asc' },
+      select: {
+        id: true, dataHora: true, rodada: true, fase: true,
+        pesoPontuacao: true, placarCasa: true, placarVisitante: true,
+        selecaoCasa:      { select: { nome: true, codigo: true, bandeiraSvg: true } },
+        selecaoVisitante: { select: { nome: true, codigo: true, bandeiraSvg: true } },
+      },
+    });
+  }
+
   async resetarSenha(id: string) {
     const usuario = await this.prisma.usuario.findUnique({ where: { id } });
     if (!usuario) throw new NotFoundException('Usuário não encontrado.');

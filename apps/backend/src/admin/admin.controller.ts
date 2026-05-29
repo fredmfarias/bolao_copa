@@ -21,6 +21,11 @@ export class AdminController {
     return this.service.getRankingDraft(bolaoId);
   }
 
+  @Get('publicacoes/pendente')
+  listarPublicacaoPendente() {
+    return this.service.listarPublicacaoPendente();
+  }
+
   @Get('usuarios')
   listarUsuarios() {
     return this.service.listarUsuarios();
