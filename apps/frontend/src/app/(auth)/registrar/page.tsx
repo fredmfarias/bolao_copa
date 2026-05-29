@@ -4,9 +4,11 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import { useInscricaoStatus } from '@/hooks/useInscricaoStatus';
 
 export default function RegistrarPage() {
   const router = useRouter();
+  const { abertas } = useInscricaoStatus();
   const [form, setForm] = useState({ nome: '', email: '', senha: '' });
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState('');
@@ -25,6 +27,17 @@ export default function RegistrarPage() {
       setLoading(false);
     }
   }
+
+  if (!abertas) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="bg-gray-900 rounded-xl p-8 text-center max-w-sm space-y-4">
+        <p className="text-red-400">
+          Cadastros encerrados a 2h do início da Copa. Procure o administrador para se cadastrar.
+        </p>
+        <Link href="/login" className="text-yellow-400 hover:underline block">Voltar ao login</Link>
+      </div>
+    </div>
+  );
 
   if (sucesso) return (
     <div className="min-h-screen flex items-center justify-center">
