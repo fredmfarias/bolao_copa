@@ -1,7 +1,7 @@
 # Corte de inscrições antes da Copa
 
 Data: 2026-05-29
-Status: aprovado para implementação
+Status: implementado (atualizado retroativamente com decisões da execução)
 
 ## Contexto e objetivos
 
@@ -23,7 +23,8 @@ Princípios:
 
 - **Constante compartilhada**: `HORAS_CORTE_INSCRICAO = 2` em `packages/shared/src/enums.ts`. Importada por backend e (eventualmente) frontend.
 - **Banco sem jogo cadastrado**: `abertas = true`. Não há calendário; corte não é computável.
-- **Cache**: `getStatus()` mantém resultado em memória por 60s. Aceita drift de até 1 min entre instâncias do backend — irrelevante para um corte de 2h.
+- **Cache**: `getStatus()` mantém resultado em memória por 60s. Aceita drift de até 1 min entre instâncias do backend — irrelevante para um corte de 2h. Invalidável manualmente via `POST /admin/inscricoes/cache/clear` (útil quando admin reagenda o primeiro jogo).
+- **Singleton garantido**: `InscricaoWindowModule` é `@Global()` e registrado uma única vez em `AppModule`. Esta foi uma correção encontrada na execução — quando cada módulo importava separadamente, NestJS criava instâncias por consumidor (cada uma com seu próprio cache), o que quebraria o invalidador.
 - **ADMIN bypassa sempre**, em qualquer endpoint que consulta o service.
 
 ## Seção 1 — Backend: `InscricaoWindowService`
@@ -39,7 +40,7 @@ inscricao-window/
 └── inscricao-window.service.spec.ts
 ```
 
-`InscricaoWindowModule` exporta o service e importa `PrismaModule`. Adicionado aos imports de `AuthModule` e `BolaoModule`. `AdminModule` não precisa importar — admin bypassa, não chama `assertAberta`.
+`InscricaoWindowModule` é decorado com `@Global()`, exporta o service e importa `PrismaModule`. Registrado **uma única vez em `AppModule`** (`apps/backend/src/app.module.ts`). Os módulos consumidores (`AuthModule`, `BolaoModule`, `AdminModule`) NÃO importam explicitamente — receberiam instâncias separadas via DI scope local, o que invalidaria o cache. `AdminModule` consome o service para o endpoint de cache clear.
 
 ### API do service
 
@@ -53,6 +54,7 @@ type InscricaoStatus = {
 class InscricaoWindowService {
   async getStatus(): Promise<InscricaoStatus>;
   async assertAberta(user?: { role?: string }): Promise<void>;
+  clearCache(): void; // invalida cache em memória (usado pelo endpoint admin)
 }
 ```
 
@@ -78,7 +80,7 @@ return {
 
 ### Cache
 
-Membro privado `cache: { value: InscricaoStatus; expiresAt: number } | null = null`. Cada chamada de `getStatus` verifica `cache?.expiresAt > Date.now()`; senão recomputa e seta `expiresAt = Date.now() + 60_000`. Sem invalidação manual.
+Membro privado `cache: { value: InscricaoStatus; expiresAt: number } | null = null`. Cada chamada de `getStatus` verifica `cache?.expiresAt > Date.now()`; senão recomputa e seta `expiresAt = Date.now() + 60_000`. `clearCache()` zera para `null` — próxima chamada recomputa.
 
 ## Seção 2 — Backend: endpoints novos e existentes
 
@@ -160,6 +162,15 @@ class CreateUsuarioAdminDto {
 
 Não envia e-mail de confirmação — admin compartilha senha temp diretamente.
 
+### `POST /admin/inscricoes/cache/clear` (novo)
+
+```
+POST /admin/inscricoes/cache/clear
+@UseGuards(JwtAuthGuard, RolesGuard) @Roles(ADMIN)
+```
+
+Chama `InscricaoWindowService.clearCache()` e retorna `{ message: 'Cache invalidado.' }`. Uso em produção: admin reagenda primeiro jogo e quer que o novo `dataCorte` seja refletido imediatamente, sem esperar o TTL de 60s. Também consumido pelo E2E spec para garantir determinismo após mutar `Jogo.dataHora`.
+
 ### `POST /admin/boloes/:bolaoId/membros` (novo)
 
 ```
@@ -213,15 +224,15 @@ Faz `fetch('/auth/inscricoes/status')` no mount. Cacheia em `sessionStorage` com
 
 ### `/admin/usuarios` (alterado)
 
-`apps/frontend/src/app/(admin)/admin/usuarios/page.tsx`:
+`apps/frontend/src/app/admin/usuarios/page.tsx` (sem route group `(admin)`):
 
-**Botão "Novo usuário" no topo da página**: abre `Dialog` (reusa `components/ui/dialog.tsx`) com formulário:
+**Botão "Novo usuário" no topo da página**: abre `AdminCriarUsuarioDialog` (`apps/frontend/src/components/AdminCriarUsuarioDialog.tsx`) — componente novo que usa `Dialog` de `components/ui/dialog.tsx`. Formulário:
 
 - Campos: nome, email, senha temporária, "Adicionar também ao bolão?" (autocomplete usando `GET /boloes/buscar?nome=...`, opcional).
-- Submit: `POST /admin/usuarios` → fecha modal, toast de sucesso, recarrega lista.
+- Submit: `POST /admin/usuarios` → fecha modal, callback `onCriado` recarrega lista.
 - Erros: e-mail duplicado renderiza inline.
 
-**Botão "Adicionar a bolão" por linha de usuário** (ícone discreto): abre `Dialog` com autocomplete de bolão. Submit: `POST /admin/boloes/:bolaoId/membros` com `{ usuarioId }` → toast, fecha modal.
+**Botão "+ Bolão" por linha de usuário** (em `AdminUsuarioRow.tsx`): abre `AdminAdicionarBolaoDialog` (`apps/frontend/src/components/AdminAdicionarBolaoDialog.tsx`) — componente novo com autocomplete de bolão. Submit: `POST /admin/boloes/:bolaoId/membros` com `{ usuarioId }` → callback `onAdicionado` (reusa `onAtualizado` da row para refresh), fecha modal.
 
 ### Sem mudança em `/auth/google` button
 
@@ -236,8 +247,9 @@ O botão "Entrar com Google" no `/login` continua igual. Bloqueio acontece no ca
 | Admin promovido pós-corte | Passa a bypassar (esperado) |
 | Convite pré-emitido usado por não-admin pós-corte | 403 "Inscrições encerradas" |
 | Submit em andamento quando corte expira | Backend devolve 403; frontend mostra no banner de erro do form |
-| Múltiplas instâncias do backend | Cada uma tem seu cache de 60s; drift máximo de 1 min é aceitável |
+| Múltiplas instâncias do backend | Cada uma tem seu cache de 60s; drift máximo de 1 min é aceitável. `clearCache` invalida só a instância que recebeu a chamada — em frota com várias instâncias, drift permanece até próximo TTL nas outras. |
 | Race entre `getStatus` e mudança de calendário | Aceito sem lock distribuído |
+| Admin reagenda primeiro jogo e precisa janela imediata | Chamar `POST /admin/inscricoes/cache/clear` após o reagendamento |
 
 ## Seção 5 — Testes
 
@@ -253,21 +265,26 @@ O botão "Entrar com Google" no `/login` continua igual. Bloqueio acontece no ca
 
 ### Frontend
 
+Testes em `apps/frontend/src/__tests__/` (padrão do projeto — testes não co-localizados):
+
 | Arquivo | Casos novos |
 |---|---|
-| `app/(auth)/login/page.test.tsx` (criar se não existir) | Link "Criar conta" desabilitado quando `abertas=false`; banner renderiza quando `?erro=cadastros-encerrados` |
-| `app/(auth)/registrar/page.test.tsx` (criar se não existir) | Renderiza só mensagem quando `abertas=false`; renderiza form quando `abertas=true` |
-| `app/(admin)/admin/usuarios/page.test.tsx` (estender) | Modal "Novo usuário" submete `POST /admin/usuarios`; modal "Adicionar a bolão" submete `POST /admin/boloes/:bolaoId/membros` |
-| `hooks/useInscricaoStatus.test.ts` (novo) | Lê do `sessionStorage` quando válido; faz fetch quando expirou; retorna `abertas=true` durante loading |
+| `LoginPage.test.tsx` (estender) | Link "Criar conta" desabilitado quando `abertas=false`; banner renderiza quando `?erro=cadastros-encerrados` |
+| `RegistrarPage.test.tsx` (novo) | Renderiza só mensagem quando `abertas=false`; renderiza form quando `abertas=true` |
+| `AdminCriarUsuarioDialog.test.tsx` (novo) | Submete `POST /admin/usuarios`; exibe erro inline em falha |
+| `AdminAdicionarBolaoDialog.test.tsx` (novo) | Submete `POST /admin/boloes/:bolaoId/membros` e chama `onAdicionado` |
+| `useInscricaoStatus.test.ts` (novo) | Lê do `sessionStorage` quando válido; faz fetch quando expirou; retorna `abertas=true` durante loading |
 
 ### E2E
 
-`e2e/tests/api/inscricao-window.spec.ts` (novo):
+`e2e/tests/auth/janela-inscricao.api.spec.ts` (novo):
 
-- Seed com 1 jogo em T+3h → `POST /auth/registrar` 201.
-- Seed com 1 jogo em T+1h → `POST /auth/registrar` 403.
-- Mesmo cenário com janela fechada: `POST /boloes/entrar/:token` 403.
-- Admin: `POST /admin/usuarios` com janela fechada 201; usuário criado autentica em `POST /auth/login`.
+- **Isolamento**: spec mexe APENAS no jogo de menor `dataHora` (não `updateMany` sem `where`). `afterAll` restaura para T+30 dias, garantindo janela aberta para suítes subsequentes — independentemente do estado em que outros testes deixaram o jogo (importante porque `aposta/prazo.api.spec.ts` roda alfabeticamente antes e move o primeiro jogo para o passado).
+- **Determinismo de cache**: cada mutação de `dataHora` é seguida por `POST /admin/inscricoes/cache/clear`, evitando esperas de TTL.
+- Casos:
+  - Janela fechada (jogo em T+30min) → `POST /auth/registrar` 403, mensagem contém "Inscrições encerradas".
+  - Janela fechada → admin chama `POST /admin/usuarios` 201; usuário criado consegue `POST /auth/login` imediatamente (emailVerificado=true).
+- Também ajustado `e2e/playwright.config.ts` para incluir o subdiretório `auth` no `testMatch` do projeto API (estava cobrindo só `authz|aposta|...`).
 
 ### Comandos finais (rodados ao fim, não a cada passo)
 
@@ -286,30 +303,41 @@ Adicionar entrada em "Funcionalidades":
 ## Resumo dos arquivos tocados
 
 **Novos:**
-- `packages/shared/src/enums.ts` → adicionar `HORAS_CORTE_INSCRICAO = 2`
-- `apps/backend/src/inscricao-window/inscricao-window.module.ts`
+- `packages/shared/src/enums.ts` → `HORAS_CORTE_INSCRICAO = 2`
+- `apps/backend/src/inscricao-window/inscricao-window.module.ts` (`@Global()`)
 - `apps/backend/src/inscricao-window/inscricao-window.service.ts`
 - `apps/backend/src/inscricao-window/inscricao-window.service.spec.ts`
 - `apps/backend/src/admin/dto/create-usuario-admin.dto.ts`
 - `apps/frontend/src/hooks/useInscricaoStatus.ts`
-- `apps/frontend/src/hooks/useInscricaoStatus.test.ts`
-- `e2e/tests/api/inscricao-window.spec.ts`
+- `apps/frontend/src/components/AdminCriarUsuarioDialog.tsx`
+- `apps/frontend/src/components/AdminAdicionarBolaoDialog.tsx`
+- `apps/frontend/src/__tests__/useInscricaoStatus.test.ts`
+- `apps/frontend/src/__tests__/RegistrarPage.test.tsx`
+- `apps/frontend/src/__tests__/AdminCriarUsuarioDialog.test.tsx`
+- `apps/frontend/src/__tests__/AdminAdicionarBolaoDialog.test.tsx`
+- `e2e/tests/auth/janela-inscricao.api.spec.ts`
 
 **Alterados (backend):**
-- `apps/backend/src/auth/auth.controller.ts` (novo endpoint status + Google callback)
-- `apps/backend/src/auth/auth.service.ts` (assertAberta no registrar)
-- `apps/backend/src/auth/auth.module.ts` (import InscricaoWindowModule)
-- `apps/backend/src/bolao/bolao.service.ts` (assertAberta + tornar `adicionarMembro` público)
+- `apps/backend/src/app.module.ts` (importa `InscricaoWindowModule` — singleton via `@Global()`)
+- `apps/backend/src/auth/auth.controller.ts` (`GET /auth/inscricoes/status` + Google callback guard)
+- `apps/backend/src/auth/auth.service.ts` (`assertAberta()` no `registrar`)
+- `apps/backend/src/bolao/bolao.service.ts` (`assertAberta(user)` em `entrarViaConvite`/`aprovarMembro`; `adicionarMembro` público)
 - `apps/backend/src/bolao/bolao.controller.ts` (passa user pro service)
-- `apps/backend/src/bolao/bolao.module.ts` (import InscricaoWindowModule)
-- `apps/backend/src/admin/admin.controller.ts` (POST /usuarios e POST /boloes/:bolaoId/membros)
-- `apps/backend/src/admin/admin.service.ts` (criarUsuario, adicionarUsuarioBolao)
-- `apps/backend/src/admin/admin.module.ts` (import BolaoModule para reuso de `adicionarMembro`)
+- `apps/backend/src/bolao/bolao.module.ts` (exporta `BolaoService`)
+- `apps/backend/src/admin/admin.controller.ts` (POST `/usuarios`, `/boloes/:bolaoId/membros`, `/inscricoes/cache/clear`)
+- `apps/backend/src/admin/admin.service.ts` (`criarUsuario`, `adicionarUsuarioBolao`)
+- `apps/backend/src/admin/admin.module.ts` (importa `BolaoModule` para reuso de `adicionarMembro`)
+- `apps/backend/src/auth/auth.service.spec.ts`, `bolao/bolao.service.spec.ts`, `admin/admin.service.spec.ts` (testes estendidos)
 
 **Alterados (frontend):**
 - `apps/frontend/src/app/(auth)/login/page.tsx`
 - `apps/frontend/src/app/(auth)/registrar/page.tsx`
-- `apps/frontend/src/app/(admin)/admin/usuarios/page.tsx`
+- `apps/frontend/src/app/admin/usuarios/page.tsx` (sem route group `(admin)`)
+- `apps/frontend/src/components/AdminUsuarioRow.tsx` (botão "+ Bolão" + dialog mount)
+- `apps/frontend/src/__tests__/LoginPage.test.tsx` (testes estendidos)
+
+**Alterados (E2E):**
+- `e2e/playwright.config.ts` (adiciona `auth` ao `testMatch` do projeto API)
 
 **Alterados (docs):**
 - `README.md` (entrada em "Funcionalidades")
