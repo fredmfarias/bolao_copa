@@ -1,0 +1,53 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy-main
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write   # necessário para Workload Identity Federation
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.DEPLOY_SA }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker ${{ vars.GCP_REGION }}-docker.pkg.dev --quiet
+
+      - name: Build & push images
+        env:
+          IMAGE_BASE: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/bolao
+        run: |
+          docker build -f apps/backend/Dockerfile -t $IMAGE_BASE/backend:${{ github.sha }} .
+          docker push $IMAGE_BASE/backend:${{ github.sha }}
+          docker build -f apps/frontend/Dockerfile \
+            --build-arg NEXT_PUBLIC_API_URL=https://api.bolaotrovao.com \
+            -t $IMAGE_BASE/frontend:${{ github.sha }} .
+          docker push $IMAGE_BASE/frontend:${{ github.sha }}
+
+      - name: Deploy backend
+        run: |
+          gcloud run deploy bolao-backend \
+            --image=${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/bolao/backend:${{ github.sha }} \
+            --region=${{ vars.GCP_REGION }} --quiet
+
+      - name: Deploy frontend
+        run: |
+          gcloud run deploy bolao-frontend \
+            --image=${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/bolao/frontend:${{ github.sha }} \
+            --region=${{ vars.GCP_REGION }} --quiet
