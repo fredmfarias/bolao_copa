@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { api } from '@/lib/api';
 import { PageSkeleton } from '@/components/PageSkeleton';
 import { EmptyState } from '@/components/EmptyState';
+import { SelecaoAvatar } from '@/components/SelecaoAvatar';
 import { MINUTOS_PRAZO_APOSTA, BOLAO_GLOBAL_ID } from '@bolao/shared';
 import type { Bolao, Jogo } from '@/types/api';
 
@@ -69,10 +70,18 @@ export default function PalpitesPage() {
 
       {/* Cabeçalho do jogo */}
       <div className="text-center">
-        <p className="text-trovao-muted text-xs mb-1">{jogo.fase} · Rodada {jogo.rodada}</p>
-        <h1 className="text-lg font-bold text-white">
-          {jogo.selecaoCasa.codigo} × {jogo.selecaoVisitante.codigo}
-        </h1>
+        <p className="text-trovao-muted text-xs mb-2">{jogo.fase} · Rodada {jogo.rodada}</p>
+        <div className="flex items-center justify-center gap-3">
+          <div className="flex items-center gap-2">
+            <SelecaoAvatar nome={jogo.selecaoCasa.nome} bandeiraSvg={jogo.selecaoCasa.bandeiraSvg} size="sm" shape="rect" />
+            <span className="text-lg font-bold text-white">{jogo.selecaoCasa.codigo}</span>
+          </div>
+          <span className="text-trovao-muted text-sm">×</span>
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-bold text-white">{jogo.selecaoVisitante.codigo}</span>
+            <SelecaoAvatar nome={jogo.selecaoVisitante.nome} bandeiraSvg={jogo.selecaoVisitante.bandeiraSvg} size="sm" shape="rect" />
+          </div>
+        </div>
         {jogo.placarCasa !== null && (
           <p className="text-trovao-gold font-mono text-2xl font-bold mt-1">
             {jogo.placarCasa} : {jogo.placarVisitante}
@@ -135,8 +144,10 @@ export default function PalpitesPage() {
                 <span className="text-white text-sm font-medium">{p.nome}</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-white font-mono text-sm font-semibold">
+                <span className="flex items-center gap-1.5 text-white font-mono text-sm font-semibold">
+                  <SelecaoAvatar nome={jogo.selecaoCasa.nome} bandeiraSvg={jogo.selecaoCasa.bandeiraSvg} size="sm" shape="rect" />
                   {p.placarCasa} × {p.placarVisitante}
+                  <SelecaoAvatar nome={jogo.selecaoVisitante.nome} bandeiraSvg={jogo.selecaoVisitante.bandeiraSvg} size="sm" shape="rect" />
                 </span>
                 {p.pontuacao !== null && (
                   <span className="text-trovao-gold text-sm font-bold tabular-nums">

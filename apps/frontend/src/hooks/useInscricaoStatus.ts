@@ -32,14 +32,20 @@ function writeCache(value: CachedStatus['value']) {
 }
 
 export function useInscricaoStatus() {
-  const [state, setState] = useState<{ abertas: boolean; loading: boolean }>(() => {
-    const cached = readCache();
-    if (cached) return { abertas: cached.abertas, loading: false };
-    return { abertas: true, loading: true };
+  // Initial render must be deterministic (same on server and client) to avoid a
+  // hydration mismatch — the cache lives in sessionStorage, so we only read it
+  // after mount, inside the effect.
+  const [state, setState] = useState<{ abertas: boolean; loading: boolean }>({
+    abertas: true,
+    loading: true,
   });
 
   useEffect(() => {
-    if (!state.loading) return;
+    const cached = readCache();
+    if (cached) {
+      setState({ abertas: cached.abertas, loading: false });
+      return;
+    }
     let cancelled = false;
     fetch(`${BASE}/auth/inscricoes/status`)
       .then((r) => (r.ok ? r.json() : Promise.reject(r)))
@@ -55,7 +61,7 @@ export function useInscricaoStatus() {
     return () => {
       cancelled = true;
     };
-  }, [state.loading]);
+  }, []);
 
   return state;
 }

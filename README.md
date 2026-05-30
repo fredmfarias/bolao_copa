@@ -124,12 +124,38 @@ cp .env.example .env
 | `JWT_SECRET` | Sim | Chave de assinatura dos tokens de acesso (32+ chars) |
 | `JWT_REFRESH_SECRET` | Sim | Chave de assinatura dos refresh tokens (32+ chars) |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Não | OAuth Google — deixe em branco para desabilitar |
+| `GOOGLE_CALLBACK_URL` | Não | URI de callback do OAuth — deve bater com a registrada no Google Cloud Console (ex.: `https://seudominio.com/auth/google/callback`) |
 | `SMTP_HOST` / `SMTP_USER` / `SMTP_PASS` | Não | Envio de e-mails (recuperação de senha, etc.) |
 | `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | Não | Web Push — gere com `npx web-push generate-vapid-keys` |
+| `APP_URL` | Sim | URL pública do frontend — usada no redirect pós-login Google e nos e-mails |
+| `NODE_ENV` | Sim | `development` ou `production`. Em `production` o cookie de refresh token vira `secure` (exige HTTPS) |
 | `NEXT_PUBLIC_API_URL` | Sim | URL do backend acessível pelo browser |
 
 > [!IMPORTANT]
 > Em produção, substitua todos os segredos padrão (`change-me...`) por valores únicos e seguros antes de subir os contêineres.
+
+### Configuração de produção do Google OAuth
+
+O login com Google exige ajustes específicos ao sair do ambiente local:
+
+1. **Crie um OAuth client dedicado de produção** no [Google Cloud Console](https://console.cloud.google.com/) (Web application). Recomenda-se separar do client de desenvolvimento para isolar os segredos.
+2. **Registre a redirect URI de produção** (com HTTPS) em *Authorized redirect URIs*:
+   ```
+   https://seudominio.com/auth/google/callback
+   ```
+   O valor deve ser idêntico ao `GOOGLE_CALLBACK_URL`.
+3. **Publique a OAuth consent screen** (status *In production*). Em modo *Testing* apenas os e-mails listados em *Test users* conseguem logar. Como o app só pede os escopos `email` e `profile` (non-sensitive), a publicação não requer verificação do Google.
+4. **Defina as variáveis de produção**:
+   ```env
+   GOOGLE_CLIENT_ID="<client-id-de-producao>"
+   GOOGLE_CLIENT_SECRET="<secret-de-producao>"
+   GOOGLE_CALLBACK_URL="https://seudominio.com/auth/google/callback"
+   APP_URL="https://seudominio.com"
+   NODE_ENV="production"
+   ```
+
+> [!WARNING]
+> Com `NODE_ENV=production` o cookie de refresh token é marcado como `secure` e só trafega por HTTPS — o backend de produção **precisa** estar atrás de HTTPS, caso contrário o login não persiste.
 
 ---
 
