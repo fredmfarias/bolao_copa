@@ -42,6 +42,10 @@ export class InscricaoWindowService {
     return value;
   }
 
+  clearCache(): void {
+    this.cache = null;
+  }
+
   async assertAberta(user?: { role?: string }): Promise<void> {
     if (user?.role === Role.ADMIN) return;
     const status = await this.getStatus();

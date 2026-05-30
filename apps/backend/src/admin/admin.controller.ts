@@ -5,12 +5,16 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { AdminService } from './admin.service';
 import { Role } from '@bolao/shared';
 import { CreateUsuarioAdminDto } from './dto/create-usuario-admin.dto';
+import { InscricaoWindowService } from '../inscricao-window/inscricao-window.service';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.ADMIN)
 @Controller('admin')
 export class AdminController {
-  constructor(private service: AdminService) {}
+  constructor(
+    private service: AdminService,
+    private inscricaoWindow: InscricaoWindowService,
+  ) {}
 
   @Get('boloes')
   listarBoloes() {
@@ -61,5 +65,11 @@ export class AdminController {
     @Body('usuarioId') usuarioId: string,
   ) {
     return this.service.adicionarUsuarioBolao(bolaoId, usuarioId);
+  }
+
+  @Post('inscricoes/cache/clear')
+  clearInscricoesCache() {
+    this.inscricaoWindow.clearCache();
+    return { message: 'Cache invalidado.' };
   }
 }

@@ -12,6 +12,7 @@ import { RankingModule } from './ranking/ranking.module';
 import { NotificacaoModule } from './notificacao/notificacao.module';
 import { AdminModule } from './admin/admin.module';
 import { PublicacaoModule } from './publicacao/publicacao.module';
+import { InscricaoWindowModule } from './inscricao-window/inscricao-window.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { PublicacaoModule } from './publicacao/publicacao.module';
       }),
     }),
     PrismaModule,
+    InscricaoWindowModule,
     AuthModule,
     UsuarioModule,
     BolaoModule,
