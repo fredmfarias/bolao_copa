@@ -120,7 +120,7 @@ Expected: `bolaotrovao.com.`
 
 ```bash
 gcloud sql instances create bolao-db \
-  --database-version=POSTGRES_16 --tier=db-f1-micro --region=$REGION \
+  --database-version=POSTGRES_16 --edition=ENTERPRISE --tier=db-f1-micro --region=$REGION \
   --storage-size=10GB --storage-auto-increase \
   --backup --backup-start-time=06:00 --availability-type=zonal
 ```
@@ -156,7 +156,7 @@ Expected: `RUNNABLE`, depois `conn=bolao-497903:us-central1:bolao-db`, depois `s
 
 ```bash
 export REDIS_PASSWORD=$(openssl rand -base64 24)
-gcloud compute instances create redis-vm \
+gcloud compute instances create-with-container redis-vm \
   --zone=$ZONE --machine-type=e2-micro \
   --image-family=cos-stable --image-project=cos-cloud \
   --boot-disk-size=10GB --network=default --subnet=default \
