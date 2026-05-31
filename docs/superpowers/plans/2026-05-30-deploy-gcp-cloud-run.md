@@ -544,7 +544,7 @@ kill %1
 ```
 Expected: contagem de jogos > 0 (dados da Copa 2026 inseridos). Sem erro de conexão.
 
-> O seed cria o admin padrão `admin@bolao.com` / `admin123`. Troque a senha no primeiro login (Task 17).
+> O seed cria o admin padrão `admin@bolaotrovao.com` / `admin123`. Troque a senha no primeiro login (Task 17).
 
 ---
 
@@ -677,7 +677,7 @@ Abra `https://bolaotrovao.com` no navegador. Expected: a aplicação carrega com
 
 - [ ] **Step 2: Login admin + persistência de sessão**
 
-Faça login com `admin@bolao.com` / `admin123`. Dê **F5**. Expected: continua logado (cookie de refresh `secure` persistiu). Em seguida, **troque a senha do admin**.
+Faça login com `admin@bolaotrovao.com` / `admin123`. Dê **F5**. Expected: continua logado (cookie de refresh `secure` persistiu). Em seguida, **troque a senha do admin**.
 
 - [ ] **Step 3: Login com Google**
 
