@@ -226,20 +226,22 @@ bolao-trovao/
 
 ## Deploy em produção
 
-```bash
-# 1. Preencha .env com valores de produção
-cp .env.example .env
+Produção roda na **Google Cloud Platform** (projeto `bolao-497903`):
 
-# 2. Suba a stack com Nginx
-docker compose -f docker-compose.prod.yml up -d --build
-```
+- **Frontend e backend** em Cloud Run (`bolao-frontend`, `bolao-backend`).
+- **PostgreSQL** no Cloud SQL; **Redis** (filas Bull) numa VM e2-micro free-tier.
+- **HTTPS** em `bolaotrovao.com` / `api.bolaotrovao.com` via Cloud Run Domain Mappings.
+- **Segredos** no Secret Manager (nada no git).
+- **Deploy automático**: todo merge na `main` dispara `.github/workflows/deploy.yml`,
+  que builda as imagens, publica no Artifact Registry e roda `gcloud run deploy`.
+  A autenticação usa Workload Identity Federation (sem chave JSON).
 
-O Nginx escuta na porta 80 e roteia:
-- `/api/*` → backend (porta 3001)
-- `/*` → frontend (porta 3000)
+Setup completo e passo-a-passo:
+- Spec: `docs/superpowers/specs/2026-05-30-deploy-gcp-cloud-run-design.md`
+- Plano de execução: `docs/superpowers/plans/2026-05-30-deploy-gcp-cloud-run.md`
 
-> [!TIP]
-> Para HTTPS, monte seus certificados em `/etc/nginx/certs` e ajuste `nginx/nginx.conf` para incluir o bloco SSL.
+> [!NOTE]
+> O `docker-compose.prod.yml` permanece no repo apenas para smoke test local do build de produção.
 
 ---
 
