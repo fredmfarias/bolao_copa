@@ -50,7 +50,7 @@ export async function criarUsuarioAutenticado(user: {
 
 // Authenticated context for the seeded admin.
 export async function adminContext(): Promise<APIRequestContext> {
-  return authedContext('admin@bolao.com', 'admin123');
+  return authedContext('admin@bolaotrovao.com', 'admin123');
 }
 
 export { BOLAO_GLOBAL_ID, BASE };
