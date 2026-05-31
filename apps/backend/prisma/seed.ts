@@ -14,7 +14,7 @@ async function main() {
     create: {
       id: ADMIN_ID,
       nome: 'Administrador',
-      email: 'admin@bolao.com',
+      email: 'admin@bolaotrovao.com',
       role: Role.ADMIN,
       emailVerificado: true,
       senhaHash,

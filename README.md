@@ -66,7 +66,7 @@ Serviços disponíveis:
 
 > [!NOTE]
 > O seed cria o usuário administrador com credenciais padrão:
-> - **E-mail:** `admin@bolao.com`
+> - **E-mail:** `admin@bolaotrovao.com`
 > - **Senha:** `admin123`
 >
 > Troque a senha após o primeiro login. Para criar outros usuários, acesse http://localhost:3000/registrar.

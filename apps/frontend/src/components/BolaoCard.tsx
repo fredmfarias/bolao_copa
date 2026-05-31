@@ -40,9 +40,9 @@ export function BolaoCard({ bolao, href, favoritoId, onFavoritoChange }: BolaoCa
 
   return (
     <>
-      <div className="relative bg-trovao-card border border-trovao-border rounded-xl hover:border-trovao-gold/50 transition-colors">
+      <div className="relative overflow-hidden bg-trovao-card border border-trovao-border rounded-xl hover:border-trovao-gold/50 transition-colors">
         <Link href={href} className={`block p-4 ${onFavoritoChange ? 'pr-12' : ''}`}>
-          <p className="font-semibold text-white">{bolao.nome}</p>
+          <p className="font-semibold text-white truncate">{bolao.nome}</p>
           {bolao.descricao && (
             <p className="text-sm text-trovao-muted mt-0.5 truncate">{bolao.descricao}</p>
           )}

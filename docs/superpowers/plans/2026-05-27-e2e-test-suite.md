@@ -50,7 +50,7 @@ These are the concrete contracts the specs assert against. Do not invent others.
 
 **Shared constants** (`@bolao/shared`): `BOLAO_GLOBAL_ID = '00000000-0000-0000-0000-000000000001'`, `MINUTOS_PRAZO_APOSTA = 60`, `BolaoEscopo`, `JogoFase`, `Role`.
 
-**Seed admin** (from README): `admin@bolao.com` / `admin123`.
+**Seed admin** (from README): `admin@bolaotrovao.com` / `admin123`.
 
 **Frontend selectors (verified):**
 - `/registrar`: inputs are `input[type="text"]` (nome), `input[type="email"]`, `input[type="password"]`; submit `button` text "Cadastrar"/"Cadastrando..."; on success shows the message + link "Ir para login".
@@ -330,7 +330,7 @@ export const prisma = new PrismaClient();
 const GLOBAL_ID = '00000000-0000-0000-0000-000000000001';
 // Fixture accounts that must survive truncation: the seeded admin and the
 // participante created in global-setup (its captured session must stay valid).
-const KEEP_EMAILS = ['admin@bolao.com', 'participante@test.local'];
+const KEEP_EMAILS = ['admin@bolaotrovao.com', 'participante@test.local'];
 
 // Wipes dynamic data while keeping reference data (selecao, estadio, jogo,
 // bolao global, configuracao_pontuacao) and the fixture accounts.
@@ -498,7 +498,7 @@ export async function criarUsuarioAutenticado(user: {
 
 // Authenticated context for the seeded admin.
 export async function adminContext(): Promise<APIRequestContext> {
-  return authedContext('admin@bolao.com', 'admin123');
+  return authedContext('admin@bolaotrovao.com', 'admin123');
 }
 
 export { BOLAO_GLOBAL_ID, BASE };
@@ -601,7 +601,7 @@ export default async function globalSetup(_config: FullConfig) {
   await prisma.usuario.update({ where: { email: 'participante@test.local' }, data: { emailVerificado: true } });
 
   // 3. Capture sessions.
-  await saveSession('admin@bolao.com', 'admin123', resolve(__dirname, '.auth/admin.json'));
+  await saveSession('admin@bolaotrovao.com', 'admin123', resolve(__dirname, '.auth/admin.json'));
   await saveSession('participante@test.local', 'senha12345', resolve(__dirname, '.auth/participante.json'));
 }
 ```

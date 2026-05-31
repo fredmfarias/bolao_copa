@@ -56,9 +56,9 @@ export default function BolaoesPage() {
         <h2 className="text-lg font-semibold">Buscar bolão</h2>
         <form onSubmit={handleBusca} className="flex gap-2">
           <input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Nome do bolão"
-            className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-yellow-400" />
+            className="flex-1 min-w-0 bg-trovao-card border border-trovao-border rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-trovao-gold" />
           <button type="submit"
-            className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm">Buscar</button>
+            className="bg-trovao-surface hover:bg-trovao-border px-4 py-2 rounded-lg text-sm text-white">Buscar</button>
         </form>
         {resultados.length > 0 && (
           <div className="grid gap-3 sm:grid-cols-2">

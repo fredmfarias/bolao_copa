@@ -120,7 +120,7 @@ Expected: `bolaotrovao.com.`
 
 ```bash
 gcloud sql instances create bolao-db \
-  --database-version=POSTGRES_16 --tier=db-f1-micro --region=$REGION \
+  --database-version=POSTGRES_16 --edition=ENTERPRISE --tier=db-f1-micro --region=$REGION \
   --storage-size=10GB --storage-auto-increase \
   --backup --backup-start-time=06:00 --availability-type=zonal
 ```
@@ -156,7 +156,7 @@ Expected: `RUNNABLE`, depois `conn=bolao-497903:us-central1:bolao-db`, depois `s
 
 ```bash
 export REDIS_PASSWORD=$(openssl rand -base64 24)
-gcloud compute instances create redis-vm \
+gcloud compute instances create-with-container redis-vm \
   --zone=$ZONE --machine-type=e2-micro \
   --image-family=cos-stable --image-project=cos-cloud \
   --boot-disk-size=10GB --network=default --subnet=default \
@@ -544,7 +544,7 @@ kill %1
 ```
 Expected: contagem de jogos > 0 (dados da Copa 2026 inseridos). Sem erro de conexão.
 
-> O seed cria o admin padrão `admin@bolao.com` / `admin123`. Troque a senha no primeiro login (Task 17).
+> O seed cria o admin padrão `admin@bolaotrovao.com` / `admin123`. Troque a senha no primeiro login (Task 17).
 
 ---
 
@@ -677,7 +677,7 @@ Abra `https://bolaotrovao.com` no navegador. Expected: a aplicação carrega com
 
 - [ ] **Step 2: Login admin + persistência de sessão**
 
-Faça login com `admin@bolao.com` / `admin123`. Dê **F5**. Expected: continua logado (cookie de refresh `secure` persistiu). Em seguida, **troque a senha do admin**.
+Faça login com `admin@bolaotrovao.com` / `admin123`. Dê **F5**. Expected: continua logado (cookie de refresh `secure` persistiu). Em seguida, **troque a senha do admin**.
 
 - [ ] **Step 3: Login com Google**
 

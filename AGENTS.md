@@ -64,8 +64,8 @@ Service URLs:
 - Postgres: localhost:5432 · Redis: localhost:6379
 
 Test credentials (created by seed):
-- `fred@bolao.com` / `senha123` — ADMIN role
-- `maria@bolao.com` / `senha123` — USER role
+- `fred@bolaotrovao.com` / `senha123` — ADMIN role
+- `maria@bolaotrovao.com` / `senha123` — USER role
 
 ### What to re-run after a code change
 - `apps/frontend/**` → nothing (HMR).

@@ -419,7 +419,7 @@ DATABASE_URL="postgresql://bolao:${DB_PASSWORD}@localhost:5432/bolao_trovao?sche
 kill %1                                  # encerra o proxy
 ```
 
-> O seed também cria o admin padrão (`admin@bolao.com` / `admin123`). **Troque a senha no
+> O seed também cria o admin padrão (`admin@bolaotrovao.com` / `admin123`). **Troque a senha no
 > primeiro login** em produção.
 
 ### Fase 14 — Deploy automático (GitHub Actions)
