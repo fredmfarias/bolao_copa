@@ -3,6 +3,7 @@ import RegistrarPage from '@/app/(auth)/registrar/page';
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: jest.fn() }),
+  useSearchParams: () => ({ get: jest.fn().mockReturnValue(null) }),
 }));
 
 jest.mock('@/hooks/useInscricaoStatus', () => ({

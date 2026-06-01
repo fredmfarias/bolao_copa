@@ -81,7 +81,7 @@ export default function RegistrarPage() {
 
           <div>
             <label className="block text-sm text-gray-400 mb-1">Telefone</label>
-            <input type="tel" inputMode="numeric" value={form.telefone} required
+            <input type="tel" inputMode="tel" value={form.telefone} required
               placeholder="(11) 91234-5678"
               onChange={e => setForm(p => ({ ...p, telefone: mascaraTelefone(e.target.value) }))}
               className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-yellow-400" />
