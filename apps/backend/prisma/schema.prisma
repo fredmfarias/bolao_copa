@@ -90,9 +90,9 @@ model BolaoMembro {
   bolao     Bolao            @relation(fields: [bolaoId], references: [id])
   usuarioId String
   usuario   Usuario          @relation(fields: [usuarioId], references: [id])
-  papel           BolaoMembroPapel @default(PARTICIPANTE)
-  entrouEm        DateTime         @default(now())
-  statusPagamento StatusPagamento  @default(PENDENTE)
+  papel     BolaoMembroPapel @default(PARTICIPANTE)
+  entrouEm  DateTime         @default(now())
+  statusPagamento StatusPagamento @default(PENDENTE)
 
   @@unique([bolaoId, usuarioId])
   @@map("bolao_membro")
