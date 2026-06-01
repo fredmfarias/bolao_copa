@@ -7,6 +7,7 @@ export function newUser(prefix = 'user') {
     nome: `Teste ${id}`,
     email: `${prefix}-${worker}-${id}@test.local`,
     senha: 'senha12345',
+    telefone: '(11) 91234-5678',
   };
 }
 

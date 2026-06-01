@@ -30,11 +30,11 @@ async function authedContext(email: string, senha: string): Promise<APIRequestCo
 
 // Registers a user, confirms e-mail directly (fast), returns an authed context.
 export async function criarUsuarioAutenticado(user: {
-  nome: string; email: string; senha: string;
+  nome: string; email: string; senha: string; telefone?: string;
 }): Promise<{ ctx: APIRequestContext; user: TestUser }> {
   const anon = await request.newContext({ baseURL: BASE });
   const reg = await anon.post('/auth/registrar', {
-    data: { nome: user.nome, email: user.email, senha: user.senha },
+    data: { nome: user.nome, email: user.email, senha: user.senha, telefone: user.telefone ?? '(11) 91234-5678' },
   });
   if (!reg.ok()) throw new Error(`registrar falhou: ${reg.status()} ${await reg.text()}`);
   await anon.dispose();
