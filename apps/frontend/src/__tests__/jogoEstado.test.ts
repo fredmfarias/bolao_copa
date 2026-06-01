@@ -45,3 +45,11 @@ it('filtro Encerrados inclui aguardando, finalizado, sem-palpite', () => {
   expect(jogoNoFiltro('aberto', 'Encerrados')).toBe(false);
   expect(jogoNoFiltro('salvo', 'Encerrados')).toBe(false);
 });
+
+it('filtro Placares retorna false para qualquer estado', () => {
+  expect(jogoNoFiltro('aberto',      'Placares')).toBe(false);
+  expect(jogoNoFiltro('salvo',       'Placares')).toBe(false);
+  expect(jogoNoFiltro('aguardando',  'Placares')).toBe(false);
+  expect(jogoNoFiltro('finalizado',  'Placares')).toBe(false);
+  expect(jogoNoFiltro('sem-palpite', 'Placares')).toBe(false);
+});

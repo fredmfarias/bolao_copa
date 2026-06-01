@@ -4,7 +4,7 @@ import { MINUTOS_PRAZO_APOSTA } from '@bolao/shared';
 export type EstadoAposta =
   | 'aberto' | 'salvo' | 'aguardando' | 'finalizado' | 'sem-palpite';
 
-export type FiltroJogo = 'Todos' | 'Pendentes' | 'Apostados' | 'Encerrados';
+export type FiltroJogo = 'Todos' | 'Pendentes' | 'Apostados' | 'Encerrados' | 'Placares';
 
 export function prazoEncerrado(jogo: Jogo): boolean {
   const prazo = new Date(jogo.dataHora).getTime() - MINUTOS_PRAZO_APOSTA * 60 * 1000;
@@ -27,6 +27,7 @@ export function jogoNoFiltro(estado: EstadoAposta, filtro: FiltroJogo): boolean 
     case 'Pendentes':  return estado === 'aberto';
     case 'Apostados':  return estado === 'salvo';
     case 'Encerrados': return estado === 'aguardando' || estado === 'finalizado' || estado === 'sem-palpite';
+    case 'Placares':   return false;
   }
 }
 

@@ -73,6 +73,24 @@ describe('ApostaService', () => {
       ).resolves.not.toThrow();
     });
 
+    it('usa OR para contar placares invertidos como idênticos (2×0 = 0×2)', async () => {
+      prismaMock.jogo.findUnique.mockResolvedValue(jogoGrupos);
+      prismaMock.aposta.findUnique.mockResolvedValue(null);
+      prismaMock.aposta.count.mockResolvedValue(0);
+      prismaMock.aposta.upsert.mockResolvedValue({});
+      await service.upsert('user-1', { jogoId: 'jogo-1', placarCasa: 2, placarVisitante: 0 });
+      expect(prismaMock.aposta.count).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            OR: [
+              { placarCasa: 0, placarVisitante: 2 },
+              { placarCasa: 2, placarVisitante: 0 },
+            ],
+          }),
+        }),
+      );
+    });
+
     it('não chama bolaoMembro ao fazer aposta', async () => {
       prismaMock.jogo.findUnique.mockResolvedValue(jogoGrupos);
       prismaMock.aposta.findUnique.mockResolvedValue(null);

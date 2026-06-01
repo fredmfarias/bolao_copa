@@ -30,11 +30,14 @@ export class ApostaService {
       const isElim = FASES_ELIMINATORIAS.includes(jogo.fase as any);
       const limite = isElim ? MAX_APOSTAS_IGUAIS_ELIMINATORIAS : MAX_APOSTAS_IGUAIS_GRUPOS;
 
+      const [menor, maior] = [dto.placarCasa, dto.placarVisitante].sort((a, b) => a - b);
       const totalIguais = await this.prisma.aposta.count({
         where: {
           usuarioId,
-          placarCasa: dto.placarCasa,
-          placarVisitante: dto.placarVisitante,
+          OR: [
+            { placarCasa: menor, placarVisitante: maior },
+            { placarCasa: maior, placarVisitante: menor },
+          ],
           jogo: { fase: isElim ? { in: FASES_ELIMINATORIAS as any } : { equals: 'GRUPOS' as any } },
         },
       });
