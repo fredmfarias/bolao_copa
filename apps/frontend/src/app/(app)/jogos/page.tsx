@@ -7,6 +7,7 @@ import { ApostaDrawer } from '@/components/ApostaDrawer';
 import { FiltroJogosChips } from '@/components/FiltroJogosChips';
 import { PageSkeleton } from '@/components/PageSkeleton';
 import { EmptyState } from '@/components/EmptyState';
+import { PlacaresDist } from '@/components/PlacaresDist';
 import type { Jogo, Aposta } from '@/types/api';
 import {
   getEstadoAposta, jogoNoFiltro, ordenarPorFiltro, type FiltroJogo,
@@ -72,6 +73,11 @@ export default function JogosPage() {
 
       {loading ? (
         <PageSkeleton />
+      ) : filtro === 'Placares' ? (
+        <PlacaresDist
+          apostas={[...apostas.values()]}
+          onApostar={setJogoSelecionado}
+        />
       ) : jogosFiltrados.length === 0 ? (
         <EmptyState titulo="Nenhum jogo" descricao="Não há jogos para este filtro." />
       ) : (
