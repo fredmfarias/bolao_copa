@@ -121,14 +121,13 @@ it('0×2 e 2×0 são agrupados como o mesmo placar, exibido como 2×0', () => {
   expect(screen.getByText('2/18')).toBeInTheDocument();
 });
 
-it('placar mais frequente aparece antes', () => {
-  const maisFreq = [
-    makeAposta({ id: 'a1', jogoId: 'j1', placarCasa: 2, placarVisitante: 0, jogo: makeJogo({ id: 'j1' }) }),
-    makeAposta({ id: 'a2', jogoId: 'j2', placarCasa: 2, placarVisitante: 0, jogo: makeJogo({ id: 'j2' }) }),
-  ];
-  const menosFreq = makeAposta({ id: 'a3', jogoId: 'j3', placarCasa: 1, placarVisitante: 1, jogo: makeJogo({ id: 'j3' }) });
-  const { container } = render(<PlacaresDist apostas={[...maisFreq, menosFreq]} onApostar={jest.fn()} />);
+it('ordena por placarAlto decrescente', () => {
+  const a1 = makeAposta({ id: 'a1', jogoId: 'j1', placarCasa: 1, placarVisitante: 0, jogo: makeJogo({ id: 'j1' }) });
+  const a2 = makeAposta({ id: 'a2', jogoId: 'j2', placarCasa: 3, placarVisitante: 1, jogo: makeJogo({ id: 'j2' }) });
+  const a3 = makeAposta({ id: 'a3', jogoId: 'j3', placarCasa: 2, placarVisitante: 2, jogo: makeJogo({ id: 'j3' }) });
+  const { container } = render(<PlacaresDist apostas={[a1, a2, a3]} onApostar={jest.fn()} />);
   const rowButtons = container.querySelectorAll('button');
-  expect(rowButtons[0].textContent).toContain('2 × 0');
-  expect(rowButtons[1].textContent).toContain('1 × 1');
+  expect(rowButtons[0].textContent).toContain('3 × 1');
+  expect(rowButtons[1].textContent).toContain('2 × 2');
+  expect(rowButtons[2].textContent).toContain('1 × 0');
 });

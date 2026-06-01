@@ -38,7 +38,7 @@ function agruparPorPlacar(apostas: Aposta[]): PlacarGrupo[] {
       placarBaixo: Math.min(lista[0].placarCasa, lista[0].placarVisitante),
       apostas: lista,
     }))
-    .sort((a, b) => b.apostas.length - a.apostas.length);
+    .sort((a, b) => b.placarAlto - a.placarAlto || b.placarBaixo - a.placarBaixo);
 }
 
 function barraColor(count: number, limite: number): string {
