@@ -13,6 +13,7 @@ export class UsuarioService {
         id: true,
         nome: true,
         email: true,
+        telefone: true,
         avatarUrl: true,
         role: true,
         criadoEm: true,
