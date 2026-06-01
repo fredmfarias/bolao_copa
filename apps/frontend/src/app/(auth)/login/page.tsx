@@ -46,10 +46,10 @@ function LoginForm() {
             className="h-auto w-12 shrink-0"
             priority
           />
-          <span className="text-gray-300 text-sm">O Bolão da Copa do Mundo 2026.</span>
-        </div>
-        <div className="flex justify-end mb-4">
-          <Link href="/regulamento" className="text-xs text-gray-500 hover:text-white">Regulamento</Link>
+          <div className="flex flex-col flex-1">
+            <span className="text-gray-300 text-sm">O Bolão da Copa do Mundo 2026.</span>
+            <Link href="/regulamento" className="text-xs text-gray-500 hover:text-white self-end">Regulamento</Link>
+          </div>
         </div>
         {erroQuery === 'cadastros-encerrados' && (
           <p className="text-red-400 text-sm text-center mb-4">
