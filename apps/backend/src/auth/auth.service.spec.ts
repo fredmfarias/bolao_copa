@@ -4,8 +4,9 @@ import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { ConflictException, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import { BadRequestException, ConflictException, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { InscricaoWindowService } from '../inscricao-window/inscricao-window.service';
+import { BolaoService } from '../bolao/bolao.service';
 
 const prismaMock = {
   usuario: { findUnique: jest.fn(), create: jest.fn() },
@@ -15,6 +16,7 @@ const prismaMock = {
 
 const mailerMock = { sendMail: jest.fn() };
 const inscricaoMock = { assertAberta: jest.fn() };
+const bolaoMock = { entrarViaConvite: jest.fn() };
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -28,6 +30,7 @@ describe('AuthService', () => {
         { provide: ConfigService, useValue: { get: jest.fn().mockReturnValue('secret') } },
         { provide: 'MAILER', useValue: mailerMock },
         { provide: InscricaoWindowService, useValue: inscricaoMock },
+        { provide: BolaoService, useValue: bolaoMock },
       ],
     }).compile();
     service = module.get<AuthService>(AuthService);
@@ -95,5 +98,38 @@ describe('AuthService', () => {
     await service.registrar({ nome: 'Test', email: 'b@b.com', senha: '12345678', telefone: '(11) 91234-5678' });
     const html: string = mailerMock.sendMail.mock.calls[0][0].html;
     expect(html).toContain('/auth/confirmar-email?token=');
+  });
+
+  it('registrar chama entrarViaConvite quando conviteToken fornecido', async () => {
+    prismaMock.usuario.findUnique.mockResolvedValue(null);
+    prismaMock.usuario.create.mockResolvedValue({ id: 'new-id', email: 'b@b.com', nome: 'Test' });
+    bolaoMock.entrarViaConvite.mockResolvedValue({});
+    await service.registrar({
+      nome: 'Test', email: 'b@b.com', senha: '12345678',
+      telefone: '(11) 91234-5678', conviteToken: 'token-abc',
+    });
+    expect(bolaoMock.entrarViaConvite).toHaveBeenCalledWith(
+      { id: 'new-id', role: undefined },
+      'token-abc',
+    );
+  });
+
+  it('registrar não chama entrarViaConvite quando conviteToken ausente', async () => {
+    prismaMock.usuario.findUnique.mockResolvedValue(null);
+    prismaMock.usuario.create.mockResolvedValue({ id: 'new-id', email: 'b@b.com', nome: 'Test' });
+    await service.registrar({ nome: 'Test', email: 'b@b.com', senha: '12345678', telefone: '(11) 91234-5678' });
+    expect(bolaoMock.entrarViaConvite).not.toHaveBeenCalled();
+  });
+
+  it('registrar propaga exceção do convite inválido', async () => {
+    prismaMock.usuario.findUnique.mockResolvedValue(null);
+    prismaMock.usuario.create.mockResolvedValue({ id: 'new-id', email: 'b@b.com', nome: 'Test' });
+    bolaoMock.entrarViaConvite.mockRejectedValueOnce(new BadRequestException('Convite inválido.'));
+    await expect(
+      service.registrar({
+        nome: 'Test', email: 'b@b.com', senha: '12345678',
+        telefone: '(11) 91234-5678', conviteToken: 'token-ruim',
+      }),
+    ).rejects.toThrow(BadRequestException);
   });
 });
