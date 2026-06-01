@@ -37,15 +37,16 @@ function LoginForm() {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="w-full max-w-sm bg-gray-900 rounded-xl p-8">
-        <div className="flex justify-end mb-2">
+        <div className="flex items-center gap-3 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 mb-4">
           <Image
             src="/logo_bolao.png"
             alt="Bolão Trovão"
-            width={80}
-            height={80}
-            className="h-auto w-20"
+            width={48}
+            height={48}
+            className="h-auto w-12 shrink-0"
             priority
           />
+          <span className="text-gray-300 text-sm">O Bolão da Copa do Mundo 2026.</span>
         </div>
         {erroQuery === 'cadastros-encerrados' && (
           <p className="text-red-400 text-sm text-center mb-4">
