@@ -77,10 +77,14 @@ export default function ConvitePage() {
           <h1 className="text-white font-bold text-lg">{convite?.bolaoNome}</h1>
           {convite?.descricao && <p className="text-trovao-muted text-sm">{convite.descricao}</p>}
           <p className="text-trovao-muted text-xs">Convidado por {convite?.criadorNome}</p>
-          <p className="text-trovao-muted text-sm">Faça login para entrar neste bolão.</p>
+          <p className="text-trovao-muted text-sm">Entre ou crie uma conta para participar.</p>
           <button onClick={() => router.push(`/login?redirect=/convite/${codigo}`)}
             className="w-full py-2 bg-trovao-gold text-trovao-base text-sm font-bold rounded-lg hover:opacity-90 transition-opacity">
             Fazer login
+          </button>
+          <button onClick={() => router.push(`/registrar?convite=${codigo}`)}
+            className="w-full py-2 bg-trovao-surface border border-trovao-border text-trovao-muted text-sm rounded-lg hover:text-white transition-colors">
+            Criar conta
           </button>
         </div>
       </div>
