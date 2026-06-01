@@ -1,12 +1,13 @@
 import type { FiltroJogo } from '@/lib/jogoEstado';
 
-const FILTROS: FiltroJogo[] = ['Todos', 'Pendentes', 'Apostados', 'Encerrados'];
+const FILTROS: FiltroJogo[] = ['Todos', 'Pendentes', 'Apostados', 'Encerrados', 'Placares'];
 
 const FILTRO_LABELS: Record<FiltroJogo, string> = {
   Todos: 'Todos',
   Pendentes: 'Pendentes de aposta',
   Apostados: 'Apostados',
   Encerrados: 'Encerrados',
+  Placares: 'Meus Placares',
 };
 
 interface FiltroJogosChipsProps {
