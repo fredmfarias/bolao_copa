@@ -2,14 +2,23 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
 import { useInscricaoStatus } from '@/hooks/useInscricaoStatus';
 
+function mascaraTelefone(valor: string): string {
+  const nums = valor.replace(/\D/g, '').slice(0, 11);
+  if (nums.length <= 2) return `(${nums}`;
+  if (nums.length <= 7) return `(${nums.slice(0, 2)}) ${nums.slice(2)}`;
+  return `(${nums.slice(0, 2)}) ${nums.slice(2, 7)}-${nums.slice(7)}`;
+}
+
 export default function RegistrarPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const conviteToken = searchParams.get('convite');
   const { abertas } = useInscricaoStatus();
-  const [form, setForm] = useState({ nome: '', email: '', senha: '' });
+  const [form, setForm] = useState({ nome: '', email: '', telefone: '', senha: '' });
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState('');
   const [loading, setLoading] = useState(false);
@@ -19,7 +28,8 @@ export default function RegistrarPage() {
     setErro('');
     setLoading(true);
     try {
-      const data = await api.post<{ message: string }>('/auth/registrar', form);
+      const body = conviteToken ? { ...form, conviteToken } : form;
+      const data = await api.post<{ message: string }>('/auth/registrar', body);
       setSucesso(data.message);
     } catch (err: any) {
       setErro(err.message ?? 'Erro ao cadastrar.');
@@ -54,14 +64,36 @@ export default function RegistrarPage() {
         <h1 className="text-xl font-bold text-center">Criar conta</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           {erro && <p className="text-red-400 text-sm">{erro}</p>}
-          {(['nome', 'email', 'senha'] as const).map(f => (
-            <div key={f}>
-              <label className="block text-sm text-gray-400 mb-1 capitalize">{f}</label>
-              <input type={f === 'senha' ? 'password' : f === 'email' ? 'email' : 'text'}
-                value={form[f]} onChange={e => setForm(p => ({ ...p, [f]: e.target.value }))} required
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-yellow-400" />
-            </div>
-          ))}
+
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Nome</label>
+            <input type="text" value={form.nome} required
+              onChange={e => setForm(p => ({ ...p, nome: e.target.value }))}
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-yellow-400" />
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Email</label>
+            <input type="email" value={form.email} required
+              onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-yellow-400" />
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Telefone</label>
+            <input type="tel" inputMode="numeric" value={form.telefone} required
+              placeholder="(11) 91234-5678"
+              onChange={e => setForm(p => ({ ...p, telefone: mascaraTelefone(e.target.value) }))}
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-yellow-400" />
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Senha</label>
+            <input type="password" value={form.senha} required
+              onChange={e => setForm(p => ({ ...p, senha: e.target.value }))}
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-yellow-400" />
+          </div>
+
           <button type="submit" disabled={loading}
             className="w-full bg-yellow-400 text-gray-900 font-bold py-2 rounded-lg hover:bg-yellow-300 disabled:opacity-50">
             {loading ? 'Cadastrando...' : 'Cadastrar'}
