@@ -14,19 +14,21 @@ export function AdminTopNav() {
   const pathname = usePathname();
   return (
     <nav className="bg-trovao-card border-b border-trovao-border px-4">
-      <div className="max-w-2xl mx-auto flex items-center gap-1 h-12">
-        <span className="text-trovao-gold font-bold text-sm mr-4">Admin</span>
-        {NAV.map(({ href, label }) => (
-          <Link key={href} href={href}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-              pathname.startsWith(href)
-                ? 'bg-trovao-gold text-trovao-base'
-                : 'text-trovao-muted hover:text-white'
-            }`}>
-            {label}
-          </Link>
-        ))}
-        <Link href="/jogos" className="ml-auto text-trovao-muted text-xs hover:text-white">
+      <div className="max-w-2xl mx-auto flex items-center h-12 gap-2">
+        <span className="text-trovao-gold font-bold text-sm shrink-0">Admin</span>
+        <div className="flex items-center gap-1 flex-1 overflow-x-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+          {NAV.map(({ href, label }) => (
+            <Link key={href} href={href}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors shrink-0 ${
+                pathname.startsWith(href)
+                  ? 'bg-trovao-gold text-trovao-base'
+                  : 'text-trovao-muted hover:text-white'
+              }`}>
+              {label}
+            </Link>
+          ))}
+        </div>
+        <Link href="/jogos" className="shrink-0 ml-2 text-trovao-muted text-xs hover:text-white">
           ← App
         </Link>
       </div>
