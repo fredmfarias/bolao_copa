@@ -102,28 +102,28 @@ describe('AuthService', () => {
 
   it('registrar chama entrarViaConvite quando conviteToken fornecido', async () => {
     prismaMock.usuario.findUnique.mockResolvedValue(null);
-    prismaMock.usuario.create.mockResolvedValue({ id: 'new-id', email: 'b@b.com', nome: 'Test' });
+    prismaMock.usuario.create.mockResolvedValue({ id: 'new-id', email: 'b@b.com', nome: 'Test', role: 'USER' });
     bolaoMock.entrarViaConvite.mockResolvedValue({});
     await service.registrar({
       nome: 'Test', email: 'b@b.com', senha: '12345678',
       telefone: '(11) 91234-5678', conviteToken: 'token-abc',
     });
     expect(bolaoMock.entrarViaConvite).toHaveBeenCalledWith(
-      { id: 'new-id', role: undefined },
+      { id: 'new-id', role: 'USER' },
       'token-abc',
     );
   });
 
   it('registrar não chama entrarViaConvite quando conviteToken ausente', async () => {
     prismaMock.usuario.findUnique.mockResolvedValue(null);
-    prismaMock.usuario.create.mockResolvedValue({ id: 'new-id', email: 'b@b.com', nome: 'Test' });
+    prismaMock.usuario.create.mockResolvedValue({ id: 'new-id', email: 'b@b.com', nome: 'Test', role: 'USER' });
     await service.registrar({ nome: 'Test', email: 'b@b.com', senha: '12345678', telefone: '(11) 91234-5678' });
     expect(bolaoMock.entrarViaConvite).not.toHaveBeenCalled();
   });
 
   it('registrar propaga exceção do convite inválido', async () => {
     prismaMock.usuario.findUnique.mockResolvedValue(null);
-    prismaMock.usuario.create.mockResolvedValue({ id: 'new-id', email: 'b@b.com', nome: 'Test' });
+    prismaMock.usuario.create.mockResolvedValue({ id: 'new-id', email: 'b@b.com', nome: 'Test', role: 'USER' });
     bolaoMock.entrarViaConvite.mockRejectedValueOnce(new BadRequestException('Convite inválido.'));
     await expect(
       service.registrar({
