@@ -86,6 +86,13 @@ export default function ConvitePage() {
             className="w-full py-2 bg-trovao-surface border border-trovao-border text-trovao-muted text-sm rounded-lg hover:text-white transition-colors">
             Criar conta
           </button>
+          <a
+            href={`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/auth/google`}
+            onClick={() => sessionStorage.setItem('convitePendente', codigo)}
+            className="block w-full py-2 bg-trovao-surface border border-trovao-border text-trovao-muted text-sm rounded-lg hover:text-white transition-colors text-center"
+          >
+            Registrar com Google
+          </a>
         </div>
       </div>
     );
