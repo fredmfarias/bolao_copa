@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
@@ -13,7 +13,7 @@ function mascaraTelefone(valor: string): string {
   return `(${nums.slice(0, 2)}) ${nums.slice(2, 7)}-${nums.slice(7)}`;
 }
 
-export default function RegistrarPage() {
+function RegistrarForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const conviteToken = searchParams.get('convite');
@@ -104,5 +104,13 @@ export default function RegistrarPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RegistrarPage() {
+  return (
+    <Suspense>
+      <RegistrarForm />
+    </Suspense>
   );
 }
