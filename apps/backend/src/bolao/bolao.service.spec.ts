@@ -115,4 +115,13 @@ describe('BolaoService', () => {
       service.aprovarMembro({ id: 'mod-1', role: 'USER' }, 'b1', 'u1'),
     ).rejects.toThrow(ForbiddenException);
   });
+
+  it('atualizarPagamento chama update com status correto', async () => {
+    prismaMock.bolaoMembro.update.mockResolvedValue({});
+    await service.atualizarPagamento('b1', 'u1', 'PAGO' as any);
+    expect(prismaMock.bolaoMembro.update).toHaveBeenCalledWith({
+      where: { bolaoId_usuarioId: { bolaoId: 'b1', usuarioId: 'u1' } },
+      data: { statusPagamento: 'PAGO' },
+    });
+  });
 });

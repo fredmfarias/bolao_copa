@@ -8,6 +8,7 @@ import { BolaoService } from './bolao.service';
 import { ApostaService } from '../aposta/aposta.service';
 import { CreateBolaoDto } from './dto/create-bolao.dto';
 import { UpdateBolaoStatusDto } from './dto/update-bolao-status.dto';
+import { UpdatePagamentoStatusDto } from './dto/update-pagamento-status.dto';
 import { Role } from '@bolao/shared';
 
 @Controller('convites')
@@ -87,6 +88,16 @@ export class BolaoController {
   @Post(':bolaoId/eleger/:usuarioId')
   eleger(@Param('bolaoId') bolaoId: string, @Param('usuarioId') usuarioId: string) {
     return this.service.elegerModerador(bolaoId, usuarioId);
+  }
+
+  @UseGuards(BolaoModeradorGuard)
+  @Patch(':bolaoId/membros/:usuarioId/pagamento')
+  atualizarPagamento(
+    @Param('bolaoId') bolaoId: string,
+    @Param('usuarioId') usuarioId: string,
+    @Body() dto: UpdatePagamentoStatusDto,
+  ) {
+    return this.service.atualizarPagamento(bolaoId, usuarioId, dto.status);
   }
 
   @Get(':bolaoId/apostas')

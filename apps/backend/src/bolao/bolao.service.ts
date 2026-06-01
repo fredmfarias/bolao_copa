@@ -6,7 +6,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { InscricaoWindowService } from '../inscricao-window/inscricao-window.service';
 import { CreateBolaoDto } from './dto/create-bolao.dto';
 import { UpdateBolaoStatusDto } from './dto/update-bolao-status.dto';
-import { BolaoMembroPapel, BolaoStatus, BOLAO_GLOBAL_ID } from '@bolao/shared';
+import { BolaoMembroPapel, BolaoStatus, BOLAO_GLOBAL_ID, StatusPagamento } from '@bolao/shared';
 
 @Injectable()
 export class BolaoService {
@@ -109,6 +109,13 @@ export class BolaoService {
     return this.prisma.bolao.update({ where: { id: bolaoId }, data: { status: dto.status } });
   }
 
+  async atualizarPagamento(bolaoId: string, usuarioId: string, status: StatusPagamento) {
+    return this.prisma.bolaoMembro.update({
+      where: { bolaoId_usuarioId: { bolaoId, usuarioId } },
+      data: { statusPagamento: status },
+    });
+  }
+
   async lookupConvite(token: string) {
     const convite = await this.prisma.bolaoConvite.findUnique({
       where: { token },
@@ -129,6 +136,11 @@ export class BolaoService {
   async adicionarMembro(bolaoId: string, usuarioId: string) {
     const bolao = await this.prisma.bolao.findUnique({ where: { id: bolaoId } });
     if (!bolao) throw new NotFoundException('Bolão não encontrado.');
+
+    const jaEMembro = await this.prisma.bolaoMembro.findUnique({
+      where: { bolaoId_usuarioId: { bolaoId, usuarioId } },
+    });
+    if (jaEMembro) throw new ConflictException('Você já é membro deste bolão.');
 
     const totalMembros = await this.prisma.bolaoMembro.count({ where: { bolaoId } });
     if (totalMembros >= bolao.maxParticipantes) {
