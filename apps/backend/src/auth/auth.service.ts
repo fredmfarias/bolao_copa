@@ -26,7 +26,7 @@ export class AuthService {
 
     const senhaHash = await bcrypt.hash(dto.senha, 12);
     const usuario = await this.prisma.usuario.create({
-      data: { nome: dto.nome, email: dto.email, senhaHash },
+      data: { nome: dto.nome, email: dto.email, senhaHash, telefone: dto.telefone },
     });
 
     await this.prisma.bolaoMembro.create({

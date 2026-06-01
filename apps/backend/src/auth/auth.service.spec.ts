@@ -38,14 +38,14 @@ describe('AuthService', () => {
   it('registrar lança ConflictException se e-mail já existe', async () => {
     prismaMock.usuario.findUnique.mockResolvedValue({ id: '1', email: 'a@a.com' });
     await expect(
-      service.registrar({ nome: 'Test', email: 'a@a.com', senha: '12345678' }),
+      service.registrar({ nome: 'Test', email: 'a@a.com', senha: '12345678', telefone: '(11) 91234-5678' }),
     ).rejects.toThrow(ConflictException);
   });
 
   it('registrar cria usuário e entra no bolão global', async () => {
     prismaMock.usuario.findUnique.mockResolvedValue(null);
     prismaMock.usuario.create.mockResolvedValue({ id: 'new-id', email: 'b@b.com', nome: 'Test' });
-    await service.registrar({ nome: 'Test', email: 'b@b.com', senha: '12345678' });
+    await service.registrar({ nome: 'Test', email: 'b@b.com', senha: '12345678', telefone: '(11) 91234-5678' });
     expect(prismaMock.bolaoMembro.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({ bolaoId: '00000000-0000-0000-0000-000000000001' }),
@@ -56,9 +56,20 @@ describe('AuthService', () => {
   it('registrar lança ForbiddenException quando janela está fechada', async () => {
     inscricaoMock.assertAberta.mockRejectedValueOnce(new ForbiddenException('Inscrições encerradas.'));
     await expect(
-      service.registrar({ nome: 'Test', email: 'c@c.com', senha: '12345678' }),
+      service.registrar({ nome: 'Test', email: 'c@c.com', senha: '12345678', telefone: '(11) 91234-5678' }),
     ).rejects.toThrow(ForbiddenException);
     expect(prismaMock.usuario.create).not.toHaveBeenCalled();
+  });
+
+  it('registrar inclui telefone na criação do usuário', async () => {
+    prismaMock.usuario.findUnique.mockResolvedValue(null);
+    prismaMock.usuario.create.mockResolvedValue({ id: 'new-id', email: 'b@b.com', nome: 'Test' });
+    await service.registrar({ nome: 'Test', email: 'b@b.com', senha: '12345678', telefone: '(11) 91234-5678' });
+    expect(prismaMock.usuario.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ telefone: '(11) 91234-5678' }),
+      }),
+    );
   });
 
   it('login lança UnauthorizedException se e-mail não existe', async () => {
@@ -81,7 +92,7 @@ describe('AuthService', () => {
   it('envia e-mail de confirmação com URL /auth/confirmar-email', async () => {
     prismaMock.usuario.findUnique.mockResolvedValue(null);
     prismaMock.usuario.create.mockResolvedValue({ id: 'new-id', email: 'b@b.com', nome: 'Test' });
-    await service.registrar({ nome: 'Test', email: 'b@b.com', senha: '12345678' });
+    await service.registrar({ nome: 'Test', email: 'b@b.com', senha: '12345678', telefone: '(11) 91234-5678' });
     const html: string = mailerMock.sendMail.mock.calls[0][0].html;
     expect(html).toContain('/auth/confirmar-email?token=');
   });
