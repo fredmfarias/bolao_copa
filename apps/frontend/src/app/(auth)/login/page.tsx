@@ -84,7 +84,7 @@ function LoginForm() {
             <span className="block text-gray-600 cursor-not-allowed">Cadastros encerrados</span>
           )}
           <a href={`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/auth/google`}
-            className="block bg-gray-800 border border-gray-700 rounded-lg py-2 hover:bg-gray-700 text-center">
+            className="block bg-yellow-400/10 border border-yellow-400/40 text-yellow-300 rounded-lg py-2 hover:bg-yellow-400/20 hover:border-yellow-400/60 transition-colors text-center">
             Entrar com Google
           </a>
         </div>
