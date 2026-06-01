@@ -7,6 +7,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { BOLAO_GLOBAL_ID } from '@bolao/shared';
 import { InscricaoWindowService } from '../inscricao-window/inscricao-window.service';
+import { BolaoService } from '../bolao/bolao.service';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +17,7 @@ export class AuthService {
     private config: ConfigService,
     @Inject('MAILER') private mailer: any,
     private inscricaoWindow: InscricaoWindowService,
+    private bolaoService: BolaoService,
   ) {}
 
   async registrar(dto: RegisterDto) {
@@ -26,7 +28,7 @@ export class AuthService {
 
     const senhaHash = await bcrypt.hash(dto.senha, 12);
     const usuario = await this.prisma.usuario.create({
-      data: { nome: dto.nome, email: dto.email, senhaHash },
+      data: { nome: dto.nome, email: dto.email, senhaHash, telefone: dto.telefone },
     });
 
     await this.prisma.bolaoMembro.create({
@@ -37,6 +39,11 @@ export class AuthService {
     });
 
     await this.enviarEmailConfirmacao(usuario.id, usuario.email);
+
+    if (dto.conviteToken) {
+      await this.bolaoService.entrarViaConvite({ id: usuario.id, role: usuario.role }, dto.conviteToken);
+    }
+
     return { message: 'Cadastro realizado. Verifique seu e-mail.' };
   }
 

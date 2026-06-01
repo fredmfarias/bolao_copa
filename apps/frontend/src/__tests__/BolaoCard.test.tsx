@@ -5,6 +5,8 @@ const mockBolao = {
   id: 'bolao-1',
   nome: 'Bolão Copa',
   descricao: 'Descrição do bolão',
+  status: 'ATIVO' as const,
+  precoReais: '20.00',
   _count: { membros: 5 },
   maxParticipantes: 20,
 };

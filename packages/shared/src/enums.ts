@@ -23,6 +23,11 @@ export enum BolaoMembroPapel {
   PARTICIPANTE = 'PARTICIPANTE',
 }
 
+export enum StatusPagamento {
+  PENDENTE = 'PENDENTE',
+  PAGO = 'PAGO',
+}
+
 export const FASES_ELIMINATORIAS: JogoFase[] = [
   JogoFase.SEGUNDA_FASE,
   JogoFase.OITAVAS,

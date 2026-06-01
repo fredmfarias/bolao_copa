@@ -7,9 +7,10 @@ export class RegistroPage {
     await this.page.goto('/registrar');
   }
 
-  async register(nome: string, email: string, senha: string) {
+  async register(nome: string, email: string, senha: string, telefone = '(11) 91234-5678') {
     await this.page.locator('input[type="text"]').fill(nome);
     await this.page.locator('input[type="email"]').fill(email);
+    await this.page.locator('input[type="tel"]').fill(telefone);
     await this.page.locator('input[type="password"]').fill(senha);
     await this.page.getByRole('button', { name: /cadastrar/i }).click();
   }

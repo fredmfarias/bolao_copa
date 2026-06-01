@@ -27,6 +27,17 @@ export function ModeradorPanel({ bolaoId, membros, onAtualizado }: ModeradorPane
     }
   }
 
+  async function alternarPagamento(m: BolaoMembro) {
+    const novoStatus = m.statusPagamento === 'PENDENTE' ? 'PAGO' : 'PENDENTE';
+    setAtivo(`pag-${m.usuarioId}`);
+    try {
+      await api.patch(`/boloes/${bolaoId}/membros/${m.usuarioId}/pagamento`, { status: novoStatus });
+      onAtualizado();
+    } finally {
+      setAtivo(null);
+    }
+  }
+
   const restante = membros.length - visiveis;
 
   return (
@@ -49,6 +60,18 @@ export function ModeradorPanel({ bolaoId, membros, onAtualizado }: ModeradorPane
           }`}>
             {m.papel === 'MODERADOR' ? 'Mod' : 'Membro'}
           </span>
+
+          <button
+            disabled={ativo === `pag-${m.usuarioId}`}
+            onClick={() => alternarPagamento(m)}
+            className={`text-xs px-2 py-0.5 rounded-full transition-opacity disabled:opacity-50 ${
+              m.statusPagamento === 'PAGO'
+                ? 'bg-green-500/20 text-green-400'
+                : 'bg-yellow-500/20 text-yellow-400'
+            }`}
+          >
+            {m.statusPagamento === 'PAGO' ? 'Pago' : 'Pendente'}
+          </button>
 
           <div className="flex gap-1">
             {m.papel === 'PARTICIPANTE' && (

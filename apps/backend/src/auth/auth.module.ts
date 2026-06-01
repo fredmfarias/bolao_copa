@@ -7,9 +7,10 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { MailerModule } from '../mailer/mailer.module';
+import { BolaoModule } from '../bolao/bolao.module';
 
 @Module({
-  imports: [PassportModule, JwtModule, MailerModule],
+  imports: [PassportModule, JwtModule, MailerModule, BolaoModule],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, JwtRefreshStrategy, GoogleStrategy],
   exports: [AuthService],

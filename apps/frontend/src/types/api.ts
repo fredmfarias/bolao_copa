@@ -2,6 +2,7 @@ export interface Usuario {
   id: string;
   nome: string;
   email: string;
+  telefone: string;
   avatarUrl: string | null;
   role: 'ADMIN' | 'USER';
   ativo?: boolean;
@@ -24,6 +25,7 @@ export interface BolaoMembro {
   id: string;
   usuarioId: string;
   papel: 'MODERADOR' | 'PARTICIPANTE';
+  statusPagamento: 'PENDENTE' | 'PAGO';
   usuario: { id: string; nome: string; avatarUrl: string | null };
 }
 
