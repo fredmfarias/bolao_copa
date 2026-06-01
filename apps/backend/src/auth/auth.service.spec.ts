@@ -130,4 +130,14 @@ describe('AuthService', () => {
     await service.registrar({ nome: 'Test', email: 'b@b.com', senha: '12345678', telefone: '(11) 91234-5678', conviteToken: 'token-abc' });
     expect(bolaoMock.lookupConvite).toHaveBeenCalledWith('token-abc');
   });
+
+  it('registrar propaga exceção quando entrarViaConvite falha após criar usuário', async () => {
+    prismaMock.usuario.findUnique.mockResolvedValue(null);
+    prismaMock.usuario.create.mockResolvedValue({ id: 'new-id', email: 'b@b.com', nome: 'Test', role: 'USER' });
+    bolaoMock.entrarViaConvite.mockRejectedValueOnce(new ForbiddenException('Inscrições encerradas.'));
+    await expect(
+      service.registrar({ nome: 'Test', email: 'b@b.com', senha: '12345678', telefone: '(11) 91234-5678', conviteToken: 'token-abc' }),
+    ).rejects.toThrow(ForbiddenException);
+    expect(prismaMock.usuario.create).toHaveBeenCalled();
+  });
 });
