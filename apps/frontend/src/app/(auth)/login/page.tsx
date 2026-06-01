@@ -37,13 +37,13 @@ function LoginForm() {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="w-full max-w-sm bg-gray-900 rounded-xl p-8 space-y-6">
-        <div className="flex justify-center">
+        <div className="flex justify-end">
           <Image
             src="/logo_bolao.png"
             alt="Bolão Trovão"
-            width={176}
-            height={176}
-            className="h-auto w-44"
+            width={80}
+            height={80}
+            className="h-auto w-20"
             priority
           />
         </div>
