@@ -96,7 +96,9 @@ function PlacarDistRow({ grupo, limite, onApostar }: PlacarDistRowProps) {
                     size="sm"
                   />
                   <span className="text-xs text-trovao-muted">{aposta.jogo.selecaoCasa.codigo}</span>
-                  <span className="text-xs text-trovao-muted">×</span>
+                  <span className="text-xs font-semibold tabular-nums text-white">
+                    {aposta.placarCasa} × {aposta.placarVisitante}
+                  </span>
                   <span className="text-xs text-trovao-muted">{aposta.jogo.selecaoVisitante.codigo}</span>
                   <SelecaoAvatar
                     nome={aposta.jogo.selecaoVisitante.nome}
