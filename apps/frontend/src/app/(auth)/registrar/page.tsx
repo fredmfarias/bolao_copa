@@ -4,7 +4,6 @@ import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
-import { useInscricaoStatus } from '@/hooks/useInscricaoStatus';
 
 function mascaraTelefone(valor: string): string {
   const nums = valor.replace(/\D/g, '').slice(0, 11);
@@ -17,7 +16,6 @@ function RegistrarForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const conviteToken = searchParams.get('convite');
-  const { abertas } = useInscricaoStatus();
   const [form, setForm] = useState({ nome: '', email: '', telefone: '', senha: '' });
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState('');
@@ -28,8 +26,7 @@ function RegistrarForm() {
     setErro('');
     setLoading(true);
     try {
-      const body = conviteToken ? { ...form, conviteToken } : form;
-      const data = await api.post<{ message: string }>('/auth/registrar', body);
+      const data = await api.post<{ message: string }>('/auth/registrar', { ...form, conviteToken });
       setSucesso(data.message);
     } catch (err: any) {
       setErro(err.message ?? 'Erro ao cadastrar.');
@@ -38,11 +35,11 @@ function RegistrarForm() {
     }
   }
 
-  if (!abertas) return (
+  if (!conviteToken) return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="bg-gray-900 rounded-xl p-8 text-center max-w-sm space-y-4">
         <p className="text-red-400">
-          Cadastros encerrados a 2h do início da Copa. Procure o administrador para se cadastrar.
+          Você precisa de um convite para criar uma conta.
         </p>
         <Link href="/login" className="text-yellow-400 hover:underline block">Voltar ao login</Link>
       </div>

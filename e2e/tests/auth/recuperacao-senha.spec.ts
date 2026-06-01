@@ -1,6 +1,6 @@
 import { test, expect } from '../../fixtures';
 import { mailpit } from '../../support/mailpit';
-import { truncateDynamic, prisma } from '../../support/db';
+import { truncateDynamic } from '../../support/db';
 import { newUser } from '../../data/factories';
 import { LoginPage } from '../../pages/login.page';
 
@@ -8,10 +8,9 @@ test.describe('Recuperação de senha', () => {
   test.beforeAll(async () => { await truncateDynamic(); });
   test.beforeEach(async () => { await mailpit.clear(); });
 
-  test('usuário solicita reset, define nova senha e loga', async ({ page, anonApi }) => {
+  test('usuário solicita reset, define nova senha e loga', async ({ page, anonApi, adminApi }) => {
     const user = newUser();
-    await anonApi.post('/auth/registrar', { data: user });
-    await prisma.usuario.update({ where: { email: user.email }, data: { emailVerificado: true } });
+    await adminApi.post('/admin/usuarios', { data: { nome: user.nome, email: user.email, senhaTemp: user.senha } });
 
     // Solicita reset
     const esqueceu = await anonApi.post('/auth/esqueceu-senha', { data: { email: user.email } });

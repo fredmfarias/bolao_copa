@@ -1,20 +1,35 @@
 import { test, expect } from '@playwright/test';
 import { mailpit } from '../../support/mailpit';
-import { truncateDynamic } from '../../support/db';
+import { truncateDynamic, prisma } from '../../support/db';
 import { newUser } from '../../data/factories';
 import { RegistroPage } from '../../pages/registro.page';
 import { LoginPage } from '../../pages/login.page';
 
 test.describe('Registro → confirmação → login', () => {
-  test.beforeAll(async () => { await truncateDynamic(); });
+  let conviteToken: string;
+
+  test.beforeAll(async () => {
+    await truncateDynamic();
+
+    // Create a private bolão and convite so the /registrar form is accessible
+    const adminUser = await prisma.usuario.findFirstOrThrow({ where: { email: 'admin@bolaotrovao.com' } });
+    const bolao = await prisma.bolao.create({
+      data: { nome: 'Bolão E2E Convite', maxParticipantes: 100, precoReais: 0, criadoPorId: adminUser.id },
+    });
+    const convite = await prisma.bolaoConvite.create({
+      data: { bolaoId: bolao.id, criadoPorId: adminUser.id },
+    });
+    conviteToken = convite.token;
+  });
+
   test.beforeEach(async () => { await mailpit.clear(); });
 
   test('usuário se registra, confirma e-mail e faz login', async ({ page }) => {
     const user = newUser();
 
-    // 1. Registro pela UI
+    // 1. Registro pela UI (convite na URL)
     const registro = new RegistroPage(page);
-    await registro.goto();
+    await registro.goto(conviteToken);
     await registro.register(user.nome, user.email, user.senha);
     await registro.expectSuccess();
 

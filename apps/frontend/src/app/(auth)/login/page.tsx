@@ -5,7 +5,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
-import { useInscricaoStatus } from '@/hooks/useInscricaoStatus';
 
 function LoginForm() {
   const { login } = useAuth();
@@ -14,7 +13,6 @@ function LoginForm() {
   const redirect = searchParams.get('redirect') ?? '/jogos';
   const emailConfirmado = searchParams.get('emailConfirmado');
   const erroQuery = searchParams.get('erro');
-  const { abertas } = useInscricaoStatus();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
@@ -82,13 +80,8 @@ function LoginForm() {
             Entrar com Google
           </a>
         </form>
-        <div className="text-center space-y-2 text-sm text-gray-400">
+        <div className="text-center text-sm text-gray-400">
           <Link href="/esqueceu-senha" className="hover:text-white block">Esqueceu a senha?</Link>
-          {abertas ? (
-            <Link href="/registrar" className="hover:text-white block">Criar conta</Link>
-          ) : (
-            <span className="block text-gray-600 cursor-not-allowed">Cadastros encerrados</span>
-          )}
         </div>
       </div>
     </div>

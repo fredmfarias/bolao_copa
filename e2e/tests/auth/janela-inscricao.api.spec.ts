@@ -58,7 +58,8 @@ test.describe('Janela de inscrição (API)', () => {
     await clearCache(adminApi);
 
     const u = newUser('janela');
-    const res = await anonApi.post('/auth/registrar', { data: { nome: u.nome, email: u.email, senha: u.senha, telefone: u.telefone } });
+    // conviteToken must be present to pass DTO validation; window check (403) fires before token lookup
+    const res = await anonApi.post('/auth/registrar', { data: { nome: u.nome, email: u.email, senha: u.senha, telefone: u.telefone, conviteToken: 'qualquer-token' } });
     expect(res.status()).toBe(403);
     const body = await res.json();
     expect(body.message).toContain('Inscrições encerradas');
