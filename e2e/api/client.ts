@@ -28,22 +28,19 @@ async function authedContext(email: string, senha: string): Promise<APIRequestCo
   });
 }
 
-// Registers a user, confirms e-mail directly (fast), returns an authed context.
+// Creates a user via the admin endpoint (bypasses invite requirement and window check),
+// then returns an authed context. Admin endpoint sets emailVerificado=true automatically.
 export async function criarUsuarioAutenticado(user: {
   nome: string; email: string; senha: string; telefone?: string;
 }): Promise<{ ctx: APIRequestContext; user: TestUser }> {
-  const anon = await request.newContext({ baseURL: BASE });
-  const reg = await anon.post('/auth/registrar', {
-    data: { nome: user.nome, email: user.email, senha: user.senha, telefone: user.telefone ?? '(11) 91234-5678' },
+  const adminApi = await adminContext();
+  const reg = await adminApi.post('/admin/usuarios', {
+    data: { nome: user.nome, email: user.email, senhaTemp: user.senha },
   });
-  if (!reg.ok()) throw new Error(`registrar falhou: ${reg.status()} ${await reg.text()}`);
-  await anon.dispose();
+  if (!reg.ok()) throw new Error(`admin/usuarios falhou: ${reg.status()} ${await reg.text()}`);
+  await adminApi.dispose();
 
-  const dbUser = await prisma.usuario.update({
-    where: { email: user.email },
-    data: { emailVerificado: true },
-  });
-
+  const dbUser = await prisma.usuario.findUniqueOrThrow({ where: { email: user.email } });
   const ctx = await authedContext(user.email, user.senha);
   return { ctx, user: { id: dbUser.id, nome: user.nome, email: user.email, senha: user.senha } };
 }

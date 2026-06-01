@@ -3,8 +3,9 @@ import { Page, expect } from '@playwright/test';
 export class RegistroPage {
   constructor(private page: Page) {}
 
-  async goto() {
-    await this.page.goto('/registrar');
+  async goto(conviteToken?: string) {
+    const url = conviteToken ? `/registrar?convite=${conviteToken}` : '/registrar';
+    await this.page.goto(url);
   }
 
   async register(nome: string, email: string, senha: string, telefone = '(11) 91234-5678') {
