@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
@@ -36,7 +37,16 @@ function LoginForm() {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="w-full max-w-sm bg-gray-900 rounded-xl p-8 space-y-6">
-        <h1 className="text-2xl font-bold text-center text-yellow-400">⚡ Bolão Trovão</h1>
+        <div className="flex justify-center">
+          <Image
+            src="/logo_bolao.png"
+            alt="Bolão Trovão"
+            width={176}
+            height={176}
+            className="h-auto w-44"
+            priority
+          />
+        </div>
         {erroQuery === 'cadastros-encerrados' && (
           <p className="text-red-400 text-sm text-center">
             Cadastros encerrados a 2h do início da Copa. Procure o administrador para se cadastrar.
