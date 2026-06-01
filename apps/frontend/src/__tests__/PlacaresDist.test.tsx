@@ -113,6 +113,14 @@ it('aposta encerrada sem pontuacao exibe "Aguardando"', () => {
   expect(screen.getByText('Aguardando')).toBeInTheDocument();
 });
 
+it('0×2 e 2×0 são agrupados como o mesmo placar, exibido como 2×0', () => {
+  const a1 = makeAposta({ id: 'a1', jogoId: 'j1', placarCasa: 2, placarVisitante: 0, jogo: makeJogo({ id: 'j1' }) });
+  const a2 = makeAposta({ id: 'a2', jogoId: 'j2', placarCasa: 0, placarVisitante: 2, jogo: makeJogo({ id: 'j2' }) });
+  render(<PlacaresDist apostas={[a1, a2]} onApostar={jest.fn()} />);
+  expect(screen.getByText('2 × 0')).toBeInTheDocument();
+  expect(screen.getByText('2/18')).toBeInTheDocument();
+});
+
 it('placar mais frequente aparece antes', () => {
   const maisFreq = [
     makeAposta({ id: 'a1', jogoId: 'j1', placarCasa: 2, placarVisitante: 0, jogo: makeJogo({ id: 'j1' }) }),

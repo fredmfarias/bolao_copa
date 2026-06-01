@@ -18,22 +18,24 @@ interface PlacasDistProps {
 }
 
 type PlacarGrupo = {
-  placarCasa: number;
-  placarVisitante: number;
+  placarAlto: number;
+  placarBaixo: number;
   apostas: Aposta[];
 };
 
 function agruparPorPlacar(apostas: Aposta[]): PlacarGrupo[] {
   const map = new Map<string, Aposta[]>();
   for (const a of apostas) {
-    const key = `${a.placarCasa}-${a.placarVisitante}`;
+    const alto = Math.max(a.placarCasa, a.placarVisitante);
+    const baixo = Math.min(a.placarCasa, a.placarVisitante);
+    const key = `${alto}-${baixo}`;
     if (!map.has(key)) map.set(key, []);
     map.get(key)!.push(a);
   }
   return Array.from(map.values())
     .map(lista => ({
-      placarCasa: lista[0].placarCasa,
-      placarVisitante: lista[0].placarVisitante,
+      placarAlto: Math.max(lista[0].placarCasa, lista[0].placarVisitante),
+      placarBaixo: Math.min(lista[0].placarCasa, lista[0].placarVisitante),
       apostas: lista,
     }))
     .sort((a, b) => b.apostas.length - a.apostas.length);
@@ -52,6 +54,7 @@ interface PlacarDistRowProps {
   onApostar: (jogo: Jogo) => void;
 }
 
+
 function PlacarDistRow({ grupo, limite, onApostar }: PlacarDistRowProps) {
   const [expandido, setExpandido] = useState(false);
   const count = grupo.apostas.length;
@@ -64,7 +67,7 @@ function PlacarDistRow({ grupo, limite, onApostar }: PlacarDistRowProps) {
         className="w-full flex items-center gap-3 px-4 py-3 hover:bg-trovao-surface/50 transition-colors"
       >
         <span className="text-white font-bold tabular-nums w-14 text-left shrink-0">
-          {grupo.placarCasa} × {grupo.placarVisitante}
+          {grupo.placarAlto} × {grupo.placarBaixo}
         </span>
         <div className="flex-1 h-2 bg-trovao-border rounded-full overflow-hidden">
           <div
@@ -162,7 +165,7 @@ export function PlacaresDist({ apostas, onApostar }: PlacasDistProps) {
           <div className="space-y-2">
             {gruposDistribuicao.map(g => (
               <PlacarDistRow
-                key={`${g.placarCasa}-${g.placarVisitante}`}
+                key={`${g.placarAlto}-${g.placarBaixo}`}
                 grupo={g}
                 limite={MAX_APOSTAS_IGUAIS_GRUPOS}
                 onApostar={onApostar}
@@ -188,7 +191,7 @@ export function PlacaresDist({ apostas, onApostar }: PlacasDistProps) {
           <div className="space-y-2">
             {elimDistribuicao.map(g => (
               <PlacarDistRow
-                key={`${g.placarCasa}-${g.placarVisitante}`}
+                key={`${g.placarAlto}-${g.placarBaixo}`}
                 grupo={g}
                 limite={MAX_APOSTAS_IGUAIS_ELIMINATORIAS}
                 onApostar={onApostar}
