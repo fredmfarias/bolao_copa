@@ -48,6 +48,9 @@ function LoginForm() {
           />
           <span className="text-gray-300 text-sm">O Bolão da Copa do Mundo 2026.</span>
         </div>
+        <div className="flex justify-end mb-4">
+          <Link href="/regulamento" className="text-xs text-gray-500 hover:text-white">Regulamento</Link>
+        </div>
         {erroQuery === 'cadastros-encerrados' && (
           <p className="text-red-400 text-sm text-center mb-4">
             Cadastros encerrados a 2h do início da Copa. Procure o administrador para se cadastrar.
@@ -80,7 +83,6 @@ function LoginForm() {
           </a>
         </form>
         <div className="text-center space-y-2 text-sm text-gray-400">
-          <Link href="/regulamento" className="hover:text-white block">Regulamento</Link>
           <Link href="/esqueceu-senha" className="hover:text-white block">Esqueceu a senha?</Link>
           {abertas ? (
             <Link href="/registrar" className="hover:text-white block">Criar conta</Link>
