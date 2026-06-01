@@ -32,6 +32,11 @@ enum BolaoMembroPapel {
   PARTICIPANTE
 }
 
+enum StatusPagamento {
+  PENDENTE
+  PAGO
+}
+
 model Usuario {
   id              String    @id @default(uuid())
   nome            String
@@ -42,6 +47,7 @@ model Usuario {
   avatarUrl       String?
   emailVerificado Boolean   @default(false)
   ativo           Boolean   @default(true)
+  telefone        String    @default("")
   criadoEm        DateTime  @default(now())
   bolaoFavoritoId String?
   bolaoFavorito   Bolao?    @relation("UsuarioBolaoFavorito", fields: [bolaoFavoritoId], references: [id])
@@ -84,8 +90,9 @@ model BolaoMembro {
   bolao     Bolao            @relation(fields: [bolaoId], references: [id])
   usuarioId String
   usuario   Usuario          @relation(fields: [usuarioId], references: [id])
-  papel     BolaoMembroPapel @default(PARTICIPANTE)
-  entrouEm  DateTime         @default(now())
+  papel           BolaoMembroPapel @default(PARTICIPANTE)
+  entrouEm        DateTime         @default(now())
+  statusPagamento StatusPagamento  @default(PENDENTE)
 
   @@unique([bolaoId, usuarioId])
   @@map("bolao_membro")
