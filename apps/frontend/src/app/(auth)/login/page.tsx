@@ -36,8 +36,8 @@ function LoginForm() {
 
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="w-full max-w-sm bg-gray-900 rounded-xl p-8 space-y-6">
-        <div className="flex justify-end">
+      <div className="w-full max-w-sm bg-gray-900 rounded-xl p-8">
+        <div className="flex justify-end mb-2">
           <Image
             src="/logo_bolao.png"
             alt="Bolão Trovão"
@@ -48,11 +48,11 @@ function LoginForm() {
           />
         </div>
         {erroQuery === 'cadastros-encerrados' && (
-          <p className="text-red-400 text-sm text-center">
+          <p className="text-red-400 text-sm text-center mb-4">
             Cadastros encerrados a 2h do início da Copa. Procure o administrador para se cadastrar.
           </p>
         )}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 mb-6">
           {erro && <p className="text-red-400 text-sm text-center">{erro}</p>}
           {emailConfirmado && (
             <p className="text-green-400 text-sm text-center">
