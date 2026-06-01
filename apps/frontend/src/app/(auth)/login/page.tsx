@@ -65,6 +65,7 @@ function LoginForm() {
           </button>
         </form>
         <div className="text-center space-y-2 text-sm text-gray-400">
+          <Link href="/regulamento" className="hover:text-white block">Regulamento</Link>
           <Link href="/esqueceu-senha" className="hover:text-white block">Esqueceu a senha?</Link>
           {abertas ? (
             <Link href="/registrar" className="hover:text-white block">Criar conta</Link>
