@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, UnauthorizedException, Inject } from '@nestjs/common';
+import { Injectable, ConflictException, UnauthorizedException, BadRequestException, Inject } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
@@ -26,6 +26,9 @@ export class AuthService {
     const existe = await this.prisma.usuario.findUnique({ where: { email: dto.email } });
     if (existe) throw new ConflictException('E-mail já cadastrado.');
 
+    const conviteInfo = await this.bolaoService.lookupConvite(dto.conviteToken);
+    if (!conviteInfo.valido) throw new BadRequestException('Convite inválido ou expirado.');
+
     const senhaHash = await bcrypt.hash(dto.senha, 12);
     const usuario = await this.prisma.usuario.create({
       data: { nome: dto.nome, email: dto.email, senhaHash, telefone: dto.telefone },
@@ -40,9 +43,7 @@ export class AuthService {
 
     await this.enviarEmailConfirmacao(usuario.id, usuario.email);
 
-    if (dto.conviteToken) {
-      await this.bolaoService.entrarViaConvite({ id: usuario.id, role: usuario.role }, dto.conviteToken);
-    }
+    await this.bolaoService.entrarViaConvite({ id: usuario.id, role: usuario.role }, dto.conviteToken);
 
     return { message: 'Cadastro realizado. Verifique seu e-mail.' };
   }
