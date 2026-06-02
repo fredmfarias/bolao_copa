@@ -101,6 +101,7 @@ describe('BolaoService', () => {
 
   it('entrarViaConvite passa quando admin', async () => {
     prismaMock.bolaoConvite.findUnique.mockResolvedValue({ bolaoId: 'b1', expiraEm: null });
+    prismaMock.bolaoMembro.findUnique.mockResolvedValue(null);
     prismaMock.bolao.findUnique.mockResolvedValue({ id: 'b1', maxParticipantes: 10 });
     prismaMock.bolaoMembro.count.mockResolvedValue(0);
     prismaMock.bolaoMembro.create.mockResolvedValue({});
