@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import {
   Accordion,
   AccordionItem,
@@ -12,7 +13,9 @@ import {
 const PIX_COPIA_COLA =
   '00020126360014BR.GOV.BCB.PIX0114+5583988269825520400005303986540550.005802BR5901N6001C62150511BolaoTrovao6304793E';
 
-export default function RegulamentoPage() {
+function RegulamentoConteudo() {
+  const searchParams = useSearchParams();
+  const from = searchParams.get('from') ?? '/login';
   const [copiado, setCopiado] = useState(false);
 
   async function copiarPix() {
@@ -26,8 +29,8 @@ export default function RegulamentoPage() {
       <div className="mx-auto max-w-2xl">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-yellow-400">Regulamento</h1>
-          <Link href="/login" className="text-sm text-gray-400 hover:text-white">
-            Voltar ao login
+          <Link href={from} className="text-sm text-gray-400 hover:text-white">
+            Voltar
           </Link>
         </div>
 
@@ -287,5 +290,13 @@ export default function RegulamentoPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RegulamentoPage() {
+  return (
+    <Suspense>
+      <RegulamentoConteudo />
+    </Suspense>
   );
 }
