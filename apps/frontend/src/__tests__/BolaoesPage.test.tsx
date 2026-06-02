@@ -52,3 +52,13 @@ it('não exibe banner durante carregamento', () => {
     screen.queryByText(/você ainda não participa de nenhum bolão privado/i),
   ).not.toBeInTheDocument();
 });
+
+it('não exibe a busca de bolão', async () => {
+  mockApiGet.mockResolvedValue([
+    { id: GLOBAL_ID, nome: 'Global', status: 'ATIVO', precoReais: '0', _count: { membros: 1 }, maxParticipantes: 100 },
+  ]);
+  render(<BolaoesPage />);
+  await waitFor(() => screen.getByText('Global'));
+  expect(screen.queryByText(/buscar bolão/i)).not.toBeInTheDocument();
+  expect(screen.queryByPlaceholderText(/nome do bolão/i)).not.toBeInTheDocument();
+});

@@ -101,12 +101,27 @@ describe('BolaoService', () => {
 
   it('entrarViaConvite passa quando admin', async () => {
     prismaMock.bolaoConvite.findUnique.mockResolvedValue({ bolaoId: 'b1', expiraEm: null });
+    prismaMock.bolaoMembro.findUnique.mockResolvedValue(null);
     prismaMock.bolao.findUnique.mockResolvedValue({ id: 'b1', maxParticipantes: 10 });
     prismaMock.bolaoMembro.count.mockResolvedValue(0);
     prismaMock.bolaoMembro.create.mockResolvedValue({});
     prismaMock.ranking.create.mockResolvedValue({});
     await service.entrarViaConvite({ id: 'admin-1', role: 'ADMIN' }, 'token-valido');
     expect(inscricaoMock.assertAberta).toHaveBeenCalledWith({ id: 'admin-1', role: 'ADMIN' });
+  });
+
+  it('entrarViaConvite retorna associação existente quando já é membro (idempotente)', async () => {
+    const membroExistente = { bolaoId: 'b1', usuarioId: 'user-1' };
+    prismaMock.bolaoConvite.findUnique.mockResolvedValue({ bolaoId: 'b1', expiraEm: null });
+    prismaMock.bolaoMembro.findUnique.mockResolvedValue(membroExistente);
+
+    const resultado = await service.entrarViaConvite({ id: 'user-1', role: 'USER' }, 'token-valido');
+
+    expect(resultado).toBe(membroExistente);
+    expect(inscricaoMock.assertAberta).toHaveBeenCalledWith({ id: 'user-1', role: 'USER' });
+    expect(prismaMock.bolaoMembro.create).not.toHaveBeenCalled();
+    expect(prismaMock.ranking.create).not.toHaveBeenCalled();
+    expect(prismaMock.bolaoMembro.count).not.toHaveBeenCalled();
   });
 
   it('aprovarMembro lança ForbiddenException quando janela fechada', async () => {

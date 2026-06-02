@@ -72,6 +72,13 @@ export class BolaoService {
     if (convite.expiraEm && convite.expiraEm < new Date()) {
       throw new BadRequestException('Convite expirado.');
     }
+    // Idempotente: entrar por convite num bolão que já participa (ex.: bolão
+    // global) não deve falhar. Curto-circuita antes de adicionarMembro, que
+    // lança ConflictException em duplicidade.
+    const jaEMembro = await this.prisma.bolaoMembro.findUnique({
+      where: { bolaoId_usuarioId: { bolaoId: convite.bolaoId, usuarioId: user.id } },
+    });
+    if (jaEMembro) return jaEMembro;
     return this.adicionarMembro(convite.bolaoId, user.id);
   }
 
