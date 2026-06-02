@@ -4,10 +4,13 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import { BottomNav } from '@/components/BottomNav';
+import { usePushSubscription } from '@/hooks/usePushSubscription';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+
+  usePushSubscription(user);
 
   useEffect(() => {
     if (!loading && !user) router.push('/login');
