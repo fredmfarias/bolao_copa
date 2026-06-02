@@ -19,7 +19,7 @@ type Estado = 'carregando' | 'invalido' | 'nao-autenticado' | 'pronto' | 'entran
 
 export default function ConvitePage() {
   const { codigo } = useParams<{ codigo: string }>();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, logout } = useAuth();
   const router = useRouter();
 
   const [estado, setEstado] = useState<Estado>('carregando');
@@ -49,6 +49,12 @@ export default function ConvitePage() {
       setErro(err instanceof Error ? err.message : 'Erro ao entrar no bolão.');
       setEstado('pronto');
     }
+  }
+
+  async function trocarConta() {
+    await logout();
+    setErro('');
+    setEstado('nao-autenticado');
   }
 
   if (estado === 'carregando') return <PageSkeleton />;
@@ -127,6 +133,15 @@ export default function ConvitePage() {
           className="w-full py-3 bg-trovao-gold text-trovao-base text-sm font-bold rounded-xl disabled:opacity-50 hover:opacity-90 transition-opacity">
           {estado === 'entrando' ? 'Entrando...' : 'Entrar no Bolão'}
         </button>
+        {user && (
+          <div className="pt-2 border-t border-trovao-border space-y-1">
+            <p className="text-trovao-muted text-xs">Logado como {user.email}</p>
+            <button onClick={trocarConta} disabled={estado === 'entrando'}
+              className="text-trovao-gold text-xs hover:underline disabled:opacity-50">
+              Não é você? Trocar de conta
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
