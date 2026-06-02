@@ -5,6 +5,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { AdminService } from './admin.service';
 import { Role } from '@bolao/shared';
 import { CreateUsuarioAdminDto } from './dto/create-usuario-admin.dto';
+import { EnviarNotificacaoDto } from './dto/enviar-notificacao.dto';
 import { InscricaoWindowService } from '../inscricao-window/inscricao-window.service';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -71,5 +72,10 @@ export class AdminController {
   clearInscricoesCache() {
     this.inscricaoWindow.clearCache();
     return { message: 'Cache invalidado.' };
+  }
+
+  @Post('notificacoes/enviar')
+  enviarNotificacao(@Body() dto: EnviarNotificacaoDto) {
+    return this.service.enviarNotificacao(dto);
   }
 }

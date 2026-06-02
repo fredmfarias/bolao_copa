@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RankingService } from '../ranking/ranking.service';
+import { NotificacaoService } from '../notificacao/notificacao.service';
 
 @Injectable()
 export class PublicacaoService {
   constructor(
     private prisma: PrismaService,
     private ranking: RankingService,
+    private notificacao: NotificacaoService,
   ) {}
 
   async listarJogosPendentes() {
@@ -105,6 +107,12 @@ export class PublicacaoService {
         });
       }
     }
+
+    await this.notificacao.enviarParaTodos({
+      title: 'Ranking publicado!',
+      body: `A rodada ${numero} foi publicada. Confira sua posição no ranking!`,
+      url: '/ranking',
+    });
 
     return { numero: publicacao.numero, publicadoEm: publicacao.publicadoEm };
   }

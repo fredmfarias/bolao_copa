@@ -8,5 +8,6 @@ import { NotificacaoProcessor } from './notificacao.processor';
   imports: [BullModule.registerQueue({ name: 'aposta-reminder' })],
   controllers: [NotificacaoController],
   providers: [NotificacaoService, NotificacaoProcessor],
+  exports: [NotificacaoService],
 })
 export class NotificacaoModule {}

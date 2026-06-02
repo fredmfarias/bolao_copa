@@ -60,6 +60,19 @@ export class NotificacaoService {
     await Promise.all(membros.map((m) => this.enviarParaUsuario(m.usuarioId, payload)));
   }
 
+  async enviarParaTodos(payload: object) {
+    if (!this.vapidConfigured) return;
+    const subs = await this.prisma.notificacaoSubscription.findMany({
+      distinct: ['usuarioId'],
+      select: { usuarioId: true },
+    });
+    await Promise.all(subs.map((s) => this.enviarParaUsuario(s.usuarioId, payload)));
+  }
+
+  async enviarParaLista(usuarioIds: string[], payload: object) {
+    await Promise.all(usuarioIds.map((id) => this.enviarParaUsuario(id, payload)));
+  }
+
   async processarLembrete(jogoId: string) {
     const jogo = await this.prisma.jogo.findUnique({
       where: { id: jogoId },

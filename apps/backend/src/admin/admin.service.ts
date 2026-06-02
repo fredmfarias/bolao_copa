@@ -4,9 +4,11 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RankingService } from '../ranking/ranking.service';
 import { PublicacaoService } from '../publicacao/publicacao.service';
 import { BolaoService } from '../bolao/bolao.service';
+import { NotificacaoService } from '../notificacao/notificacao.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { CreateUsuarioAdminDto } from './dto/create-usuario-admin.dto';
+import { EnviarNotificacaoDto } from './dto/enviar-notificacao.dto';
 import { BOLAO_GLOBAL_ID } from '@bolao/shared';
 
 @Injectable()
@@ -16,6 +18,7 @@ export class AdminService {
     private ranking: RankingService,
     private publicacao: PublicacaoService,
     private bolao: BolaoService,
+    private notificacao: NotificacaoService,
     private jwt: JwtService,
     private config: ConfigService,
     @Inject('MAILER') private mailer: any,
@@ -139,6 +142,16 @@ export class AdminService {
     }
 
     return { id: usuario.id, nome: usuario.nome, email: usuario.email };
+  }
+
+  async enviarNotificacao(dto: EnviarNotificacaoDto) {
+    const payload = { title: dto.titulo, body: dto.corpo };
+    if (dto.usuarioIds && dto.usuarioIds.length > 0) {
+      await this.notificacao.enviarParaLista(dto.usuarioIds, payload);
+      return { message: `Notificação enviada para ${dto.usuarioIds.length} usuário(s).` };
+    }
+    await this.notificacao.enviarParaTodos(payload);
+    return { message: 'Notificação enviada para todos os usuários.' };
   }
 
   async adicionarUsuarioBolao(bolaoId: string, usuarioId: string) {
