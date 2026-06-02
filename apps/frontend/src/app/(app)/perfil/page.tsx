@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { api } from '@/lib/api';
 import { useAuth } from '@/components/AuthProvider';
 
@@ -92,6 +93,12 @@ export default function PerfilPage() {
         </button>
       </form>
 
+      <Link
+        href="/regulamento?from=/perfil"
+        className="block text-sm text-gray-400 hover:text-white"
+      >
+        Regulamento
+      </Link>
       <button
         onClick={handleLogout}
         disabled={logoutLoading}

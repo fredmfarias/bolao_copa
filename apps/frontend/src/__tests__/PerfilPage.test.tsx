@@ -49,3 +49,9 @@ it('desabilita o botão e exibe "Saindo..." durante o logout', async () => {
   fireEvent.click(screen.getByRole('button', { name: /sair/i }));
   expect(screen.getByRole('button', { name: /saindo/i })).toBeDisabled();
 });
+
+it('exibe link do Regulamento com from=/perfil', () => {
+  render(<PerfilPage />);
+  const link = screen.getByRole('link', { name: /regulamento/i });
+  expect(link).toHaveAttribute('href', '/regulamento?from=/perfil');
+});
