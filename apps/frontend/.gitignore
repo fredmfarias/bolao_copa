@@ -1,2 +1,8 @@
 .next/
 tsconfig.tsbuildinfo
+
+# Gerados pelo next-pwa em tempo de build
+public/sw.js
+public/workbox-*.js
+public/swe-worker-*.js
+public/worker-*.js
