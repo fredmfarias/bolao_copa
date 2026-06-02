@@ -117,6 +117,7 @@ describe('BolaoService', () => {
     const resultado = await service.entrarViaConvite({ id: 'user-1', role: 'USER' }, 'token-valido');
 
     expect(resultado).toBe(membroExistente);
+    expect(inscricaoMock.assertAberta).toHaveBeenCalledWith({ id: 'user-1', role: 'USER' });
     expect(prismaMock.bolaoMembro.create).not.toHaveBeenCalled();
     expect(prismaMock.ranking.create).not.toHaveBeenCalled();
     expect(prismaMock.bolaoMembro.count).not.toHaveBeenCalled();
