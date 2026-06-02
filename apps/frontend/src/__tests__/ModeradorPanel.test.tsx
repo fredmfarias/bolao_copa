@@ -25,6 +25,12 @@ it('exibe lista de membros', () => {
   expect(screen.getByText('Bob')).toBeInTheDocument();
 });
 
+it('marca moderador com a tag "Mod" e não exibe tag "Membro" para participantes', () => {
+  render(<ModeradorPanel bolaoId="b1" membros={membros} onAtualizado={jest.fn()} />);
+  expect(screen.getByText('Mod')).toBeInTheDocument();
+  expect(screen.queryByText('Membro')).not.toBeInTheDocument();
+});
+
 it('botão remover chama POST /boloes/:id/remover/:userId', async () => {
   const onAtualizado = jest.fn();
   render(<ModeradorPanel bolaoId="b1" membros={membros} onAtualizado={onAtualizado} />);
