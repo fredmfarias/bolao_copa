@@ -10,8 +10,6 @@ import type { Bolao } from '@/types/api';
 export default function BolaoesPage() {
   const { user, refresh } = useAuth();
   const [meus, setMeus] = useState<Bolao[]>([]);
-  const [busca, setBusca] = useState('');
-  const [resultados, setResultados] = useState<Bolao[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,13 +20,6 @@ export default function BolaoesPage() {
   }, []);
 
   const semBolaoReal = !loading && meus.length === 1 && meus[0].id === BOLAO_GLOBAL_ID;
-
-  async function handleBusca(e: React.FormEvent) {
-    e.preventDefault();
-    if (!busca.trim()) return;
-    const data = await api.get<Bolao[]>(`/boloes/buscar?nome=${encodeURIComponent(busca)}`).catch(() => []);
-    setResultados(data);
-  }
 
   return (
     <div className="space-y-8">
@@ -59,37 +50,6 @@ export default function BolaoesPage() {
           ))}
         </div>
       )}
-
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Buscar bolão</h2>
-        <form onSubmit={handleBusca} className="flex gap-2">
-          <input
-            value={busca}
-            onChange={e => setBusca(e.target.value)}
-            placeholder="Nome do bolão"
-            className="flex-1 min-w-0 bg-trovao-card border border-trovao-border rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-trovao-gold"
-          />
-          <button
-            type="submit"
-            className="bg-trovao-surface hover:bg-trovao-border px-4 py-2 rounded-lg text-sm text-white"
-          >
-            Buscar
-          </button>
-        </form>
-        {resultados.length > 0 && (
-          <div className="grid gap-3 sm:grid-cols-2">
-            {resultados.map(b => (
-              <BolaoCard
-                key={b.id}
-                bolao={b}
-                href={`/boloes/${b.id}`}
-                favoritoId={user?.bolaoFavoritoId}
-                onFavoritoChange={b.id !== BOLAO_GLOBAL_ID ? refresh : undefined}
-              />
-            ))}
-          </div>
-        )}
-      </div>
     </div>
   );
 }
