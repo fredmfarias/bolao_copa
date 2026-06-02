@@ -3,6 +3,7 @@ import { AdminService } from './admin.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RankingService } from '../ranking/ranking.service';
 import { PublicacaoService } from '../publicacao/publicacao.service';
+import { NotificacaoService } from '../notificacao/notificacao.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { NotFoundException, ConflictException } from '@nestjs/common';
@@ -10,6 +11,7 @@ import { BolaoService } from '../bolao/bolao.service';
 import * as bcrypt from 'bcrypt';
 
 const bolaoServiceMock = { adicionarMembro: jest.fn() };
+const notificacaoMock = { enviarParaTodos: jest.fn().mockResolvedValue(undefined), enviarParaLista: jest.fn().mockResolvedValue(undefined) };
 
 const prismaMock = {
   bolao: { findUnique: jest.fn(), findMany: jest.fn() },
@@ -34,6 +36,7 @@ describe('AdminService', () => {
         { provide: RankingService, useValue: rankingMock },
         { provide: PublicacaoService, useValue: publicacaoMock },
         { provide: BolaoService, useValue: bolaoServiceMock },
+        { provide: NotificacaoService, useValue: notificacaoMock },
         { provide: JwtService, useValue: { signAsync: jest.fn().mockResolvedValue('token') } },
         { provide: ConfigService, useValue: { get: jest.fn().mockReturnValue('x') } },
         { provide: 'MAILER', useValue: mailerMock },
