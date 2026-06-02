@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/accordion';
 
 const PIX_COPIA_COLA =
-  '00020126730014BR.GOV.BCB.PIX0114+55839882698250233Inscrição Bolão Da Família Trovão520400005303986540550.005802BR5925Fred Augusto de Melo Fari6009SAO PAULO62140510b39ukQVYm66304DA4A';
+  '00020126360014BR.GOV.BCB.PIX0114+5583988269825520400005303986540550.005802BR5901N6001C62150511BolaoTrovao6304793E';
 
 export default function RegulamentoPage() {
   const [copiado, setCopiado] = useState(false);

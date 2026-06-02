@@ -25,7 +25,7 @@ describe('RegulamentoPage', () => {
     });
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-      expect.stringContaining('00020126730014BR.GOV.BCB.PIX')
+      expect.stringContaining('00020126360014BR.GOV.BCB.PIX0114+5583988269825520400005303986540550.005802BR5901N6001C62150511BolaoTrovao6304793E')
     );
     expect(screen.getByRole('button', { name: /copiado/i })).toBeInTheDocument();
   });
