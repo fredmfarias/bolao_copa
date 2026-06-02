@@ -78,4 +78,14 @@ export class AdminController {
   enviarNotificacao(@Body() dto: EnviarNotificacaoDto) {
     return this.service.enviarNotificacao(dto);
   }
+
+  @Get('jogos/lembretes')
+  verificarLembretes() {
+    return this.service.verificarLembretes();
+  }
+
+  @Post('jogos/reagendar-lembretes')
+  reagendarLembretes() {
+    return this.service.reagendarLembretes();
+  }
 }

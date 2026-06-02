@@ -10,5 +10,6 @@ import { JogoService } from './jogo.service';
   ],
   controllers: [JogoController],
   providers: [JogoService],
+  exports: [JogoService],
 })
 export class JogoModule {}

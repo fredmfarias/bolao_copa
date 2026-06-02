@@ -7,9 +7,10 @@ import { MailerModule } from '../mailer/mailer.module';
 import { PublicacaoModule } from '../publicacao/publicacao.module';
 import { BolaoModule } from '../bolao/bolao.module';
 import { NotificacaoModule } from '../notificacao/notificacao.module';
+import { JogoModule } from '../jogo/jogo.module';
 
 @Module({
-  imports: [RankingModule, JwtModule, MailerModule, PublicacaoModule, BolaoModule, NotificacaoModule],
+  imports: [RankingModule, JwtModule, MailerModule, PublicacaoModule, BolaoModule, NotificacaoModule, JogoModule],
   controllers: [AdminController],
   providers: [AdminService],
 })

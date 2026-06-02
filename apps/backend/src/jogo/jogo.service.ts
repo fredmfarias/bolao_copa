@@ -48,6 +48,40 @@ export class JogoService {
     return jogo;
   }
 
+  async verificarLembretes(): Promise<{ jogoId: string; dataHora: Date; agendado: boolean }[]> {
+    const agora = new Date();
+    const jogos = await this.prisma.jogo.findMany({
+      where: { dataHora: { gt: agora }, placarCasa: null },
+      select: { id: true, dataHora: true },
+      orderBy: { dataHora: 'asc' },
+    });
+
+    return Promise.all(
+      jogos.map(async (j) => {
+        const job = await this.reminderQueue.getJob(`reminder-${j.id}`);
+        return { jogoId: j.id, dataHora: j.dataHora, agendado: !!job };
+      }),
+    );
+  }
+
+  async reagendarLembretes(): Promise<{ total: number; agendados: number }> {
+    const agora = new Date();
+    const jogos = await this.prisma.jogo.findMany({
+      where: { dataHora: { gt: agora }, placarCasa: null },
+      select: { id: true, dataHora: true },
+    });
+
+    let agendados = 0;
+    for (const j of jogos) {
+      const delay = j.dataHora.getTime() - Date.now() - (MINUTOS_PRAZO_APOSTA + 60) * 60 * 1000;
+      if (delay > 0) {
+        await this.agendarLembrete(j.id, j.dataHora);
+        agendados++;
+      }
+    }
+    return { total: jogos.length, agendados };
+  }
+
   private async agendarLembrete(jogoId: string, dataHora: Date) {
     const jobId = `reminder-${jogoId}`;
     const existing = await this.reminderQueue.getJob(jobId);
