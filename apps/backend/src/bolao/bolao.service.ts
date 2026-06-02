@@ -72,6 +72,10 @@ export class BolaoService {
     if (convite.expiraEm && convite.expiraEm < new Date()) {
       throw new BadRequestException('Convite expirado.');
     }
+    const jaEMembro = await this.prisma.bolaoMembro.findUnique({
+      where: { bolaoId_usuarioId: { bolaoId: convite.bolaoId, usuarioId: user.id } },
+    });
+    if (jaEMembro) return jaEMembro;
     return this.adicionarMembro(convite.bolaoId, user.id);
   }
 

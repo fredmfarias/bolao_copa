@@ -109,6 +109,19 @@ describe('BolaoService', () => {
     expect(inscricaoMock.assertAberta).toHaveBeenCalledWith({ id: 'admin-1', role: 'ADMIN' });
   });
 
+  it('entrarViaConvite retorna associação existente quando já é membro (idempotente)', async () => {
+    const membroExistente = { bolaoId: 'b1', usuarioId: 'user-1' };
+    prismaMock.bolaoConvite.findUnique.mockResolvedValue({ bolaoId: 'b1', expiraEm: null });
+    prismaMock.bolaoMembro.findUnique.mockResolvedValue(membroExistente);
+
+    const resultado = await service.entrarViaConvite({ id: 'user-1', role: 'USER' }, 'token-valido');
+
+    expect(resultado).toBe(membroExistente);
+    expect(prismaMock.bolaoMembro.create).not.toHaveBeenCalled();
+    expect(prismaMock.ranking.create).not.toHaveBeenCalled();
+    expect(prismaMock.bolaoMembro.count).not.toHaveBeenCalled();
+  });
+
   it('aprovarMembro lança ForbiddenException quando janela fechada', async () => {
     inscricaoMock.assertAberta.mockRejectedValueOnce(new ForbiddenException('Inscrições encerradas.'));
     await expect(
