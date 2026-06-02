@@ -23,13 +23,18 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: 'black-translucent',
     title: 'Bolão Trovão',
+    startupImage: '/icons/icon-512x512.png',
   },
   icons: {
     apple: [
+      { url: '/apple-touch-icon.png' },
+      { url: '/icons/icon-180x180.png', sizes: '180x180' },
       { url: '/icons/icon-152x152.png', sizes: '152x152' },
-      { url: '/icons/icon-192x192.png', sizes: '192x192' },
     ],
-    icon: '/icons/icon-192x192.png',
+    icon: [
+      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+    ],
   },
 };
 
