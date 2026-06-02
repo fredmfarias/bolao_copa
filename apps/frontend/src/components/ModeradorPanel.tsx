@@ -57,11 +57,11 @@ export function ModeradorPanel({ bolaoId, membros, onAtualizado }: ModeradorPane
           </div>
 
           <div className="flex items-center gap-1 shrink-0">
-            <span className={`text-xs px-2 py-0.5 rounded-full ${
-              m.papel === 'MODERADOR' ? 'bg-trovao-gold/20 text-trovao-gold' : 'bg-trovao-surface text-trovao-muted'
-            }`}>
-              {m.papel === 'MODERADOR' ? 'Mod' : 'Membro'}
-            </span>
+            {m.papel === 'MODERADOR' && (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-trovao-gold/20 text-trovao-gold">
+                Mod
+              </span>
+            )}
 
             <button
               disabled={ativo === `pag-${m.usuarioId}`}
