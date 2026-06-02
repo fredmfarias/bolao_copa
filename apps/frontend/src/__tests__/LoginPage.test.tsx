@@ -57,3 +57,9 @@ it('exibe o logo do Bolão Trovão', () => {
   const logo = screen.getByAltText('Bolão Trovão');
   expect(logo).toBeInTheDocument();
 });
+
+it('link do Regulamento inclui from=/login', () => {
+  render(<LoginPage />);
+  const link = screen.getByRole('link', { name: /regulamento/i });
+  expect(link).toHaveAttribute('href', '/regulamento?from=/login');
+});

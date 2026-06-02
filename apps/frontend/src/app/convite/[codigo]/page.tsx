@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { api } from '@/lib/api';
 import { useAuth } from '@/components/AuthProvider';
 import { PageSkeleton } from '@/components/PageSkeleton';
@@ -99,6 +100,12 @@ export default function ConvitePage() {
           >
             Registrar com Google
           </a>
+          <Link
+            href={`/regulamento?from=/convite/${codigo}`}
+            className="block text-trovao-muted text-xs hover:text-white transition-colors"
+          >
+            Regulamento
+          </Link>
         </div>
       </div>
     );
@@ -133,6 +140,12 @@ export default function ConvitePage() {
           className="w-full py-3 bg-trovao-gold text-trovao-base text-sm font-bold rounded-xl disabled:opacity-50 hover:opacity-90 transition-opacity">
           {estado === 'entrando' ? 'Entrando...' : 'Entrar no Bolão'}
         </button>
+        <Link
+          href={`/regulamento?from=/convite/${codigo}`}
+          className="block text-trovao-muted text-xs hover:text-white transition-colors"
+        >
+          Regulamento
+        </Link>
         {user && (
           <div className="pt-2 border-t border-trovao-border space-y-1">
             <p className="text-trovao-muted text-xs">Logado como {user.email}</p>

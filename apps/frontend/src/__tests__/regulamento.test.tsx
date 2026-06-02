@@ -2,6 +2,10 @@ import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import RegulamentoPage from '@/app/regulamento/page';
 
+jest.mock('next/navigation', () => ({
+  useSearchParams: () => ({ get: jest.fn().mockReturnValue(null) }),
+}));
+
 Object.assign(navigator, {
   clipboard: { writeText: jest.fn().mockResolvedValue(undefined) },
 });

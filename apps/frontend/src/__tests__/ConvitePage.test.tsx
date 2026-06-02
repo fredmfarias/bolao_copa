@@ -57,3 +57,16 @@ it('botão "Trocar de conta" chama logout', async () => {
   await userEvent.click(botao);
   expect(mockLogout).toHaveBeenCalled();
 });
+
+it('exibe link do Regulamento com origem do convite (estado pronto)', async () => {
+  render(<ConvitePage />);
+  const link = await screen.findByRole('link', { name: /regulamento/i });
+  expect(link).toHaveAttribute('href', '/regulamento?from=/convite/tok-123');
+});
+
+it('exibe link do Regulamento no estado não-autenticado', async () => {
+  mockUser = null;
+  render(<ConvitePage />);
+  const link = await screen.findByRole('link', { name: /regulamento/i });
+  expect(link).toHaveAttribute('href', '/regulamento?from=/convite/tok-123');
+});
