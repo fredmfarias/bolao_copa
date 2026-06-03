@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { SubscribeDto } from './dto/subscribe.dto';
@@ -6,6 +6,7 @@ import * as webpush from 'web-push';
 
 @Injectable()
 export class NotificacaoService {
+  private readonly logger = new Logger(NotificacaoService.name);
   private vapidConfigured: boolean;
 
   constructor(private prisma: PrismaService, private config: ConfigService) {
@@ -19,9 +20,13 @@ export class NotificacaoService {
           pub!,
           priv!,
         );
-      } catch {
+        this.logger.log('VAPID configurado com sucesso.');
+      } catch (err) {
+        this.logger.error('Falha ao configurar VAPID:', err);
         this.vapidConfigured = false;
       }
+    } else {
+      this.logger.warn('VAPID_PUBLIC_KEY ou VAPID_PRIVATE_KEY não definidos — push desabilitado.');
     }
   }
 
@@ -31,6 +36,7 @@ export class NotificacaoService {
       update: { p256dh: dto.p256dh, auth: dto.auth },
       create: { usuarioId, endpoint: dto.endpoint, p256dh: dto.p256dh, auth: dto.auth },
     });
+    this.logger.log(`Subscription registrada: usuário=${usuarioId}`);
     return { message: 'Inscrito para notificações.' };
   }
 
@@ -41,7 +47,8 @@ export class NotificacaoService {
   async enviarParaUsuario(usuarioId: string, payload: object) {
     if (!this.vapidConfigured) return;
     const subs = await this.prisma.notificacaoSubscription.findMany({ where: { usuarioId } });
-    await Promise.allSettled(
+    if (subs.length === 0) return;
+    const results = await Promise.allSettled(
       subs.map((s) =>
         webpush.sendNotification(
           { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
@@ -49,6 +56,8 @@ export class NotificacaoService {
         ),
       ),
     );
+    const erros = results.filter((r) => r.status === 'rejected');
+    if (erros.length) this.logger.warn(`${erros.length} push(es) falharam para usuário=${usuarioId}`);
   }
 
   async enviarParaMembrosBolao(bolaoIds: string[], payload: object) {
@@ -58,6 +67,28 @@ export class NotificacaoService {
       distinct: ['usuarioId'],
     });
     await Promise.all(membros.map((m) => this.enviarParaUsuario(m.usuarioId, payload)));
+  }
+
+  async enviarParaTodos(payload: object) {
+    if (!this.vapidConfigured) {
+      this.logger.warn('enviarParaTodos: VAPID não configurado, abortando.');
+      return;
+    }
+    const subs = await this.prisma.notificacaoSubscription.findMany({
+      distinct: ['usuarioId'],
+      select: { usuarioId: true },
+    });
+    this.logger.log(`enviarParaTodos: ${subs.length} assinante(s). Payload: ${JSON.stringify(payload)}`);
+    await Promise.all(subs.map((s) => this.enviarParaUsuario(s.usuarioId, payload)));
+  }
+
+  async enviarParaLista(usuarioIds: string[], payload: object) {
+    if (!this.vapidConfigured) {
+      this.logger.warn('enviarParaLista: VAPID não configurado, abortando.');
+      return;
+    }
+    this.logger.log(`enviarParaLista: ${usuarioIds.length} usuário(s). Payload: ${JSON.stringify(payload)}`);
+    await Promise.all(usuarioIds.map((id) => this.enviarParaUsuario(id, payload)));
   }
 
   async processarLembrete(jogoId: string) {

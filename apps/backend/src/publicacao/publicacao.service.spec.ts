@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import { PublicacaoService } from './publicacao.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RankingService } from '../ranking/ranking.service';
+import { NotificacaoService } from '../notificacao/notificacao.service';
 
 const prismaMock = {
   publicacao: { findFirst: jest.fn(), create: jest.fn() },
@@ -13,6 +14,7 @@ const prismaMock = {
   rankingSnapshot: { findMany: jest.fn(), create: jest.fn() },
 };
 const rankingMock = { recalcularRankingBolao: jest.fn() };
+const notificacaoMock = { enviarParaTodos: jest.fn().mockResolvedValue(undefined) };
 
 describe('PublicacaoService.listarJogosPendentes', () => {
   let service: PublicacaoService;
@@ -23,6 +25,7 @@ describe('PublicacaoService.listarJogosPendentes', () => {
         PublicacaoService,
         { provide: PrismaService, useValue: prismaMock },
         { provide: RankingService, useValue: rankingMock },
+        { provide: NotificacaoService, useValue: notificacaoMock },
       ],
     }).compile();
     service = module.get(PublicacaoService);
@@ -49,6 +52,7 @@ describe('PublicacaoService.publicar', () => {
         PublicacaoService,
         { provide: PrismaService, useValue: prismaMock },
         { provide: RankingService, useValue: rankingMock },
+        { provide: NotificacaoService, useValue: notificacaoMock },
       ],
     }).compile();
     service = module.get(PublicacaoService);
