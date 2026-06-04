@@ -85,21 +85,21 @@ export default function ConvitePage() {
           {convite?.descricao && <p className="text-trovao-muted text-sm">{convite.descricao}</p>}
           <p className="text-trovao-muted text-xs">Convidado por {convite?.criadorNome}</p>
           <p className="text-trovao-muted text-sm">Entre ou crie uma conta para participar.</p>
-          <button onClick={() => router.push(`/login?redirect=/convite/${codigo}`)}
-            className="w-full py-2 bg-trovao-gold text-trovao-base text-sm font-bold rounded-lg hover:opacity-90 transition-opacity">
-            Fazer login
-          </button>
-          <button onClick={() => router.push(`/registrar?convite=${codigo}`)}
-            className="w-full py-2 bg-trovao-surface border border-trovao-border text-trovao-muted text-sm rounded-lg hover:text-white transition-colors">
-            Criar conta
-          </button>
           <a
             href={`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/auth/google`}
             onClick={() => sessionStorage.setItem('convitePendente', codigo)}
-            className="block w-full py-2 bg-trovao-surface border border-trovao-border text-trovao-muted text-sm rounded-lg hover:text-white transition-colors text-center"
+            className="block w-full py-2 bg-trovao-gold text-trovao-base text-sm font-bold rounded-lg hover:opacity-90 transition-opacity text-center"
           >
             Registrar com Google
           </a>
+          <button onClick={() => router.push(`/registrar?convite=${codigo}`)}
+            className="w-full py-2 bg-trovao-gold/10 border border-trovao-gold/40 text-trovao-gold text-sm rounded-lg hover:bg-trovao-gold/20 hover:border-trovao-gold/60 transition-colors">
+            Criar conta
+          </button>
+          <button onClick={() => router.push(`/login?redirect=/convite/${codigo}`)}
+            className="w-full py-2 bg-trovao-green/10 border border-trovao-green/40 text-trovao-green text-sm font-semibold rounded-lg hover:bg-trovao-green/20 hover:border-trovao-green/60 transition-colors">
+            Fazer login
+          </button>
           <Link
             href={`/regulamento?from=/convite/${codigo}`}
             className="block text-trovao-muted text-xs hover:text-white transition-colors"
