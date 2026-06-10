@@ -54,6 +54,9 @@ export default function BolaoDetalhePage() {
 
   const isModerador = bolao.membros?.find(m => m.usuarioId === user?.id)?.papel === 'MODERADOR';
   const jogosEncerrados = ordenarJogosEncerrados(jogos);
+  const membrosOrdenados = [...(bolao.membros ?? [])].sort(
+    (a, b) => a.usuario.nome.localeCompare(b.usuario.nome, 'pt-BR'),
+  );
 
   return (
     <div className="space-y-8">
@@ -78,7 +81,7 @@ export default function BolaoDetalhePage() {
             Membros ({bolao.membros?.length ?? 0})
           </h2>
           <div className="flex flex-wrap gap-2">
-            {bolao.membros?.slice(0, membrosVisiveis).map(m => (
+            {membrosOrdenados.slice(0, membrosVisiveis).map(m => (
               <div key={m.id} className="flex items-center gap-1.5 bg-gray-800 rounded-full px-3 py-1 text-xs">
                 {m.usuario.avatarUrl && <img src={m.usuario.avatarUrl} alt="" className="w-4 h-4 rounded-full" />}
                 <span>{m.usuario.nome}</span>

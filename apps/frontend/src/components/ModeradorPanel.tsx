@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { api } from '@/lib/api';
 import type { BolaoMembro } from '@/types/api';
 
@@ -13,9 +13,25 @@ interface ModeradorPanelProps {
 const MEMBROS_INICIAIS = 3;
 const MEMBROS_PASSO = 10;
 
+function normalizar(s: string) {
+  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
 export function ModeradorPanel({ bolaoId, membros, onAtualizado }: ModeradorPanelProps) {
   const [ativo, setAtivo] = useState<string | null>(null);
   const [visiveis, setVisiveis] = useState(MEMBROS_INICIAIS);
+  const [query, setQuery] = useState('');
+
+  const ordenados = useMemo(
+    () => [...membros].sort((a, b) => a.usuario.nome.localeCompare(b.usuario.nome, 'pt-BR')),
+    [membros],
+  );
+
+  const filtrados = useMemo(() => {
+    const q = normalizar(query.trim());
+    if (!q) return ordenados;
+    return ordenados.filter(m => normalizar(m.usuario.nome).includes(q));
+  }, [ordenados, query]);
 
   async function acao(path: string, memberId: string) {
     setAtivo(memberId);
@@ -38,12 +54,42 @@ export function ModeradorPanel({ bolaoId, membros, onAtualizado }: ModeradorPane
     }
   }
 
-  const restante = membros.length - visiveis;
+  const buscando = query.trim().length > 0;
+  const restante = filtrados.length - visiveis;
 
   return (
     <div className="space-y-2">
       <p className="text-trovao-muted text-xs font-semibold uppercase tracking-wider px-1">Membros</p>
-      {membros.slice(0, visiveis).map(m => (
+
+      <div className="relative">
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Buscar membro por nome"
+          className="w-full bg-trovao-card border border-trovao-border rounded-xl
+                     pl-9 pr-9 py-2 text-sm text-white placeholder:text-trovao-muted
+                     focus:outline-none focus:border-trovao-gold"
+        />
+        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-trovao-muted pointer-events-none"
+          viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        {query && (
+          <button
+            onClick={() => setQuery('')}
+            aria-label="Limpar busca"
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 text-trovao-muted hover:text-white"
+          >×</button>
+        )}
+      </div>
+
+      {buscando && filtrados.length === 0 ? (
+        <p className="text-trovao-muted text-sm py-2 px-1">Nenhum membro corresponde à busca.</p>
+      ) : (
+      <>
+      {filtrados.slice(0, visiveis).map(m => (
         <div key={m.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3 bg-trovao-card border border-trovao-border rounded-xl">
           <div className="flex items-center gap-2 flex-1 min-w-0">
             {m.usuario.avatarUrl ? (
@@ -102,6 +148,8 @@ export function ModeradorPanel({ bolaoId, membros, onAtualizado }: ModeradorPane
           className="w-full text-xs text-trovao-muted hover:text-white transition-colors py-1">
           ocultar
         </button>
+      )}
+      </>
       )}
     </div>
   );
