@@ -17,6 +17,12 @@ const membros: BolaoMembro[] = [
   { id: 'm2', usuarioId: 'u2', papel: 'MODERADOR',    statusPagamento: 'PAGO',     usuario: { id: 'u2', nome: 'Bob',   avatarUrl: null } },
 ];
 
+const membrosDesordenados: BolaoMembro[] = [
+  { id: 'm1', usuarioId: 'u1', papel: 'PARTICIPANTE', statusPagamento: 'PENDENTE', usuario: { id: 'u1', nome: 'Carlos', avatarUrl: null } },
+  { id: 'm2', usuarioId: 'u2', papel: 'PARTICIPANTE', statusPagamento: 'PENDENTE', usuario: { id: 'u2', nome: 'Ana',    avatarUrl: null } },
+  { id: 'm3', usuarioId: 'u3', papel: 'PARTICIPANTE', statusPagamento: 'PENDENTE', usuario: { id: 'u3', nome: 'Bruno',  avatarUrl: null } },
+];
+
 beforeEach(() => { mockPost.mockClear(); mockPatch.mockClear(); });
 
 it('exibe lista de membros', () => {
@@ -59,4 +65,24 @@ it('badge Pago chama PATCH para PENDENTE e notifica onAtualizado', async () => {
     expect(mockPatch).toHaveBeenCalledWith('/boloes/b1/membros/u2/pagamento', { status: 'PENDENTE' });
     expect(onAtualizado).toHaveBeenCalled();
   });
+});
+
+it('exibe membros em ordem alfabética', () => {
+  render(<ModeradorPanel bolaoId="b1" membros={membrosDesordenados} onAtualizado={jest.fn()} />);
+  const nomes = screen.getAllByText(/Ana|Bruno|Carlos/).map(el => el.textContent);
+  expect(nomes).toEqual(['Ana', 'Bruno', 'Carlos']);
+});
+
+it('filtra membros pela busca por nome', () => {
+  render(<ModeradorPanel bolaoId="b1" membros={membrosDesordenados} onAtualizado={jest.fn()} />);
+  fireEvent.change(screen.getByPlaceholderText('Buscar membro por nome'), { target: { value: 'bru' } });
+  expect(screen.getByText('Bruno')).toBeInTheDocument();
+  expect(screen.queryByText('Ana')).not.toBeInTheDocument();
+  expect(screen.queryByText('Carlos')).not.toBeInTheDocument();
+});
+
+it('exibe mensagem quando a busca não encontra membros', () => {
+  render(<ModeradorPanel bolaoId="b1" membros={membrosDesordenados} onAtualizado={jest.fn()} />);
+  fireEvent.change(screen.getByPlaceholderText('Buscar membro por nome'), { target: { value: 'zzz' } });
+  expect(screen.getByText('Nenhum membro corresponde à busca.')).toBeInTheDocument();
 });
