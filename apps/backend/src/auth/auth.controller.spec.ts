@@ -34,6 +34,10 @@ describe('AuthController.googleCallback', () => {
     authMock.gerarTokens.mockResolvedValue({ accessToken: 'a', refreshToken: 'r' });
   });
 
+  afterEach(() => {
+    delete process.env.APP_URL;
+  });
+
   it('redireciona usuário inativo para /login?erro=conta-desativada e não gera tokens', async () => {
     prismaMock.usuario.findFirst.mockResolvedValue({
       id: 'u1', email: 'x@y.com', googleId: 'g1', ativo: false, role: 'USER',
@@ -44,6 +48,20 @@ describe('AuthController.googleCallback', () => {
     await controller.googleCallback(req, res);
 
     expect(res.redirect).toHaveBeenCalledWith('http://app.test/login?erro=conta-desativada');
+    expect(authMock.gerarTokens).not.toHaveBeenCalled();
+  });
+
+  it('não vincula googleId a usuário inativo (bloqueia antes do update)', async () => {
+    prismaMock.usuario.findFirst.mockResolvedValue({
+      id: 'u1', email: 'x@y.com', googleId: null, ativo: false, role: 'USER',
+    });
+    const req = { user: { googleId: 'g1', nome: 'X', email: 'x@y.com', avatarUrl: null } } as any;
+    const res = { cookie: jest.fn(), redirect: jest.fn() } as any;
+
+    await controller.googleCallback(req, res);
+
+    expect(res.redirect).toHaveBeenCalledWith('http://app.test/login?erro=conta-desativada');
+    expect(prismaMock.usuario.update).not.toHaveBeenCalled();
     expect(authMock.gerarTokens).not.toHaveBeenCalled();
   });
 

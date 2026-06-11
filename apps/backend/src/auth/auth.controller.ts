@@ -92,6 +92,10 @@ export class AuthController {
       where: { OR: [{ googleId: profile.googleId }, { email: profile.email }] },
     });
 
+    if (usuario && !usuario.ativo) {
+      return res.redirect(`${process.env.APP_URL}/login?erro=conta-desativada`);
+    }
+
     if (!usuario) {
       const status = await this.inscricaoWindow.getStatus();
       if (!status.abertas) {
@@ -116,10 +120,6 @@ export class AuthController {
         where: { id: usuario.id },
         data: { googleId: profile.googleId, avatarUrl: profile.avatarUrl, emailVerificado: true },
       });
-    }
-
-    if (!usuario.ativo) {
-      return res.redirect(`${process.env.APP_URL}/login?erro=conta-desativada`);
     }
 
     const tokens = await this.auth.gerarTokens(usuario.id, usuario.email, usuario.role);
