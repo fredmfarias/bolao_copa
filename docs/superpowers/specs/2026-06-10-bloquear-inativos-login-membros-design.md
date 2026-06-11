@@ -63,9 +63,15 @@ consistência.
 
 - `obter()` (linha 57): filtrar a relação de membros:
   `membros: { where: { usuario: { ativo: true } }, include: { usuario: { select: { id, nome, avatarUrl } } } }`.
-- Contagem excluindo inativos em `listarMeus`, `buscarPorNome` e `obter`, via
-  filtered relation count do Prisma:
-  `_count: { select: { membros: { where: { usuario: { ativo: true } } } } }`.
+  A contagem exibida na tela de detalhe (`boloes/[id]/page.tsx`) deriva de
+  `bolao.membros?.length`, ou seja, filtrar o array já corrige a contagem desse
+  ecrã — não é preciso `_count` em `obter`.
+- Contagem (`_count.membros`) excluindo inativos via filtered relation count do
+  Prisma, `_count: { select: { membros: { where: { usuario: { ativo: true } } } } }`,
+  nos três pontos que expõem esse número aos cards:
+  - `bolao.service.ts` `listarMeus` (linha 41) — feed dos `BolaoCard`.
+  - `bolao.service.ts` `buscarPorNome` (linha 49) — busca de bolões.
+  - `admin.service.ts` `listarBoloes` (linha 34) — lista admin de bolões.
 
 ### 3. Ranking — sem mudança de código
 
@@ -86,12 +92,16 @@ necessário: derivar a contagem do array de membros já filtrado.
 
 ## Testes
 
-- **e2e / auth:** usuário inativo com `googleId` no callback do Google não recebe
-  tokens e é redirecionado para `/login?erro=conta-desativada`.
-- **`bolao.service.spec`:** `obter()` não retorna membro inativo; `_count.membros`
-  reflete apenas ativos em `obter`, `listarMeus` e `buscarPorNome`.
-- **`ranking.service.spec`:** confirmar/reforçar a exclusão de inativos já
-  existente.
+- **`auth.controller.spec` (novo):** unit test do `googleCallback` — usuário
+  existente e inativo é redirecionado para `/login?erro=conta-desativada` e
+  `auth.gerarTokens` não é chamado. (O fluxo OAuth real não é testável em e2e.)
+- **`bolao.service.spec`:** `obter()` filtra membros por `ativo: true`;
+  `listarMeus` e `buscarPorNome` usam `_count` filtrado.
+- **`admin.service.spec`:** `listarBoloes` usa `_count` filtrado por `ativo: true`.
+- **`ranking.service.spec`:** já cobre a exclusão de inativos (linhas 198 e 243) —
+  sem mudança.
+- **Frontend `LoginPage.test`:** renderiza a mensagem "Sua conta está desativada."
+  quando `?erro=conta-desativada`.
 
 ## Fora de escopo
 
