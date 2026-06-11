@@ -1,11 +1,15 @@
 import { test, expect } from '../../fixtures';
 import { criarUsuarioAutenticado, adminContext } from '../../api/client';
 import { truncateDynamic } from '../../support/db';
+import { garantirJanelaAberta } from '../../support/time';
 import { newUser, newBolao } from '../../data/factories';
 import { BolaoMembroPapel } from '@bolao/shared';
 
 test.describe('Bolão + convite (API)', () => {
-  test.beforeAll(async () => { await truncateDynamic(); });
+  test.beforeAll(async () => {
+    await truncateDynamic();
+    await garantirJanelaAberta();
+  });
 
   test('criador vira MODERADOR e segundo usuário entra via convite', async () => {
     const dono = await criarUsuarioAutenticado(newUser('dono'));

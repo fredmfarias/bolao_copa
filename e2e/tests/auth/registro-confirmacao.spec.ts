@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { mailpit } from '../../support/mailpit';
 import { truncateDynamic, prisma } from '../../support/db';
+import { garantirJanelaAberta } from '../../support/time';
 import { newUser } from '../../data/factories';
 import { RegistroPage } from '../../pages/registro.page';
 import { LoginPage } from '../../pages/login.page';
@@ -10,6 +11,7 @@ test.describe('Registro → confirmação → login', () => {
 
   test.beforeAll(async () => {
     await truncateDynamic();
+    await garantirJanelaAberta();
 
     // Create a private bolão and convite so the /registrar form is accessible
     const adminUser = await prisma.usuario.findFirstOrThrow({ where: { email: 'admin@bolaotrovao.com' } });
