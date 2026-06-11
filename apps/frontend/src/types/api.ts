@@ -60,6 +60,15 @@ export interface Aposta {
   jogo: Jogo;
 }
 
+export interface Palpite {
+  usuarioId: string;
+  nome: string;
+  avatarUrl: string | null;
+  placarCasa: number;
+  placarVisitante: number;
+  pontuacao: number | null;
+}
+
 export interface RankingEntry {
   id: string;
   usuarioId: string;
