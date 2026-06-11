@@ -31,6 +31,7 @@ jest.mock('@/components/PageSkeleton', () => ({
 
 const conviteValido = {
   valido: true,
+  bolaoAtivo: true,
   bolaoId: 'bolao-b',
   bolaoNome: 'Bolão da Firma',
   descricao: null,
@@ -69,4 +70,26 @@ it('exibe link do Regulamento no estado não-autenticado', async () => {
   render(<ConvitePage />);
   const link = await screen.findByRole('link', { name: /regulamento/i });
   expect(link).toHaveAttribute('href', '/regulamento?from=/convite/tok-123');
+});
+
+it('exibe botão desabilitado e mensagem quando o bolão está inativo', async () => {
+  mockApiGet.mockResolvedValue({ ...conviteValido, bolaoAtivo: false });
+  render(<ConvitePage />);
+  const botao = await screen.findByRole('button', { name: /entrar no bolão/i });
+  expect(botao).toBeDisabled();
+  expect(screen.getByText(/desativado e não está aceitando novos participantes/i)).toBeInTheDocument();
+});
+
+it('mostra o nome do bolão no estado inativo', async () => {
+  mockApiGet.mockResolvedValue({ ...conviteValido, bolaoAtivo: false });
+  render(<ConvitePage />);
+  expect(await screen.findByText('Bolão da Firma')).toBeInTheDocument();
+});
+
+it('não chama a API de entrar quando o bolão está inativo', async () => {
+  mockApiGet.mockResolvedValue({ ...conviteValido, bolaoAtivo: false });
+  render(<ConvitePage />);
+  const botao = await screen.findByRole('button', { name: /entrar no bolão/i });
+  await userEvent.click(botao);
+  expect(mockApiPost).not.toHaveBeenCalled();
 });

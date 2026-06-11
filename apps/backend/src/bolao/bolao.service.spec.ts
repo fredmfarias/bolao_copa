@@ -2,7 +2,7 @@ import { Test } from '@nestjs/testing';
 import { BolaoService } from './bolao.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
-import { BolaoMembroPapel } from '@bolao/shared';
+import { BolaoMembroPapel, BolaoStatus } from '@bolao/shared';
 import { InscricaoWindowService } from '../inscricao-window/inscricao-window.service';
 
 const prismaMock = {
@@ -102,7 +102,7 @@ describe('BolaoService', () => {
   it('entrarViaConvite passa quando admin', async () => {
     prismaMock.bolaoConvite.findUnique.mockResolvedValue({ bolaoId: 'b1', expiraEm: null });
     prismaMock.bolaoMembro.findUnique.mockResolvedValue(null);
-    prismaMock.bolao.findUnique.mockResolvedValue({ id: 'b1', maxParticipantes: 10 });
+    prismaMock.bolao.findUnique.mockResolvedValue({ id: 'b1', maxParticipantes: 10, status: BolaoStatus.ATIVO });
     prismaMock.bolaoMembro.count.mockResolvedValue(0);
     prismaMock.bolaoMembro.create.mockResolvedValue({});
     prismaMock.ranking.create.mockResolvedValue({});
@@ -173,5 +173,67 @@ describe('BolaoService', () => {
         }),
       }),
     );
+  });
+
+  it('listarMeus filtra por status ATIVO', async () => {
+    prismaMock.bolao.findMany.mockResolvedValue([]);
+    await service.listarMeus('u1');
+    expect(prismaMock.bolao.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { membros: { some: { usuarioId: 'u1' } }, status: BolaoStatus.ATIVO },
+      }),
+    );
+  });
+
+  it('adicionarMembro lança BadRequestException se o bolão está inativo', async () => {
+    prismaMock.bolao.findUnique.mockResolvedValue({
+      id: 'b1', maxParticipantes: 10, status: BolaoStatus.INATIVO,
+    });
+    await expect(service.adicionarMembro('b1', 'u1')).rejects.toThrow(BadRequestException);
+    expect(prismaMock.bolaoMembro.create).not.toHaveBeenCalled();
+  });
+
+  it('adicionarMembro cria membro quando o bolão está ativo', async () => {
+    prismaMock.bolao.findUnique.mockResolvedValue({
+      id: 'b1', maxParticipantes: 10, status: BolaoStatus.ATIVO,
+    });
+    prismaMock.bolaoMembro.findUnique.mockResolvedValue(null);
+    prismaMock.bolaoMembro.count.mockResolvedValue(0);
+    prismaMock.bolaoMembro.create.mockResolvedValue({ bolaoId: 'b1', usuarioId: 'u1' });
+    prismaMock.ranking.create.mockResolvedValue({});
+    await service.adicionarMembro('b1', 'u1');
+    expect(prismaMock.bolaoMembro.create).toHaveBeenCalledWith({
+      data: { bolaoId: 'b1', usuarioId: 'u1' },
+    });
+  });
+
+  it('lookupConvite retorna bolaoAtivo=false quando o bolão está inativo', async () => {
+    prismaMock.bolaoConvite.findUnique.mockResolvedValue({
+      bolaoId: 'b1',
+      expiraEm: null,
+      bolao: { nome: 'Bolão X', descricao: null, status: BolaoStatus.INATIVO },
+      criadoPor: { nome: 'Fred' },
+    });
+    const r = await service.lookupConvite('tok');
+    expect(r.valido).toBe(true);
+    expect(r.bolaoAtivo).toBe(false);
+  });
+
+  it('lookupConvite retorna bolaoAtivo=true quando o bolão está ativo', async () => {
+    prismaMock.bolaoConvite.findUnique.mockResolvedValue({
+      bolaoId: 'b1',
+      expiraEm: null,
+      bolao: { nome: 'Bolão X', descricao: null, status: BolaoStatus.ATIVO },
+      criadoPor: { nome: 'Fred' },
+    });
+    const r = await service.lookupConvite('tok');
+    expect(r.bolaoAtivo).toBe(true);
+  });
+
+  it('lookupConvite retorna bolaoAtivo=false quando o convite não existe', async () => {
+    prismaMock.bolaoConvite.findUnique.mockResolvedValue(null);
+    const r = await service.lookupConvite('tok');
+    expect(r.valido).toBe(false);
+    expect(r.bolaoAtivo).toBe(false);
   });
 });

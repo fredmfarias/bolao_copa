@@ -37,7 +37,7 @@ export class BolaoService {
 
   async listarMeus(usuarioId: string) {
     return this.prisma.bolao.findMany({
-      where: { membros: { some: { usuarioId } } },
+      where: { membros: { some: { usuarioId } }, status: BolaoStatus.ATIVO },
       include: { _count: { select: { membros: { where: { usuario: { ativo: true } } } } } },
       orderBy: { criadoEm: 'asc' },
     });
@@ -134,10 +134,16 @@ export class BolaoService {
       where: { token },
       include: { bolao: true, criadoPor: { select: { nome: true } } },
     });
-    if (!convite) return { valido: false, bolaoId: null, bolaoNome: null, descricao: null, criadorNome: null, expiraEm: null };
+    if (!convite) {
+      return {
+        valido: false, bolaoAtivo: false, bolaoId: null,
+        bolaoNome: null, descricao: null, criadorNome: null, expiraEm: null,
+      };
+    }
     const valido = !convite.expiraEm || convite.expiraEm > new Date();
     return {
       valido,
+      bolaoAtivo: convite.bolao.status === BolaoStatus.ATIVO,
       bolaoId: convite.bolaoId,
       bolaoNome: convite.bolao.nome,
       descricao: convite.bolao.descricao,
@@ -149,6 +155,9 @@ export class BolaoService {
   async adicionarMembro(bolaoId: string, usuarioId: string) {
     const bolao = await this.prisma.bolao.findUnique({ where: { id: bolaoId } });
     if (!bolao) throw new NotFoundException('Bolão não encontrado.');
+    if (bolao.status !== BolaoStatus.ATIVO) {
+      throw new BadRequestException('Este bolão está desativado e não aceita novos participantes.');
+    }
 
     const jaEMembro = await this.prisma.bolaoMembro.findUnique({
       where: { bolaoId_usuarioId: { bolaoId, usuarioId } },

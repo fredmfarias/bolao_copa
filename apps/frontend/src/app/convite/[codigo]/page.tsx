@@ -9,6 +9,7 @@ import { PageSkeleton } from '@/components/PageSkeleton';
 
 interface ConviteInfo {
   valido: boolean;
+  bolaoAtivo: boolean;
   bolaoId: string | null;
   bolaoNome: string | null;
   descricao: string | null;
@@ -16,7 +17,7 @@ interface ConviteInfo {
   expiraEm: string | null;
 }
 
-type Estado = 'carregando' | 'invalido' | 'nao-autenticado' | 'pronto' | 'entrando' | 'sucesso';
+type Estado = 'carregando' | 'invalido' | 'inativo' | 'nao-autenticado' | 'pronto' | 'entrando' | 'sucesso';
 
 export default function ConvitePage() {
   const { codigo } = useParams<{ codigo: string }>();
@@ -33,6 +34,7 @@ export default function ConvitePage() {
       .then(data => {
         if (!data.valido) { setEstado('invalido'); return; }
         setConvite(data);
+        if (!data.bolaoAtivo) { setEstado('inativo'); return; }
         setEstado(user ? 'pronto' : 'nao-autenticado');
       })
       .catch(() => setEstado('invalido'));
@@ -71,6 +73,34 @@ export default function ConvitePage() {
             className="w-full py-2 bg-trovao-surface border border-trovao-border rounded-lg text-trovao-muted text-sm hover:text-white transition-colors">
             Ir para Jogos
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (estado === 'inativo') {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="w-full max-w-sm bg-trovao-card border border-trovao-border rounded-2xl p-8 text-center space-y-4">
+          <div className="text-4xl">⚡</div>
+          <h1 className="text-white font-bold text-lg">{convite?.bolaoNome}</h1>
+          {convite?.descricao && <p className="text-trovao-muted text-sm">{convite.descricao}</p>}
+          <p className="text-trovao-muted text-xs">Convidado por {convite?.criadorNome}</p>
+          <p className="text-trovao-red text-sm">
+            Este bolão está desativado e não está aceitando novos participantes.
+          </p>
+          <button
+            disabled
+            className="w-full py-3 bg-trovao-gold text-trovao-base text-sm font-bold rounded-xl disabled:opacity-50"
+          >
+            Entrar no Bolão
+          </button>
+          <Link
+            href={`/regulamento?from=/convite/${codigo}`}
+            className="block text-trovao-muted text-xs hover:text-white transition-colors"
+          >
+            Regulamento
+          </Link>
         </div>
       </div>
     );
