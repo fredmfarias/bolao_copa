@@ -54,7 +54,10 @@ export class BolaoService {
     const bolao = await this.prisma.bolao.findUnique({
       where: { id: bolaoId },
       include: {
-        membros: { include: { usuario: { select: { id: true, nome: true, avatarUrl: true } } } },
+        membros: {
+          where: { usuario: { ativo: true } },
+          include: { usuario: { select: { id: true, nome: true, avatarUrl: true } } },
+        },
       },
     });
     if (!bolao) throw new NotFoundException('Bolão não encontrado.');

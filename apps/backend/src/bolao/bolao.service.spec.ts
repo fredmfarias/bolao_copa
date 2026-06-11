@@ -139,4 +139,17 @@ describe('BolaoService', () => {
       data: { statusPagamento: 'PAGO' },
     });
   });
+
+  it('obter filtra membros por ativo: true', async () => {
+    prismaMock.bolao.findUnique.mockResolvedValue({ id: 'b1', membros: [] });
+    await service.obter('b1');
+    expect(prismaMock.bolao.findUnique).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'b1' },
+        include: expect.objectContaining({
+          membros: expect.objectContaining({ where: { usuario: { ativo: true } } }),
+        }),
+      }),
+    );
+  });
 });
