@@ -189,6 +189,20 @@ describe('AdminService', () => {
     });
   });
 
+  describe('listarBoloes', () => {
+    it('listarBoloes conta apenas membros ativos', async () => {
+      prismaMock.bolao.findMany.mockResolvedValue([]);
+      await service.listarBoloes();
+      expect(prismaMock.bolao.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          select: expect.objectContaining({
+            _count: { select: { membros: { where: { usuario: { ativo: true } } } } },
+          }),
+        }),
+      );
+    });
+  });
+
   describe('adicionarUsuarioBolao', () => {
     beforeEach(() => {
       prismaMock.usuario.findUnique.mockReset();

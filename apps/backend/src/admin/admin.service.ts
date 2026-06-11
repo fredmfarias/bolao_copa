@@ -31,7 +31,7 @@ export class AdminService {
       select: {
         id: true, nome: true, descricao: true, status: true,
         precoReais: true, maxParticipantes: true,
-        _count: { select: { membros: true } },
+        _count: { select: { membros: { where: { usuario: { ativo: true } } } } },
       },
       orderBy: { criadoEm: 'desc' },
     });
