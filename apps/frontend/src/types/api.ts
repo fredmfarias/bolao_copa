@@ -67,6 +67,7 @@ export interface Palpite {
   placarCasa: number;
   placarVisitante: number;
   pontuacao: number | null;
+  atualizadoEm: string;
 }
 
 export interface RankingEntry {
