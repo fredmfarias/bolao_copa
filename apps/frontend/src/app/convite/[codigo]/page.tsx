@@ -91,7 +91,7 @@ export default function ConvitePage() {
           </p>
           <button
             disabled
-            className="w-full py-3 bg-trovao-gold text-trovao-base text-sm font-bold rounded-xl opacity-50 cursor-not-allowed"
+            className="w-full py-3 bg-trovao-gold text-trovao-base text-sm font-bold rounded-xl disabled:opacity-50"
           >
             Entrar no Bolão
           </button>
