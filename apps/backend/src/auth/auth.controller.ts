@@ -118,6 +118,10 @@ export class AuthController {
       });
     }
 
+    if (!usuario.ativo) {
+      return res.redirect(`${process.env.APP_URL}/login?erro=conta-desativada`);
+    }
+
     const tokens = await this.auth.gerarTokens(usuario.id, usuario.email, usuario.role);
     res.cookie('refresh_token', tokens.refreshToken, REFRESH_COOKIE);
     res.redirect(`${process.env.APP_URL}/auth/callback?token=${tokens.accessToken}`);
