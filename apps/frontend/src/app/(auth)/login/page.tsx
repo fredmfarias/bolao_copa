@@ -54,6 +54,11 @@ function LoginForm() {
             Cadastros encerrados a 2h do início da Copa. Procure o administrador para se cadastrar.
           </p>
         )}
+        {erroQuery === 'conta-desativada' && (
+          <p className="text-red-400 text-sm text-center mb-4">
+            Sua conta está desativada.
+          </p>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4 mb-6">
           {erro && <p className="text-red-400 text-sm text-center">{erro}</p>}
           {emailConfirmado && (
