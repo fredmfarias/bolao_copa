@@ -11,7 +11,8 @@ interface AdminPlacardCardProps {
 }
 
 export function AdminPlacardCard({ jogo, onSalvo }: AdminPlacardCardProps) {
-  const publicado = jogo.placarCasa !== null;
+  const publicado = jogo.publicacaoId !== null;
+  const temPlacar = jogo.placarCasa !== null;
   const [casa, setCasa] = useState<number | null>(jogo.placarCasa);
   const [visitante, setVisitante] = useState<number | null>(jogo.placarVisitante);
   const [salvando, setSalvando] = useState(false);
@@ -58,9 +59,13 @@ export function AdminPlacardCard({ jogo, onSalvo }: AdminPlacardCardProps) {
         <span className="text-xs text-trovao-muted">
           {jogo.fase}{jogo.grupo ? ` · Grupo ${jogo.grupo}` : ''} · R{jogo.rodada}
         </span>
-        {publicado && (
+        {publicado ? (
           <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-trovao-green/10 text-trovao-green border border-trovao-green/40">
             Publicado
+          </span>
+        ) : (
+          <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-trovao-gold/10 text-trovao-gold border border-trovao-gold/40">
+            Pendente
           </span>
         )}
       </div>
@@ -93,7 +98,7 @@ export function AdminPlacardCard({ jogo, onSalvo }: AdminPlacardCardProps) {
 
       <button onClick={salvar} disabled={salvando || !podeSalvar}
         className="w-full py-2 bg-trovao-gold text-trovao-base font-bold rounded-lg text-sm disabled:opacity-50">
-        {salvando ? 'Salvando...' : publicado ? 'Atualizar Placar' : 'Salvar Placar'}
+        {salvando ? 'Salvando...' : temPlacar ? 'Atualizar Placar' : 'Salvar Placar'}
       </button>
     </div>
   );

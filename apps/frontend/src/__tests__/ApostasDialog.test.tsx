@@ -15,7 +15,7 @@ const selecao = (nome: string) => ({ id: nome, nome, codigo: nome.slice(0, 3).to
 
 const jogo: Jogo = {
   id: 'j1', rodada: 1, grupo: 'A', fase: 'GRUPOS',
-  placarCasa: 2, placarVisitante: 1, pesoPontuacao: 1,
+  placarCasa: 2, placarVisitante: 1, pesoPontuacao: 1, publicacaoId: null,
   dataHora: new Date().toISOString(),
   selecaoCasa: selecao('Brasil'), selecaoVisitante: selecao('Argentina'),
 };

@@ -12,7 +12,7 @@ const ATUALIZADO = new Date(2026, 5, 11, 13, 45, 25).toISOString();
 
 const jogoBase: Jogo = {
   id: 'j1', rodada: 1, grupo: 'A', fase: 'GRUPOS',
-  placarCasa: null, placarVisitante: null, pesoPontuacao: 1,
+  placarCasa: null, placarVisitante: null, pesoPontuacao: 1, publicacaoId: null,
   selecaoCasa: selecao('Brasil'), selecaoVisitante: selecao('Argentina'),
   dataHora: HORA_FUTURA,
 };

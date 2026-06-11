@@ -15,7 +15,7 @@ const selecao = (nome: string) => ({
 
 const jogo: Jogo = {
   id: 'j1', rodada: 1, grupo: 'A', fase: 'GRUPOS',
-  placarCasa: null, placarVisitante: null, pesoPontuacao: 1,
+  placarCasa: null, placarVisitante: null, pesoPontuacao: 1, publicacaoId: null,
   dataHora: new Date(Date.now() + 4 * 3600 * 1000).toISOString(),
   selecaoCasa: selecao('Brasil'), selecaoVisitante: selecao('Argentina'),
 };
