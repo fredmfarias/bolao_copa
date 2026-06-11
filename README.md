@@ -8,6 +8,7 @@
 
 - **Grupos (Bolões)** — crie grupos privados com código de convite ou participe do bolão global automático
 - **Palpites** — envie previsões de placar com prazo de 60 min antes do apito inicial; re-envios substituem o palpite anterior
+- **Palpites revelados** — após o encerramento das apostas, a tela do jogo lista os palpites ordenados pela classificação de cada membro no bolão, com destaque metálico para os 5 primeiros colocados (mesmo estilo do ranking) e um filtro por placar com chips e contagem
 - **Pontuação automática** — placar exato, acerto de vencedor, empate e outros níveis de acerto computados assincronamente via fila Redis
 - **Ranking por publicação** — participantes veem um snapshot congelado publicado pelo admin; dois modos: **Geral** (acumulado) e **Rodada** (seletor por data da publicação, ranking reordenado pela pontuação da rodada e lista de palpites do usuário no expand). Os **5 primeiros colocados** ganham destaque metálico na listagem (ouro, prata e bronze; 4º e 5º em tons degradê do bronze)
 - **Variação de posição** — seta colorida indicando quantas posições o participante subiu ou caiu em relação à publicação anterior
