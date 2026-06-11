@@ -39,16 +39,18 @@ export default function PalpitesPage() {
       setJogo(j);
       setBoloes(bs);
       setPlacarFiltro(null);
+      setPosicoes(new Map());
       if (j && prazoEncerrado(j.dataHora)) {
         setPrazoPassou(true);
         Promise.all([
           api.get<Palpite[]>(`/boloes/${bolaoId}/apostas?jogoId=${jogoId}`).catch(() => [] as Palpite[]),
           api.get<RankingEntry[]>(`/boloes/${bolaoId}/ranking`).catch(() => [] as RankingEntry[]),
-        ]).then(([ps, ranking]) => {
-          setPalpites(ps);
-          setPosicoes(new Map(ranking.map((r) => [r.usuarioId, r.posicao])));
-          setLoading(false);
-        });
+        ])
+          .then(([ps, ranking]) => {
+            setPalpites(ps);
+            setPosicoes(new Map(ranking.map((r) => [r.usuarioId, r.posicao])));
+          })
+          .finally(() => setLoading(false));
       } else {
         setLoading(false);
       }
