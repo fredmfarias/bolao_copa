@@ -52,6 +52,15 @@ it('exibe banner de erro quando ?erro=cadastros-encerrados', () => {
   ).toBeInTheDocument();
 });
 
+it('exibe banner de erro quando ?erro=conta-desativada', () => {
+  mockGetParam.mockImplementation((key: string) => {
+    if (key === 'erro') return 'conta-desativada';
+    return null;
+  });
+  render(<LoginPage />);
+  expect(screen.getByText('Sua conta está desativada.')).toBeInTheDocument();
+});
+
 it('exibe o logo do Bolão Trovão', () => {
   render(<LoginPage />);
   const logo = screen.getByAltText('Bolão Trovão');

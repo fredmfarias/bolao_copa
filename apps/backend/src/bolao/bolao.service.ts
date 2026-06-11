@@ -38,7 +38,7 @@ export class BolaoService {
   async listarMeus(usuarioId: string) {
     return this.prisma.bolao.findMany({
       where: { membros: { some: { usuarioId } } },
-      include: { _count: { select: { membros: true } } },
+      include: { _count: { select: { membros: { where: { usuario: { ativo: true } } } } } },
       orderBy: { criadoEm: 'asc' },
     });
   }
@@ -46,7 +46,10 @@ export class BolaoService {
   async buscarPorNome(nome: string) {
     return this.prisma.bolao.findMany({
       where: { nome: { contains: nome, mode: 'insensitive' }, status: BolaoStatus.ATIVO },
-      select: { id: true, nome: true, descricao: true, _count: { select: { membros: true } } },
+      select: {
+        id: true, nome: true, descricao: true,
+        _count: { select: { membros: { where: { usuario: { ativo: true } } } } },
+      },
     });
   }
 
@@ -54,7 +57,10 @@ export class BolaoService {
     const bolao = await this.prisma.bolao.findUnique({
       where: { id: bolaoId },
       include: {
-        membros: { include: { usuario: { select: { id: true, nome: true, avatarUrl: true } } } },
+        membros: {
+          where: { usuario: { ativo: true } },
+          include: { usuario: { select: { id: true, nome: true, avatarUrl: true } } },
+        },
       },
     });
     if (!bolao) throw new NotFoundException('Bolão não encontrado.');
