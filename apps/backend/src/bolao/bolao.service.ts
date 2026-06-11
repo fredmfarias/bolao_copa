@@ -149,6 +149,9 @@ export class BolaoService {
   async adicionarMembro(bolaoId: string, usuarioId: string) {
     const bolao = await this.prisma.bolao.findUnique({ where: { id: bolaoId } });
     if (!bolao) throw new NotFoundException('Bolão não encontrado.');
+    if (bolao.status !== BolaoStatus.ATIVO) {
+      throw new BadRequestException('Este bolão está desativado e não aceita novos participantes.');
+    }
 
     const jaEMembro = await this.prisma.bolaoMembro.findUnique({
       where: { bolaoId_usuarioId: { bolaoId, usuarioId } },
