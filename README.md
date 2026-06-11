@@ -9,7 +9,7 @@
 - **Grupos (Bolões)** — crie grupos privados com código de convite ou participe do bolão global automático
 - **Palpites** — envie previsões de placar com prazo de 60 min antes do apito inicial; re-envios substituem o palpite anterior
 - **Pontuação automática** — placar exato, acerto de vencedor, empate e outros níveis de acerto computados assincronamente via fila Redis
-- **Ranking por publicação** — participantes veem um snapshot congelado publicado pelo admin; dois modos: **Geral** (acumulado) e **Rodada** (seletor por data da publicação, ranking reordenado pela pontuação da rodada e lista de palpites do usuário no expand)
+- **Ranking por publicação** — participantes veem um snapshot congelado publicado pelo admin; dois modos: **Geral** (acumulado) e **Rodada** (seletor por data da publicação, ranking reordenado pela pontuação da rodada e lista de palpites do usuário no expand). Os **5 primeiros colocados** ganham destaque metálico na listagem (ouro, prata e bronze; 4º e 5º em tons degradê do bronze)
 - **Variação de posição** — seta colorida indicando quantas posições o participante subiu ou caiu em relação à publicação anterior
 - **Gráfico de evolução** — line chart com a trajetória de posição do participante ao longo das rodadas
 - **Notificações push** — alertas via Web Push (PWA) quando partidas começam ou terminam

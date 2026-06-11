@@ -132,3 +132,42 @@ it('sem publicacaoNumero, expand mostra contadores (comportamento atual)', async
   fireEvent.click(screen.getByRole('button'));
   expect(screen.getByText('Placar exato')).toBeInTheDocument();
 });
+
+describe('destaque metálico do top 5', () => {
+  const comPosicao = (posicao: number): RankingEntry => ({ ...entry, posicao });
+
+  it.each([
+    [1, 'gold'],
+    [2, 'silver'],
+    [3, 'bronze'],
+  ])('posição %iº usa a cor %s na borda e no número', (posicao, metal) => {
+    const { container } = render(<RankingRow entry={comPosicao(posicao)} bolaoId="b1" />);
+    expect((container.firstChild as HTMLElement).className).toMatch(`border-trovao-${metal}`);
+    expect(screen.getByText(`${posicao}º`).className).toMatch(`text-trovao-${metal}`);
+  });
+
+  it.each([4, 5])('posição %iº é um degradê esmaecido do bronze (cor com opacidade)', (posicao) => {
+    const { container } = render(<RankingRow entry={comPosicao(posicao)} bolaoId="b1" />);
+    expect((container.firstChild as HTMLElement).className).toMatch('border-trovao-bronze/');
+    expect(screen.getByText(`${posicao}º`).className).toMatch('text-trovao-bronze/');
+  });
+
+  it('posição fora do top 5 não recebe cor metálica', () => {
+    const { container } = render(<RankingRow entry={comPosicao(6)} bolaoId="b1" />);
+    expect((container.firstChild as HTMLElement).className).toMatch('border-trovao-border');
+    expect(screen.getByText('6º').className).toMatch('text-trovao-muted');
+  });
+
+  it('o usuário logado no top 5 ganha um ring sobre a cor da posição', () => {
+    const { container } = render(<RankingRow entry={comPosicao(2)} myId="u1" bolaoId="b1" />);
+    const root = (container.firstChild as HTMLElement).className;
+    expect(root).toMatch('border-trovao-silver');
+    expect(root).toMatch('ring-trovao-gold');
+  });
+
+  it('na rodada, o metal segue a posicaoRodada e não a posição geral', () => {
+    // posição geral 4 (cobre), mas posicaoRodada 1 deve render ouro
+    render(<RankingRow entry={comPosicao(4)} bolaoId="b1" posicaoRodada={1} publicacaoNumero={3} />);
+    expect(screen.getByText('1º').className).toMatch('text-trovao-gold');
+  });
+});
