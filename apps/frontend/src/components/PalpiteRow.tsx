@@ -9,6 +9,13 @@ interface PalpiteRowProps {
   isMe: boolean;
 }
 
+function formatarAtualizadoEm(iso: string) {
+  const d = new Date(iso);
+  const data = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+  const hora = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  return `${data} às ${hora}`;
+}
+
 export function PalpiteRow({ palpite: p, jogo, posicao, isMe }: PalpiteRowProps) {
   const medalha = posicao !== undefined ? MEDALHAS[posicao] : undefined;
 
@@ -35,16 +42,21 @@ export function PalpiteRow({ palpite: p, jogo, posicao, isMe }: PalpiteRowProps)
             {p.nome.charAt(0).toUpperCase()}
           </div>
         )}
-        <span className={`text-sm font-medium ${isMe ? 'text-trovao-gold' : 'text-white'}`}>
+        <span className={`text-sm font-medium truncate ${isMe ? 'text-trovao-gold' : 'text-white'}`}>
           {p.nome}
         </span>
       </div>
       <div className="flex items-center gap-3">
-        <span className="flex items-center gap-1.5 text-white font-mono text-sm font-semibold">
-          <SelecaoAvatar nome={jogo.selecaoCasa.nome} bandeiraSvg={jogo.selecaoCasa.bandeiraSvg} size="sm" shape="rect" />
-          {p.placarCasa} × {p.placarVisitante}
-          <SelecaoAvatar nome={jogo.selecaoVisitante.nome} bandeiraSvg={jogo.selecaoVisitante.bandeiraSvg} size="sm" shape="rect" />
-        </span>
+        <div className="flex flex-col items-end gap-0.5">
+          <span className="flex items-center gap-1.5 text-white font-mono text-sm font-semibold">
+            <SelecaoAvatar nome={jogo.selecaoCasa.nome} bandeiraSvg={jogo.selecaoCasa.bandeiraSvg} size="sm" shape="rect" />
+            {p.placarCasa} × {p.placarVisitante}
+            <SelecaoAvatar nome={jogo.selecaoVisitante.nome} bandeiraSvg={jogo.selecaoVisitante.bandeiraSvg} size="sm" shape="rect" />
+          </span>
+          <span className="text-trovao-muted text-[8px] leading-none">
+            {formatarAtualizadoEm(p.atualizadoEm)}
+          </span>
+        </div>
         {p.pontuacao !== null && (
           <span className="text-trovao-gold text-sm font-bold tabular-nums">+{p.pontuacao}</span>
         )}

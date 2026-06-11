@@ -92,6 +92,7 @@ export class ApostaService {
       placarCasa: a.placarCasa,
       placarVisitante: a.placarVisitante,
       pontuacao: a.pontuacao,
+      atualizadoEm: a.atualizadoEm,
     }));
   }
 }

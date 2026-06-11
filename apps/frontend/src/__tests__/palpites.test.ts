@@ -3,7 +3,8 @@ import type { Palpite } from '@/types/api';
 
 const mk = (over: Partial<Palpite>): Palpite => ({
   usuarioId: 'u', nome: 'X', avatarUrl: null,
-  placarCasa: 0, placarVisitante: 0, pontuacao: null, ...over,
+  placarCasa: 0, placarVisitante: 0, pontuacao: null,
+  atualizadoEm: '2026-06-11T12:00:00.000Z', ...over,
 });
 
 describe('placarKey', () => {

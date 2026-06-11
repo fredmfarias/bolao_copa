@@ -6,6 +6,7 @@ let seq = 0;
 const mk = (casa: number, visitante: number): Palpite => ({
   usuarioId: `u${seq++}`, nome: 'X', avatarUrl: null,
   placarCasa: casa, placarVisitante: visitante, pontuacao: null,
+  atualizadoEm: '2026-06-11T12:00:00.000Z',
 });
 
 it('não renderiza com 0 ou 1 placar distinto', () => {
