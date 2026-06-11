@@ -6,7 +6,7 @@
 
 ## Funcionalidades
 
-- **Grupos (Bolões)** — crie grupos privados com código de convite ou participe do bolão global automático
+- **Grupos (Bolões)** — crie grupos privados com código de convite ou participe do bolão global automático. A tela "Meus Bolões" lista apenas bolões **ativos** e só é possível ingressar em bolões ativos; abrir o link de convite de um bolão desativado exibe o botão de entrar desabilitado com uma mensagem explicativa
 - **Palpites** — envie previsões de placar com prazo de 60 min antes do apito inicial; re-envios substituem o palpite anterior
 - **Palpites revelados** — após o encerramento das apostas, a tela do jogo lista os palpites ordenados pela classificação de cada membro no bolão, com destaque metálico para os 5 primeiros colocados (mesmo estilo do ranking) e um filtro por placar com chips e contagem
 - **Pontuação automática** — placar exato, acerto de vencedor, empate e outros níveis de acerto computados assincronamente via fila Redis
