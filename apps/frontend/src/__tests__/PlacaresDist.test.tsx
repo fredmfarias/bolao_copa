@@ -12,7 +12,7 @@ const HORA_PASSADA = new Date(Date.now() - 2 * 3600 * 1000).toISOString();
 function makeJogo(overrides: Partial<Jogo> = {}): Jogo {
   return {
     id: 'j1', dataHora: HORA_FUTURA, rodada: 1, grupo: null, fase: 'GRUPOS',
-    placarCasa: null, placarVisitante: null, pesoPontuacao: 1,
+    placarCasa: null, placarVisitante: null, pesoPontuacao: 1, publicacaoId: null,
     selecaoCasa: selecao('Brasil'), selecaoVisitante: selecao('Argentina'),
     ...overrides,
   };

@@ -14,6 +14,17 @@ interface RankingRowProps {
   publicacaoNumero?: number;
 }
 
+// Destaque metálico dos 5 primeiros colocados. Classes literais para o
+// Tailwind não fazer purge (nada de montar `border-trovao-${metal}`).
+const MEDALHAS: Record<number, { border: string; texto: string }> = {
+  1: { border: 'border-trovao-gold/70',   texto: 'text-trovao-gold'      },
+  2: { border: 'border-trovao-silver/70', texto: 'text-trovao-silver'    },
+  3: { border: 'border-trovao-bronze/70', texto: 'text-trovao-bronze'    },
+  // 4º e 5º: degradê esmaecido do bronze.
+  4: { border: 'border-trovao-bronze/45', texto: 'text-trovao-bronze/80' },
+  5: { border: 'border-trovao-bronze/25', texto: 'text-trovao-bronze/55' },
+};
+
 const ACERTOS = [
   { label: 'Placar exato',                       key: 'acertosPlacarExato'    },
   { label: 'Placar do vencedor correto',         key: 'acertosPlacarVencedor' },
@@ -30,6 +41,8 @@ export function RankingRow({ entry, myId, bolaoId, posicaoRodada, publicacaoNume
   const [loading, setLoading] = useState(false);
   const isMe = entry.usuarioId === myId;
   const modoRodada = publicacaoNumero !== undefined;
+  const posicaoExibida = posicaoRodada ?? entry.posicao;
+  const medalha = MEDALHAS[posicaoExibida];
 
   const handleExpand = () => {
     const abrir = !expandido;
@@ -57,12 +70,14 @@ export function RankingRow({ entry, myId, bolaoId, posicaoRodada, publicacaoNume
   };
 
   return (
-    <div className={`rounded-xl border transition-colors ${
-      isMe ? 'border-trovao-gold/50 bg-trovao-gold/5' : 'border-trovao-border bg-trovao-card'
-    }`}>
+    <div className={`rounded-xl border bg-trovao-card transition-colors ${
+      medalha ? medalha.border : 'border-trovao-border'
+    } ${isMe ? 'ring-2 ring-trovao-gold/60' : ''}`}>
       <button onClick={handleExpand} className="w-full flex items-center gap-3 px-4 py-3 text-left">
-        <span className="text-trovao-muted text-sm w-7 flex-shrink-0">
-          {posicaoRodada !== undefined ? `${posicaoRodada}º` : `${entry.posicao}º`}
+        <span className={`text-sm w-7 flex-shrink-0 ${
+          medalha ? `${medalha.texto} font-bold` : 'text-trovao-muted'
+        }`}>
+          {posicaoExibida}º
         </span>
         {posicaoRodada !== undefined && (
           <span className="text-trovao-muted text-[10px] flex-shrink-0">(P {entry.posicao}º)</span>

@@ -11,11 +11,12 @@ const selecao = (nome: string) => ({ id: nome, nome, codigo: nome.slice(0, 3).to
 const jogo: Jogo = {
   id: 'j1', rodada: 1, grupo: 'A', fase: 'GRUPOS',
   placarCasa: null, placarVisitante: null, pesoPontuacao: 1,
+  publicacaoId: null,
   dataHora: new Date().toISOString(),
   selecaoCasa: selecao('Brasil'), selecaoVisitante: selecao('Argentina'),
 };
 
-const jogoPublicado: Jogo = { ...jogo, placarCasa: 2, placarVisitante: 1 };
+const jogoPublicado: Jogo = { ...jogo, placarCasa: 2, placarVisitante: 1, publicacaoId: 'pub1' };
 
 beforeEach(() => mockPatch.mockClear());
 
@@ -75,10 +76,23 @@ it('chama onSalvo após sucesso', async () => {
   await waitFor(() => expect(onSalvo).toHaveBeenCalledTimes(1));
 });
 
-it('mostra badge Publicado e botão Atualizar quando placar já existe', () => {
+it('mostra badge Publicado quando publicacaoId existe', () => {
   render(<AdminPlacardCard jogo={jogoPublicado} onSalvo={jest.fn()} />);
   expect(screen.getByText('Publicado')).toBeInTheDocument();
+  expect(screen.queryByText('Pendente')).not.toBeInTheDocument();
   expect(screen.getByRole('button', { name: /atualizar/i })).toBeInTheDocument();
   expect(screen.getByText('2')).toBeInTheDocument();
   expect(screen.getByText('1')).toBeInTheDocument();
+});
+
+it('mostra badge Pendente quando publicacaoId é null', () => {
+  render(<AdminPlacardCard jogo={jogo} onSalvo={jest.fn()} />);
+  expect(screen.getByText('Pendente')).toBeInTheDocument();
+  expect(screen.queryByText('Publicado')).not.toBeInTheDocument();
+});
+
+it('mostra Pendente e botão Atualizar quando há placar mas ainda não publicado', () => {
+  render(<AdminPlacardCard jogo={{ ...jogo, placarCasa: 1, placarVisitante: 0 }} onSalvo={jest.fn()} />);
+  expect(screen.getByText('Pendente')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /atualizar/i })).toBeInTheDocument();
 });

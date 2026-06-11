@@ -45,6 +45,7 @@ export interface Jogo {
   placarCasa: number | null;
   placarVisitante: number | null;
   pesoPontuacao: number;
+  publicacaoId: string | null;
   selecaoCasa: Selecao;
   selecaoVisitante: Selecao;
 }

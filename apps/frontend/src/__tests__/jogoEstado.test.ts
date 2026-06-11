@@ -6,7 +6,7 @@ const HORA_PASSADA = new Date(Date.now() - 3600_000).toISOString();
 
 const baseJogo: Jogo = {
   id: 'j1', dataHora: HORA_FUTURA, rodada: 1, grupo: null, fase: 'GRUPOS',
-  placarCasa: null, placarVisitante: null, pesoPontuacao: 1,
+  placarCasa: null, placarVisitante: null, pesoPontuacao: 1, publicacaoId: null,
   selecaoCasa: { id: 'b', nome: 'B', codigo: 'BRA', bandeiraSvg: '' },
   selecaoVisitante: { id: 'a', nome: 'A', codigo: 'ARG', bandeiraSvg: '' },
 };
