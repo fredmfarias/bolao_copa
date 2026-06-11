@@ -4,20 +4,15 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { api } from '@/lib/api';
+import { useAuth } from '@/components/AuthProvider';
 import { PageSkeleton } from '@/components/PageSkeleton';
 import { EmptyState } from '@/components/EmptyState';
 import { SelecaoAvatar } from '@/components/SelecaoAvatar';
+import { PalpiteRow } from '@/components/PalpiteRow';
+import { PlacarFiltro } from '@/components/PlacarFiltro';
+import { ordenarPorClassificacao, placarKey } from '@/lib/palpites';
 import { MINUTOS_PRAZO_APOSTA, BOLAO_GLOBAL_ID } from '@bolao/shared';
-import type { Bolao, Jogo } from '@/types/api';
-
-interface Palpite {
-  usuarioId: string;
-  nome: string;
-  avatarUrl: string | null;
-  placarCasa: number;
-  placarVisitante: number;
-  pontuacao: number | null;
-}
+import type { Bolao, Jogo, Palpite, RankingEntry } from '@/types/api';
 
 function prazoEncerrado(dataHora: string): boolean {
   const prazo = new Date(new Date(dataHora).getTime() - MINUTOS_PRAZO_APOSTA * 60 * 1000);
@@ -27,11 +22,14 @@ function prazoEncerrado(dataHora: string): boolean {
 export default function PalpitesPage() {
   const { id: bolaoId, jogoId } = useParams<{ id: string; jogoId: string }>();
   const router = useRouter();
+  const { user } = useAuth();
   const [jogo, setJogo] = useState<Jogo | null>(null);
   const [palpites, setPalpites] = useState<Palpite[]>([]);
   const [boloes, setBoloes] = useState<Bolao[]>([]);
   const [loading, setLoading] = useState(true);
   const [prazoPassou, setPrazoPassou] = useState(false);
+  const [posicoes, setPosicoes] = useState<Map<string, number>>(new Map());
+  const [placarFiltro, setPlacarFiltro] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -40,11 +38,16 @@ export default function PalpitesPage() {
     ]).then(([j, bs]) => {
       setJogo(j);
       setBoloes(bs);
+      setPlacarFiltro(null);
       if (j && prazoEncerrado(j.dataHora)) {
         setPrazoPassou(true);
-        api.get<Palpite[]>(`/boloes/${bolaoId}/apostas?jogoId=${jogoId}`)
-          .then(setPalpites)
-          .catch(() => setPalpites([]));
+        Promise.all([
+          api.get<Palpite[]>(`/boloes/${bolaoId}/apostas?jogoId=${jogoId}`).catch(() => [] as Palpite[]),
+          api.get<RankingEntry[]>(`/boloes/${bolaoId}/ranking`).catch(() => [] as RankingEntry[]),
+        ]).then(([ps, ranking]) => {
+          setPalpites(ps);
+          setPosicoes(new Map(ranking.map((r) => [r.usuarioId, r.posicao])));
+        });
       }
       setLoading(false);
     });
@@ -59,6 +62,11 @@ export default function PalpitesPage() {
   function navegarBolao(novoBolaoId: string) {
     router.push(`/boloes/${novoBolaoId}/palpites/${jogoId}`);
   }
+
+  const ordenados = ordenarPorClassificacao(palpites, posicoes);
+  const visiveis = placarFiltro === null
+    ? ordenados
+    : ordenados.filter(({ palpite }) => placarKey(palpite) === placarFiltro);
 
   return (
     <div className="space-y-4">
@@ -128,35 +136,20 @@ export default function PalpitesPage() {
       ) : palpites.length === 0 ? (
         <EmptyState titulo="Nenhum palpite" descricao="Nenhum membro apostou neste jogo." />
       ) : (
-        <div className="space-y-2">
-          <p className="text-trovao-muted text-xs px-1">{palpites.length} palpites</p>
-          {palpites.map(p => (
-            <div key={p.usuarioId}
-              className="flex items-center justify-between px-4 py-3 rounded-xl bg-trovao-card border border-trovao-border">
-              <div className="flex items-center gap-2">
-                {p.avatarUrl ? (
-                  <img src={p.avatarUrl} alt={p.nome} className="w-8 h-8 rounded-full" />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-trovao-surface flex items-center justify-center text-xs font-bold text-trovao-muted">
-                    {p.nome.charAt(0).toUpperCase()}
-                  </div>
-                )}
-                <span className="text-white text-sm font-medium">{p.nome}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="flex items-center gap-1.5 text-white font-mono text-sm font-semibold">
-                  <SelecaoAvatar nome={jogo.selecaoCasa.nome} bandeiraSvg={jogo.selecaoCasa.bandeiraSvg} size="sm" shape="rect" />
-                  {p.placarCasa} × {p.placarVisitante}
-                  <SelecaoAvatar nome={jogo.selecaoVisitante.nome} bandeiraSvg={jogo.selecaoVisitante.bandeiraSvg} size="sm" shape="rect" />
-                </span>
-                {p.pontuacao !== null && (
-                  <span className="text-trovao-gold text-sm font-bold tabular-nums">
-                    +{p.pontuacao}
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
+        <div className="space-y-3">
+          <PlacarFiltro palpites={palpites} value={placarFiltro} onChange={setPlacarFiltro} />
+          <div className="space-y-2">
+            <p className="text-trovao-muted text-xs px-1">{visiveis.length} palpites</p>
+            {visiveis.map(({ palpite, posicao }) => (
+              <PalpiteRow
+                key={palpite.usuarioId}
+                palpite={palpite}
+                jogo={jogo}
+                posicao={posicao}
+                isMe={palpite.usuarioId === user?.id}
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>
