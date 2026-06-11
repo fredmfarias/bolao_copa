@@ -47,9 +47,11 @@ export default function PalpitesPage() {
         ]).then(([ps, ranking]) => {
           setPalpites(ps);
           setPosicoes(new Map(ranking.map((r) => [r.usuarioId, r.posicao])));
+          setLoading(false);
         });
+      } else {
+        setLoading(false);
       }
-      setLoading(false);
     });
   }, [bolaoId, jogoId]);
 
