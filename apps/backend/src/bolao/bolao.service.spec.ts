@@ -2,7 +2,7 @@ import { Test } from '@nestjs/testing';
 import { BolaoService } from './bolao.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
-import { BolaoMembroPapel } from '@bolao/shared';
+import { BolaoMembroPapel, BolaoStatus } from '@bolao/shared';
 import { InscricaoWindowService } from '../inscricao-window/inscricao-window.service';
 
 const prismaMock = {
@@ -171,6 +171,16 @@ describe('BolaoService', () => {
         select: expect.objectContaining({
           _count: { select: { membros: { where: { usuario: { ativo: true } } } } },
         }),
+      }),
+    );
+  });
+
+  it('listarMeus filtra por status ATIVO', async () => {
+    prismaMock.bolao.findMany.mockResolvedValue([]);
+    await service.listarMeus('u1');
+    expect(prismaMock.bolao.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { membros: { some: { usuarioId: 'u1' } }, status: BolaoStatus.ATIVO },
       }),
     );
   });

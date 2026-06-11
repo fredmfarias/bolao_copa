@@ -37,7 +37,7 @@ export class BolaoService {
 
   async listarMeus(usuarioId: string) {
     return this.prisma.bolao.findMany({
-      where: { membros: { some: { usuarioId } } },
+      where: { membros: { some: { usuarioId } }, status: BolaoStatus.ATIVO },
       include: { _count: { select: { membros: { where: { usuario: { ativo: true } } } } } },
       orderBy: { criadoEm: 'asc' },
     });
