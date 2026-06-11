@@ -206,4 +206,34 @@ describe('BolaoService', () => {
       data: { bolaoId: 'b1', usuarioId: 'u1' },
     });
   });
+
+  it('lookupConvite retorna bolaoAtivo=false quando o bolão está inativo', async () => {
+    prismaMock.bolaoConvite.findUnique.mockResolvedValue({
+      bolaoId: 'b1',
+      expiraEm: null,
+      bolao: { nome: 'Bolão X', descricao: null, status: BolaoStatus.INATIVO },
+      criadoPor: { nome: 'Fred' },
+    });
+    const r = await service.lookupConvite('tok');
+    expect(r.valido).toBe(true);
+    expect(r.bolaoAtivo).toBe(false);
+  });
+
+  it('lookupConvite retorna bolaoAtivo=true quando o bolão está ativo', async () => {
+    prismaMock.bolaoConvite.findUnique.mockResolvedValue({
+      bolaoId: 'b1',
+      expiraEm: null,
+      bolao: { nome: 'Bolão X', descricao: null, status: BolaoStatus.ATIVO },
+      criadoPor: { nome: 'Fred' },
+    });
+    const r = await service.lookupConvite('tok');
+    expect(r.bolaoAtivo).toBe(true);
+  });
+
+  it('lookupConvite retorna bolaoAtivo=false quando o convite não existe', async () => {
+    prismaMock.bolaoConvite.findUnique.mockResolvedValue(null);
+    const r = await service.lookupConvite('tok');
+    expect(r.valido).toBe(false);
+    expect(r.bolaoAtivo).toBe(false);
+  });
 });

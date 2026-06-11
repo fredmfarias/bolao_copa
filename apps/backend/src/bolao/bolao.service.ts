@@ -134,10 +134,16 @@ export class BolaoService {
       where: { token },
       include: { bolao: true, criadoPor: { select: { nome: true } } },
     });
-    if (!convite) return { valido: false, bolaoId: null, bolaoNome: null, descricao: null, criadorNome: null, expiraEm: null };
+    if (!convite) {
+      return {
+        valido: false, bolaoAtivo: false, bolaoId: null,
+        bolaoNome: null, descricao: null, criadorNome: null, expiraEm: null,
+      };
+    }
     const valido = !convite.expiraEm || convite.expiraEm > new Date();
     return {
       valido,
+      bolaoAtivo: convite.bolao.status === BolaoStatus.ATIVO,
       bolaoId: convite.bolaoId,
       bolaoNome: convite.bolao.nome,
       descricao: convite.bolao.descricao,
