@@ -1,45 +1,50 @@
 import { test, expect } from '@playwright/test';
-import { prisma } from '../../support/db';
 import { BOLAO_GLOBAL_ID, adminContext } from '../../api/client';
 import { newUser } from '../../data/factories';
 import { LoginPage } from '../../pages/login.page';
 
 const testeUser = newUser('ordenacao');
 
-test.describe('Bolão detalhe — jogos encerrados em ordem decrescente', () => {
-  let nomesEsperados: string[]; // do mais recente ao mais antigo
+function makeJogo(id: string, casa: string, visitante: string, dataHora: string) {
+  return {
+    id,
+    dataHora,
+    rodada: 1,
+    grupo: 'A',
+    fase: 'GRUPOS',
+    placarCasa: null,
+    placarVisitante: null,
+    pesoPontuacao: 1,
+    publicacaoId: null,
+    selecaoCasa:      { id: `${id}c`, nome: casa,      codigo: casa.slice(0, 3).toUpperCase(),      bandeiraSvg: '' },
+    selecaoVisitante: { id: `${id}v`, nome: visitante, codigo: visitante.slice(0, 3).toUpperCase(), bandeiraSvg: '' },
+  };
+}
 
+test.describe('Bolão detalhe — jogos encerrados em ordem decrescente', () => {
   test.beforeAll(async () => {
     const admin = await adminContext();
     await admin.post('/admin/usuarios', {
       data: { nome: testeUser.nome, email: testeUser.email, senhaTemp: testeUser.senha },
     });
     await admin.dispose();
-
-    const now = Date.now();
-    const jogos = await prisma.jogo.findMany({
-      take: 3,
-      orderBy: { id: 'asc' },
-      select: {
-        id: true,
-        selecaoCasa: { select: { nome: true } },
-        selecaoVisitante: { select: { nome: true } },
-      },
-    });
-    if (jogos.length < 3) throw new Error('Seed precisa de ao menos 3 jogos.');
-
-    // jogos[0] = mais antigo, jogos[2] = mais recente (todos no passado = prazo encerrado)
-    await prisma.jogo.update({ where: { id: jogos[0].id }, data: { dataHora: new Date(now - 3 * 3_600_000) } });
-    await prisma.jogo.update({ where: { id: jogos[1].id }, data: { dataHora: new Date(now - 2 * 3_600_000) } });
-    await prisma.jogo.update({ where: { id: jogos[2].id }, data: { dataHora: new Date(now - 1 * 3_600_000) } });
-
-    // Ordem esperada na tela: mais recente primeiro → jogos[2], jogos[1], jogos[0]
-    nomesEsperados = [jogos[2], jogos[1], jogos[0]].map(
-      j => `${j.selecaoCasa.nome} × ${j.selecaoVisitante.nome}`.toUpperCase(),
-    );
   });
 
   test('jogos mais recentes aparecem primeiro na tela de palpites', async ({ page }) => {
+    const now = Date.now();
+
+    // Três jogos com datas passadas distintas (prazo encerrado em todos)
+    // jogos ordenados do mais antigo para o mais recente intencionalmente
+    const jogos = [
+      makeJogo('j-antigo',  'Time Alfa',   'Time Beta',  new Date(now - 3 * 3_600_000).toISOString()),
+      makeJogo('j-medio',   'Time Gama',   'Time Delta', new Date(now - 2 * 3_600_000).toISOString()),
+      makeJogo('j-recente', 'Time Epsilon', 'Time Zeta', new Date(now - 1 * 3_600_000).toISOString()),
+    ];
+
+    // Intercepta /jogos para que a tela de palpites receba dados controlados,
+    // independente do estado do banco ou fuso horário da pipeline
+    await page.route(/\/jogos$/, route => route.fulfill({ json: jogos }));
+
     const login = new LoginPage(page);
     await login.goto();
     await login.login(testeUser.email, testeUser.senha);
@@ -49,13 +54,19 @@ test.describe('Bolão detalhe — jogos encerrados em ordem decrescente', () => 
     await page.waitForSelector('h2:has-text("Jogos")');
 
     const texto = await page.locator('body').innerText();
-    const posicoes = nomesEsperados.map(nome => texto.indexOf(nome));
 
+    // Ordem esperada na tela: mais recente primeiro
+    const nomesEsperados = [
+      'TIME EPSILON × TIME ZETA',  // j-recente: -1h
+      'TIME GAMA × TIME DELTA',    // j-medio:   -2h
+      'TIME ALFA × TIME BETA',     // j-antigo:  -3h
+    ];
+
+    const posicoes = nomesEsperados.map(nome => texto.indexOf(nome));
     for (const p of posicoes) {
-      expect(p).toBeGreaterThanOrEqual(0);
+      expect(p, `Jogo não encontrado na página: "${nomesEsperados[posicoes.indexOf(p)]}"`).toBeGreaterThanOrEqual(0);
     }
-    // posicoes[0] = jogo mais recente (deve aparecer antes dos demais no texto)
-    expect(posicoes[0]).toBeLessThan(posicoes[1]);
-    expect(posicoes[1]).toBeLessThan(posicoes[2]);
+    expect(posicoes[0]).toBeLessThan(posicoes[1]); // recente antes do médio
+    expect(posicoes[1]).toBeLessThan(posicoes[2]); // médio antes do antigo
   });
 });
