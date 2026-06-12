@@ -14,13 +14,7 @@ import type { Bolao, Jogo, Aposta } from '@/types/api';
 function ordenarJogosEncerrados(jogos: Jogo[]): Jogo[] {
   return [...jogos]
     .filter(prazoEncerrado)
-    .sort((a, b) => {
-      const aTemPlacar = a.placarCasa !== null;
-      const bTemPlacar = b.placarCasa !== null;
-      if (aTemPlacar !== bTemPlacar) return aTemPlacar ? 1 : -1;
-      const diff = new Date(a.dataHora).getTime() - new Date(b.dataHora).getTime();
-      return aTemPlacar ? -diff : diff;
-    });
+    .sort((a, b) => new Date(b.dataHora).getTime() - new Date(a.dataHora).getTime());
 }
 
 const MEMBROS_INICIAIS = 5;
