@@ -116,6 +116,50 @@ describe('RankingService leitura de snapshot', () => {
     });
   });
 
+  describe('palpitesDoUsuario', () => {
+    it('agrupa por publicação e omite rodadas sem jogos visíveis', async () => {
+      prismaMock.rankingSnapshot.findMany.mockResolvedValue([
+        { publicacao: { id: 'pub-2', numero: 2, publicadoEm: new Date('2026-05-26') } },
+        { publicacao: { id: 'pub-1', numero: 1, publicadoEm: new Date('2026-05-25') } },
+      ]);
+      // pub-2 tem um jogo passado; pub-1 não tem jogos
+      prismaMock.jogo.findMany
+        .mockResolvedValueOnce([
+          {
+            id: 'j1', dataHora: new Date('2026-05-25T16:00:00Z'),
+            pesoPontuacao: 1, placarCasa: 2, placarVisitante: 1,
+            selecaoCasa:      { nome: 'Brasil',    codigo: 'BRA', bandeiraSvg: '<svg></svg>' },
+            selecaoVisitante: { nome: 'Argentina', codigo: 'ARG', bandeiraSvg: '<svg></svg>' },
+          },
+        ])
+        .mockResolvedValueOnce([]);
+      prismaMock.aposta.findMany.mockResolvedValue([
+        { jogoId: 'j1', placarCasa: 2, placarVisitante: 1, pontuacao: 6 },
+      ]);
+
+      const r = await service.palpitesDoUsuario('b1', 'u1');
+
+      expect(prismaMock.rankingSnapshot.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { bolaoId: 'b1' },
+          distinct: ['publicacaoId'],
+        }),
+      );
+      expect(r).toEqual([
+        {
+          publicacao: { numero: 2, publicadoEm: new Date('2026-05-26') },
+          items: [
+            {
+              jogo: expect.objectContaining({ id: 'j1' }),
+              palpite: { placarCasa: 2, placarVisitante: 1 },
+              pontuacao: 6,
+            },
+          ],
+        },
+      ]);
+    });
+  });
+
   describe('palpitesDaRodada', () => {
     it('retorna jogos da publicação com palpites (ou null) e pontuação', async () => {
       prismaMock.publicacao.findUnique.mockResolvedValue({ id: 'pub-3', numero: 3 });

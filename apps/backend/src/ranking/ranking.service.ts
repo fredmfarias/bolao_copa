@@ -92,6 +92,26 @@ export class RankingService {
     return snapshots.map((s) => ({ numero: s.publicacao.numero, posicao: s.posicao }));
   }
 
+  async palpitesDoUsuario(bolaoId: string, usuarioId: string) {
+    const snapshots = await this.prisma.rankingSnapshot.findMany({
+      where: { bolaoId },
+      distinct: ['publicacaoId'],
+      include: { publicacao: { select: { id: true, numero: true, publicadoEm: true } } },
+      orderBy: { publicacao: { numero: 'desc' } },
+    });
+
+    const grupos = [];
+    for (const s of snapshots) {
+      const items = await this.montarPalpitesDaPublicacao(s.publicacao.id, usuarioId);
+      if (items.length === 0) continue;
+      grupos.push({
+        publicacao: { numero: s.publicacao.numero, publicadoEm: s.publicacao.publicadoEm },
+        items,
+      });
+    }
+    return grupos;
+  }
+
   async palpitesDaRodada(bolaoId: string, numero: number, usuarioId: string) {
     // bolaoId é mantido para autorização futura/symmetry; visibilidade segue padrão das apostas.
     const publicacao = await this.prisma.publicacao.findUnique({ where: { numero } });
