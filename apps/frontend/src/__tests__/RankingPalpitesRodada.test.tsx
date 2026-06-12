@@ -25,12 +25,12 @@ const items: RodadaPalpiteItem[] = [
   },
 ];
 
-it('renderiza siglas, placar real e pontuação por item', () => {
+it('renderiza siglas, palpite e pontuação por item', () => {
   render(<RankingPalpitesRodada items={items} />);
   expect(screen.getByText('BRA')).toBeInTheDocument();
   expect(screen.getByText('ARG')).toBeInTheDocument();
   expect(screen.getByText('2 × 1')).toBeInTheDocument();
-  expect(screen.getByText(/Palpite: 2×1/)).toBeInTheDocument();
+  expect(screen.getByText(/Placar: 2 × 1/)).toBeInTheDocument();
   expect(screen.getByText('+12 pts')).toBeInTheDocument();
 });
 

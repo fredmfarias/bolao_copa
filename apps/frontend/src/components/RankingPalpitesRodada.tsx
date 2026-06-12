@@ -19,7 +19,11 @@ export function RankingPalpitesRodada({ items }: Props) {
               <div className="flex items-center gap-1.5 flex-1 min-w-0">
                 <SelecaoAvatar nome={jogo.selecaoCasa.nome} bandeiraSvg={jogo.selecaoCasa.bandeiraSvg} size="sm" shape="rect" />
                 <span className="text-white font-semibold">{jogo.selecaoCasa.codigo}</span>
-                <span className="text-white font-bold mx-1">{jogo.placarCasa} × {jogo.placarVisitante}</span>
+                {palpite ? (
+                  <span className="text-white font-bold mx-1">{palpite.placarCasa} × {palpite.placarVisitante}</span>
+                ) : (
+                  <span className="text-trovao-muted mx-1">Sem palpite</span>
+                )}
                 <span className="text-white font-semibold">{jogo.selecaoVisitante.codigo}</span>
                 <SelecaoAvatar nome={jogo.selecaoVisitante.nome} bandeiraSvg={jogo.selecaoVisitante.bandeiraSvg} size="sm" shape="rect" />
               </div>
@@ -29,7 +33,7 @@ export function RankingPalpitesRodada({ items }: Props) {
             </div>
             <div className="flex items-center justify-between text-xs">
               <span className="text-trovao-muted">
-                {palpite ? `Palpite: ${palpite.placarCasa}×${palpite.placarVisitante}` : 'Sem palpite'}
+                Placar: {jogo.placarCasa} × {jogo.placarVisitante}
               </span>
               {palpite && (
                 <span className={pontuacao > 0 ? 'text-trovao-gold font-bold' : 'text-trovao-muted'}>
