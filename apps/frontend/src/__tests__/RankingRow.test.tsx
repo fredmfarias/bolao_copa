@@ -176,7 +176,7 @@ it('exibe a quantidade de apostas realizadas ao expandir no modo geral', () => {
   render(<RankingRow entry={entry} bolaoId="b1" />);
   fireEvent.click(screen.getByRole('button'));
   expect(screen.getByText(/Apostas realizadas:/)).toBeInTheDocument();
-  expect(screen.getByText('11')).toBeInTheDocument();
+  expect(screen.getByText(/Apostas realizadas:/).parentElement).toHaveTextContent('11');
 });
 
 it('exibe link para os palpites do usuário no modo geral', () => {
