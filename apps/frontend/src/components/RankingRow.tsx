@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import type { RankingEntry, EvolucaoPonto, RodadaPalpiteItem } from '@/types/api';
 import { api } from '@/lib/api';
 import { MEDALHAS } from '@/lib/medalhas';
@@ -121,6 +122,18 @@ export function RankingRow({ entry, myId, bolaoId, posicaoRodada, publicacaoNume
               </div>
               {loading && <p className="text-trovao-muted text-xs text-center py-2">Carregando evolução...</p>}
               {!loading && evolucao && evolucao.length > 0 && <RankingEvolucao dados={evolucao} />}
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-trovao-muted text-xs">
+                  Apostas realizadas:{' '}
+                  <span className="text-white font-semibold tabular-nums">{entry.apostasPostadas}</span>
+                </span>
+                <Link
+                  href={`/ranking/${bolaoId}/usuarios/${entry.usuarioId}/palpites`}
+                  className="text-trovao-gold text-xs font-medium hover:underline"
+                >
+                  Ver palpites →
+                </Link>
+              </div>
             </>
           )}
         </div>

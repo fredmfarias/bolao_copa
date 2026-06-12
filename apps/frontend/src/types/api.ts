@@ -153,3 +153,8 @@ export interface RodadaPalpiteItem {
   palpite: { placarCasa: number; placarVisitante: number } | null;
   pontuacao: number;
 }
+
+export interface UsuarioPalpitesRodada {
+  publicacao: { numero: number; publicadoEm: string };
+  items: RodadaPalpiteItem[];
+}

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { MINUTOS_PRAZO_APOSTA } from '@bolao/shared';
 
 type Placar = { placarCasa: number; placarVisitante: number };
 
@@ -91,13 +92,36 @@ export class RankingService {
     return snapshots.map((s) => ({ numero: s.publicacao.numero, posicao: s.posicao }));
   }
 
+  async palpitesDoUsuario(bolaoId: string, usuarioId: string) {
+    const snapshots = await this.prisma.rankingSnapshot.findMany({
+      where: { bolaoId },
+      distinct: ['publicacaoId'],
+      include: { publicacao: { select: { id: true, numero: true, publicadoEm: true } } },
+      orderBy: { publicacao: { numero: 'desc' } },
+    });
+
+    const grupos = [];
+    for (const s of snapshots) {
+      const items = await this.montarPalpitesDaPublicacao(s.publicacao.id, usuarioId);
+      if (items.length === 0) continue;
+      grupos.push({
+        publicacao: { numero: s.publicacao.numero, publicadoEm: s.publicacao.publicadoEm },
+        items,
+      });
+    }
+    return grupos;
+  }
+
   async palpitesDaRodada(bolaoId: string, numero: number, usuarioId: string) {
     // bolaoId é mantido para autorização futura/symmetry; visibilidade segue padrão das apostas.
     const publicacao = await this.prisma.publicacao.findUnique({ where: { numero } });
     if (!publicacao) return [];
+    return this.montarPalpitesDaPublicacao(publicacao.id, usuarioId);
+  }
 
+  private async montarPalpitesDaPublicacao(publicacaoId: string, usuarioId: string) {
     const jogos = await this.prisma.jogo.findMany({
-      where: { publicacaoId: publicacao.id },
+      where: { publicacaoId },
       orderBy: { dataHora: 'asc' },
       select: {
         id: true, dataHora: true, pesoPontuacao: true,
@@ -106,15 +130,22 @@ export class RankingService {
         selecaoVisitante: { select: { nome: true, codigo: true, bandeiraSvg: true } },
       },
     });
-    if (jogos.length === 0) return [];
+
+    // Segurança: só revela palpites de jogos cujas apostas já encerraram,
+    // mesma regra de listarPalpitesPorJogo — publicação sozinha não garante prazo.
+    const agora = Date.now();
+    const visiveis = jogos.filter(
+      (j) => agora >= j.dataHora.getTime() - MINUTOS_PRAZO_APOSTA * 60 * 1000,
+    );
+    if (visiveis.length === 0) return [];
 
     const apostas = await this.prisma.aposta.findMany({
-      where: { usuarioId, jogoId: { in: jogos.map((j) => j.id) } },
+      where: { usuarioId, jogoId: { in: visiveis.map((j) => j.id) } },
       select: { jogoId: true, placarCasa: true, placarVisitante: true, pontuacao: true },
     });
     const apostaPorJogo = new Map(apostas.map((a) => [a.jogoId, a]));
 
-    return jogos.map((jogo) => {
+    return visiveis.map((jogo) => {
       const a = apostaPorJogo.get(jogo.id);
       return {
         jogo,
