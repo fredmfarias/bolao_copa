@@ -171,3 +171,23 @@ describe('destaque metálico do top 5', () => {
     expect(screen.getByText('1º').className).toMatch('text-trovao-gold');
   });
 });
+
+it('exibe a quantidade de apostas realizadas ao expandir no modo geral', () => {
+  render(<RankingRow entry={entry} bolaoId="b1" />);
+  fireEvent.click(screen.getByRole('button'));
+  expect(screen.getByText(/Apostas realizadas:/)).toBeInTheDocument();
+  expect(screen.getByText('11')).toBeInTheDocument();
+});
+
+it('exibe link para os palpites do usuário no modo geral', () => {
+  render(<RankingRow entry={entry} bolaoId="b1" />);
+  fireEvent.click(screen.getByRole('button'));
+  const link = screen.getByRole('link', { name: /ver palpites/i });
+  expect(link).toHaveAttribute('href', '/ranking/b1/usuarios/u1/palpites');
+});
+
+it('não exibe o link de palpites no modo rodada', () => {
+  render(<RankingRow entry={entry} bolaoId="b1" posicaoRodada={1} publicacaoNumero={3} />);
+  fireEvent.click(screen.getByRole('button'));
+  expect(screen.queryByRole('link', { name: /ver palpites/i })).not.toBeInTheDocument();
+});
