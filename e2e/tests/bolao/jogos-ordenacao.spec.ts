@@ -18,6 +18,10 @@ function makeJogo(id: string, casa: string, visitante: string, dataHora: string)
 }
 
 test.describe('Bolão detalhe — jogos encerrados em ordem decrescente', () => {
+  // O app usa next-pwa com aggressiveFrontEndNavCaching, cujo Service Worker
+  // intercepta os fetch requests antes do Playwright. Bloqueamos o SW para que
+  // page.route() consiga interceptar /jogos e retornar dados controlados.
+  test.use({ serviceWorkers: 'block' });
   test.beforeAll(async () => {
     // Cria usuário (que entra automaticamente no bolão global)
     const admin = await adminContext();
