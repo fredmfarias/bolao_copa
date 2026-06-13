@@ -99,6 +99,17 @@ describe('ApostaService', () => {
       await service.upsert('user-1', { jogoId: 'jogo-1', placarCasa: 1, placarVisitante: 0 });
       expect(prismaMock.bolaoMembro.findMany).not.toHaveBeenCalled();
     });
+
+    it('seta palpiteAtualizadoEm no create e no update do upsert', async () => {
+      prismaMock.jogo.findUnique.mockResolvedValue(jogoGrupos);
+      prismaMock.aposta.findUnique.mockResolvedValue(null);
+      prismaMock.aposta.count.mockResolvedValue(0);
+      prismaMock.aposta.upsert.mockResolvedValue({});
+      await service.upsert('user-1', { jogoId: 'jogo-1', placarCasa: 1, placarVisitante: 0 });
+      const arg = prismaMock.aposta.upsert.mock.calls[0][0];
+      expect(arg.create.palpiteAtualizadoEm).toBeInstanceOf(Date);
+      expect(arg.update.palpiteAtualizadoEm).toBeInstanceOf(Date);
+    });
   });
 
   describe('listar', () => {
@@ -146,6 +157,20 @@ describe('ApostaService', () => {
           where: { jogoId: 'jogo-1', usuarioId: { in: ['user-1', 'user-2'] } },
         }),
       );
+    });
+
+    it('expõe palpiteAtualizadoEm e não expõe atualizadoEm', async () => {
+      prismaMock.jogo.findUnique.mockResolvedValue(jogoPassado);
+      prismaMock.bolaoMembro.findMany.mockResolvedValue([{ usuarioId: 'user-1' }]);
+      const palpitadoEm = new Date('2026-06-11T12:00:00.000Z');
+      prismaMock.aposta.findMany.mockResolvedValue([
+        { usuarioId: 'user-1', placarCasa: 2, placarVisitante: 1, pontuacao: null,
+          palpiteAtualizadoEm: palpitadoEm, atualizadoEm: new Date(),
+          usuario: { id: 'user-1', nome: 'Alice', avatarUrl: null } },
+      ]);
+      const result = await service.listarPalpitesPorJogo('bolao-1', 'jogo-1');
+      expect(result[0].palpiteAtualizadoEm).toBe(palpitadoEm);
+      expect(result[0]).not.toHaveProperty('atualizadoEm');
     });
   });
 });
