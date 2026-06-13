@@ -97,7 +97,7 @@ export function JogoCard({ jogo, aposta, onApostar, palpitesHref }: JogoCardProp
           />
           <span className="text-trovao-muted text-[10px] uppercase tracking-wider">Palpite</span>
           {aposta && (
-            <span className="text-trovao-muted text-[10px]">{formatDataAposta(aposta.atualizadoEm)}</span>
+            <span className="text-trovao-muted text-[10px]">{formatDataAposta(aposta.palpiteAtualizadoEm)}</span>
           )}
         </div>
 

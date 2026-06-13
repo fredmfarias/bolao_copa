@@ -21,7 +21,7 @@ function makeJogo(overrides: Partial<Jogo> = {}): Jogo {
 function makeAposta(overrides: Partial<Aposta> = {}): Aposta {
   return {
     id: 'a1', jogoId: 'j1', placarCasa: 1, placarVisitante: 0,
-    pontuacao: null, atualizadoEm: new Date().toISOString(),
+    pontuacao: null, palpiteAtualizadoEm: new Date().toISOString(),
     jogo: makeJogo(),
     ...overrides,
   };
