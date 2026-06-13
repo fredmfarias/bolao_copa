@@ -168,6 +168,7 @@ model Aposta {
   pontuacao       Int?
   criadoEm       DateTime @default(now())
   atualizadoEm   DateTime @updatedAt
+  palpiteAtualizadoEm DateTime @default(now())
 
   @@unique([usuarioId, jogoId])
   @@map("aposta")
