@@ -56,7 +56,7 @@ export interface Aposta {
   placarCasa: number;
   placarVisitante: number;
   pontuacao: number | null;
-  atualizadoEm: string;
+  palpiteAtualizadoEm: string;
   jogo: Jogo;
 }
 
@@ -67,7 +67,7 @@ export interface Palpite {
   placarCasa: number;
   placarVisitante: number;
   pontuacao: number | null;
-  atualizadoEm: string;
+  palpiteAtualizadoEm: string;
 }
 
 export interface RankingEntry {

@@ -20,7 +20,7 @@ const jogoBase: Jogo = {
 const apostaExemplo: Aposta = {
   id: 'a1', jogoId: 'j1',
   placarCasa: 2, placarVisitante: 1, pontuacao: null,
-  atualizadoEm: ATUALIZADO, jogo: jogoBase,
+  palpiteAtualizadoEm: ATUALIZADO, jogo: jogoBase,
 };
 
 it('aberto — mostra botão Apostar, palpite vazio, sem data', () => {

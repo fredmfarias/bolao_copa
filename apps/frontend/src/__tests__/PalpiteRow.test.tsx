@@ -10,7 +10,7 @@ const jogo = {
 const palpite: Palpite = {
   usuarioId: 'u1', nome: 'Diego', avatarUrl: null,
   placarCasa: 2, placarVisitante: 1, pontuacao: 7,
-  atualizadoEm: '2026-06-11T12:00:00.000Z',
+  palpiteAtualizadoEm: '2026-06-11T12:00:00.000Z',
 };
 
 it('exibe nome, placar e pontuação', () => {

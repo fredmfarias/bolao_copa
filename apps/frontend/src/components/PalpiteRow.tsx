@@ -54,7 +54,7 @@ export function PalpiteRow({ palpite: p, jogo, posicao, isMe }: PalpiteRowProps)
             <SelecaoAvatar nome={jogo.selecaoVisitante.nome} bandeiraSvg={jogo.selecaoVisitante.bandeiraSvg} size="sm" shape="rect" />
           </span>
           <span className="text-trovao-muted text-[8px] leading-none">
-            {formatarAtualizadoEm(p.atualizadoEm)}
+            {formatarAtualizadoEm(p.palpiteAtualizadoEm)}
           </span>
         </div>
         {p.pontuacao !== null && (

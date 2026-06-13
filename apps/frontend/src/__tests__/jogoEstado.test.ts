@@ -13,7 +13,7 @@ const baseJogo: Jogo = {
 
 const baseAposta: Aposta = {
   id: 'a1', jogoId: 'j1', placarCasa: 2, placarVisitante: 1,
-  pontuacao: null, atualizadoEm: new Date().toISOString(), jogo: baseJogo,
+  pontuacao: null, palpiteAtualizadoEm: new Date().toISOString(), jogo: baseJogo,
 };
 
 it('aberto: prazo aberto, sem aposta', () => {

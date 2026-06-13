@@ -49,10 +49,22 @@ export class ApostaService {
       }
     }
 
+    const agora = new Date();
     return this.prisma.aposta.upsert({
       where: { usuarioId_jogoId: { usuarioId, jogoId: dto.jogoId } },
-      update: { placarCasa: dto.placarCasa, placarVisitante: dto.placarVisitante, pontuacao: null },
-      create: { usuarioId, jogoId: dto.jogoId, placarCasa: dto.placarCasa, placarVisitante: dto.placarVisitante },
+      update: {
+        placarCasa: dto.placarCasa,
+        placarVisitante: dto.placarVisitante,
+        pontuacao: null,
+        palpiteAtualizadoEm: agora,
+      },
+      create: {
+        usuarioId,
+        jogoId: dto.jogoId,
+        placarCasa: dto.placarCasa,
+        placarVisitante: dto.placarVisitante,
+        palpiteAtualizadoEm: agora,
+      },
     });
   }
 
@@ -92,7 +104,7 @@ export class ApostaService {
       placarCasa: a.placarCasa,
       placarVisitante: a.placarVisitante,
       pontuacao: a.pontuacao,
-      atualizadoEm: a.atualizadoEm,
+      palpiteAtualizadoEm: a.palpiteAtualizadoEm,
     }));
   }
 }
