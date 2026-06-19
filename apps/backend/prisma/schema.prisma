@@ -181,6 +181,7 @@ model Ranking {
   usuarioId             String
   usuario               Usuario @relation(fields: [usuarioId], references: [id])
   pontuacaoTotal        Int     @default(0)
+  pontosMaximoPossiveis Int     @default(0)
   acertosPlacarExato    Int     @default(0)
   acertosPlacarVencedor Int     @default(0)
   acertosPlacarPerdedor Int     @default(0)
@@ -240,8 +241,10 @@ model RankingSnapshot {
   usuario         Usuario    @relation(fields: [usuarioId], references: [id])
   posicao         Int
   posicoesGanhas  Int        @default(0)
-  pontuacaoTotal  Int        @default(0)
-  pontuacaoRodada Int        @default(0)
+  pontuacaoTotal               Int @default(0)
+  pontosMaximoPossiveis        Int @default(0)
+  pontuacaoRodada              Int @default(0)
+  pontosMaximoPossiveisRodada  Int @default(0)
 
   acertosPlacarExato    Int @default(0)
   acertosPlacarVencedor Int @default(0)

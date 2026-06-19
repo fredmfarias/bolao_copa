@@ -162,6 +162,9 @@ export class RankingService {
     });
     const usuarioIds = membros.map((m) => m.usuarioId);
 
+    const configs = await this.prisma.configuracaoPontuacao.findMany();
+    const maxPontosPorAposta = configs.length > 0 ? Math.max(...configs.map((c) => c.pontos)) : 0;
+
     const apostas = await this.prisma.aposta.findMany({
       where: { usuarioId: { in: usuarioIds }, pontuacao: { not: null } },
       include: { jogo: true },
@@ -173,9 +176,9 @@ export class RankingService {
     for (const m of membros) {
       porUsuario.set(m.usuarioId, {
         nome: m.usuario.nome,
-        pontuacaoTotal: 0, acertosPlacarExato: 0, acertosPlacarVencedor: 0,
-        acertosPlacarPerdedor: 0, acertosEmpate: 0, acertosGanhador: 0,
-        acertosNada: 0, apostasPostadas: 0,
+        pontuacaoTotal: 0, pontosMaximoPossiveis: 0, acertosPlacarExato: 0,
+        acertosPlacarVencedor: 0, acertosPlacarPerdedor: 0, acertosEmpate: 0,
+        acertosGanhador: 0, acertosNada: 0, apostasPostadas: 0,
       });
     }
 
@@ -184,6 +187,7 @@ export class RankingService {
       if (!r) continue;
       r.apostasPostadas += 1;
       r.pontuacaoTotal += aposta.pontuacao ?? 0;
+      r.pontosMaximoPossiveis += maxPontosPorAposta * aposta.jogo.pesoPontuacao;
 
       if (aposta.jogo.placarCasa !== null && aposta.jogo.placarVisitante !== null) {
         const nivel = this.calcularNivel(

@@ -46,16 +46,26 @@ export class PublicacaoService {
     const jogosRodada = pendentes.map((j) => ({ id: j.id }));
     const jogoIds = jogosRodada.map((j) => j.id);
 
+    const configs = await this.prisma.configuracaoPontuacao.findMany();
+    const maxPontosPorAposta = configs.length > 0 ? Math.max(...configs.map((c) => c.pontos)) : 0;
+    const pesoPorJogo = new Map(pendentes.map((j) => [j.id, j.pesoPontuacao]));
+
     // Pontos da rodada por usuário (apostas global, valem para todos os bolões).
     const apostasRodada = await this.prisma.aposta.findMany({
       where: { jogoId: { in: jogoIds }, pontuacao: { not: null } },
-      select: { usuarioId: true, pontuacao: true },
+      select: { usuarioId: true, pontuacao: true, jogoId: true },
     });
     const pontosRodadaPorUsuario = new Map<string, number>();
+    const pontosMaximosRodadaPorUsuario = new Map<string, number>();
     for (const a of apostasRodada) {
       pontosRodadaPorUsuario.set(
         a.usuarioId,
         (pontosRodadaPorUsuario.get(a.usuarioId) ?? 0) + (a.pontuacao ?? 0),
+      );
+      const peso = pesoPorJogo.get(a.jogoId) ?? 1;
+      pontosMaximosRodadaPorUsuario.set(
+        a.usuarioId,
+        (pontosMaximosRodadaPorUsuario.get(a.usuarioId) ?? 0) + maxPontosPorAposta * peso,
       );
     }
 
@@ -95,7 +105,9 @@ export class PublicacaoService {
             posicao: r.posicao,
             posicoesGanhas,
             pontuacaoTotal: r.pontuacaoTotal,
+            pontosMaximoPossiveis: r.pontosMaximoPossiveis,
             pontuacaoRodada: pontosRodadaPorUsuario.get(r.usuarioId) ?? 0,
+            pontosMaximoPossiveisRodada: pontosMaximosRodadaPorUsuario.get(r.usuarioId) ?? 0,
             acertosPlacarExato: r.acertosPlacarExato,
             acertosPlacarVencedor: r.acertosPlacarVencedor,
             acertosPlacarPerdedor: r.acertosPlacarPerdedor,

@@ -23,6 +23,7 @@ export default function RankingPage() {
   const [publicacoes, setPublicacoes] = useState<PublicacaoResumo[]>([]);
   const [publicacaoSel, setPublicacaoSel] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mostrarAproveitamento, setMostrarAproveitamento] = useState(false);
   const rankingGeralRef = useRef<RankingEntry[]>([]);
 
   useEffect(() => {
@@ -95,6 +96,14 @@ export default function RankingPage() {
                     : 'bg-trovao-surface text-trovao-muted border-trovao-border'}`}>
                 Rodada
               </button>
+              <button
+                onClick={() => setMostrarAproveitamento((v) => !v)}
+                className={`px-3 py-1 rounded-full text-xs font-medium border ${
+                  mostrarAproveitamento
+                    ? 'bg-trovao-gold text-trovao-base border-trovao-gold'
+                    : 'bg-trovao-surface text-trovao-muted border-trovao-border'}`}>
+                % Aproveit.
+              </button>
             </div>
             {aba === 'rodada' && publicacoes.length > 0 && (
               <div className="flex flex-col items-end gap-0.5">
@@ -128,16 +137,17 @@ export default function RankingPage() {
           <div className="space-y-2 mt-4">
             {aba === 'geral'
               ? ranking.map((entry) => (
-                  <RankingRow key={entry.id} entry={entry} myId={user?.id} bolaoId={bolaoId} />
+                  <RankingRow key={entry.id} entry={entry} myId={user?.id} bolaoId={bolaoId} mostrarAproveitamento={mostrarAproveitamento} />
                 ))
               : ordenadoRodada.map(({ entry, posicaoRodada }) => (
                   <RankingRow
                     key={entry.id}
-                    entry={{ ...entry, pontuacaoTotal: entry.pontuacaoRodada, posicoesGanhas: 0 }}
+                    entry={{ ...entry, pontuacaoTotal: entry.pontuacaoRodada, pontosMaximoPossiveis: entry.pontosMaximoPossiveisRodada, posicoesGanhas: 0 }}
                     myId={user?.id}
                     bolaoId={bolaoId}
                     posicaoRodada={posicaoRodada}
                     publicacaoNumero={publicacaoSel ?? undefined}
+                    mostrarAproveitamento={mostrarAproveitamento}
                   />
                 ))}
           </div>

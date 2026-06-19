@@ -23,7 +23,7 @@ beforeEach(() => {
 
 const entry: RankingEntry = {
   id: 'r1', usuarioId: 'u1', posicao: 4, posicoesGanhas: 0,
-  pontuacaoTotal: 55, pontuacaoRodada: 0,
+  pontuacaoTotal: 55, pontosMaximoPossiveis: 100, pontuacaoRodada: 0, pontosMaximoPossiveisRodada: 0,
   acertosPlacarExato: 3, acertosPlacarVencedor: 5, acertosPlacarPerdedor: 4,
   acertosEmpate: 1, acertosGanhador: 2, acertosNada: 0, apostasPostadas: 11,
   usuario: { id: 'u1', nome: 'Diego', avatarUrl: null },

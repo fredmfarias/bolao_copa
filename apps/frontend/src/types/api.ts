@@ -76,7 +76,9 @@ export interface RankingEntry {
   posicao: number;
   posicoesGanhas: number;
   pontuacaoTotal: number;
+  pontosMaximoPossiveis: number;
   pontuacaoRodada: number;
+  pontosMaximoPossiveisRodada: number;
   acertosPlacarExato: number;
   acertosPlacarVencedor: number;
   acertosPlacarPerdedor: number;

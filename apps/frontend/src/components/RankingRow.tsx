@@ -14,6 +14,12 @@ interface RankingRowProps {
   bolaoId: string;
   posicaoRodada?: number;
   publicacaoNumero?: number;
+  mostrarAproveitamento?: boolean;
+}
+
+function calcAproveitamento(pontos: number, max: number): string {
+  if (max <= 0) return '—';
+  return `${((pontos / max) * 100).toFixed(1)}%`;
 }
 
 const ACERTOS = [
@@ -25,7 +31,7 @@ const ACERTOS = [
   { label: 'Acertou nada',                       key: 'acertosNada'           },
 ] as const;
 
-export function RankingRow({ entry, myId, bolaoId, posicaoRodada, publicacaoNumero }: RankingRowProps) {
+export function RankingRow({ entry, myId, bolaoId, posicaoRodada, publicacaoNumero, mostrarAproveitamento }: RankingRowProps) {
   const [expandido, setExpandido] = useState(false);
   const [evolucao, setEvolucao] = useState<EvolucaoPonto[] | null>(null);
   const [palpites, setPalpites] = useState<RodadaPalpiteItem[] | null>(null);
@@ -96,9 +102,15 @@ export function RankingRow({ entry, myId, bolaoId, posicaoRodada, publicacaoNume
           </span>
         )}
 
-        <span className={`text-sm font-bold tabular-nums ${isMe ? 'text-trovao-gold' : 'text-white'}`}>
-          {entry.pontuacaoTotal}
-        </span>
+        {mostrarAproveitamento ? (
+          <span className={`text-sm font-bold tabular-nums ${isMe ? 'text-trovao-gold' : 'text-white'}`}>
+            {calcAproveitamento(entry.pontuacaoTotal, entry.pontosMaximoPossiveis)}
+          </span>
+        ) : (
+          <span className={`text-sm font-bold tabular-nums ${isMe ? 'text-trovao-gold' : 'text-white'}`}>
+            {entry.pontuacaoTotal}
+          </span>
+        )}
 
         <span className="text-trovao-muted text-xs ml-1">{expandido ? '▲' : '▼'}</span>
       </button>
@@ -112,6 +124,17 @@ export function RankingRow({ entry, myId, bolaoId, posicaoRodada, publicacaoNume
             </>
           ) : (
             <>
+              <div className="flex justify-between text-xs mb-1 pb-2 border-b border-trovao-border/40">
+                <span className="text-trovao-muted">Índice de aproveitamento</span>
+                <span className="text-trovao-gold font-bold tabular-nums">
+                  {calcAproveitamento(entry.pontuacaoTotal, entry.pontosMaximoPossiveis)}
+                  {entry.pontosMaximoPossiveis > 0 && (
+                    <span className="text-trovao-muted font-normal ml-1">
+                      ({entry.pontuacaoTotal}/{entry.pontosMaximoPossiveis} pts)
+                    </span>
+                  )}
+                </span>
+              </div>
               <div className="grid grid-cols-2 gap-2">
                 {ACERTOS.map(({ label, key }) => (
                   <div key={key} className="flex justify-between text-xs">

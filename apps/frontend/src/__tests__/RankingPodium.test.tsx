@@ -3,7 +3,8 @@ import { RankingPodium } from '@/components/RankingPodium';
 import type { RankingEntry } from '@/types/api';
 
 const entry = (posicao: number, nome: string, pts: number, id = posicao.toString()): RankingEntry => ({
-  id, usuarioId: id, posicao, posicoesGanhas: 0, pontuacaoTotal: pts, pontuacaoRodada: 0,
+  id, usuarioId: id, posicao, posicoesGanhas: 0, pontuacaoTotal: pts, pontosMaximoPossiveis: 0,
+  pontuacaoRodada: 0, pontosMaximoPossiveisRodada: 0,
   acertosPlacarExato: 0, acertosPlacarVencedor: 0, acertosPlacarPerdedor: 0,
   acertosEmpate: 0, acertosGanhador: 0, acertosNada: 0, apostasPostadas: 0,
   usuario: { id, nome, avatarUrl: null },
