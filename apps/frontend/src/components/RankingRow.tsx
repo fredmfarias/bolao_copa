@@ -96,8 +96,15 @@ export function RankingRow({ entry, myId, bolaoId, posicaoRodada, publicacaoNume
           </span>
         )}
 
-        <span className={`text-sm font-bold tabular-nums ${isMe ? 'text-trovao-gold' : 'text-white'}`}>
-          {entry.pontuacaoTotal}
+        <span className={`flex flex-col items-end leading-none ${isMe ? 'text-trovao-gold' : 'text-white'}`}>
+          <span className="text-lg font-bold tabular-nums">{entry.pontuacaoTotal}</span>
+          {!modoRodada && (
+            <span className={`mt-0.5 text-[10px] font-medium tabular-nums ${
+              medalha ? medalha.texto : 'text-trovao-muted'
+            }`}>
+              {entry.aproveitamento}%
+            </span>
+          )}
         </span>
 
         <span className="text-trovao-muted text-xs ml-1">{expandido ? '▲' : '▼'}</span>

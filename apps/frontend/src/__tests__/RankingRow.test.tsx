@@ -26,6 +26,7 @@ const entry: RankingEntry = {
   pontuacaoTotal: 55, pontuacaoRodada: 0,
   acertosPlacarExato: 3, acertosPlacarVencedor: 5, acertosPlacarPerdedor: 4,
   acertosEmpate: 1, acertosGanhador: 2, acertosNada: 0, apostasPostadas: 11,
+  aproveitamento: 72,
   usuario: { id: 'u1', nome: 'Diego', avatarUrl: null },
 };
 
@@ -190,4 +191,19 @@ it('não exibe o link de palpites no modo rodada', () => {
   render(<RankingRow entry={entry} bolaoId="b1" posicaoRodada={1} publicacaoNumero={3} />);
   fireEvent.click(screen.getByRole('button'));
   expect(screen.queryByRole('link', { name: /ver palpites/i })).not.toBeInTheDocument();
+});
+
+it('exibe o badge de aproveitamento no modo geral', () => {
+  render(<RankingRow entry={entry} bolaoId="b1" />);
+  expect(screen.getByText('72%')).toBeInTheDocument();
+});
+
+it('não exibe o badge de aproveitamento no modo rodada', () => {
+  render(<RankingRow entry={entry} bolaoId="b1" posicaoRodada={1} publicacaoNumero={3} />);
+  expect(screen.queryByText('72%')).not.toBeInTheDocument();
+});
+
+it('mantém a pontuação visível ao lado do badge', () => {
+  render(<RankingRow entry={entry} bolaoId="b1" />);
+  expect(screen.getByText('55')).toBeInTheDocument(); // pontuacaoTotal
 });
