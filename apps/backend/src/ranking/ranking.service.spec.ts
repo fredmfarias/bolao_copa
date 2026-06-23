@@ -45,6 +45,7 @@ describe('RankingService leitura de snapshot', () => {
     rankingSnapshot: { findMany: jest.fn() },
     jogo: { findMany: jest.fn() },
     aposta: { findMany: jest.fn() },
+    configuracaoPontuacao: { findFirst: jest.fn() },
   };
   let service: RankingService;
 
@@ -82,6 +83,54 @@ describe('RankingService leitura de snapshot', () => {
       expect(prismaMock.rankingSnapshot.findMany).toHaveBeenCalledWith(
         expect.objectContaining({ where: { bolaoId: 'b1', publicacaoId: 'pub-2' } }),
       );
+    });
+
+    it('anexa aproveitamento relativo ao máximo possível', async () => {
+      prismaMock.publicacao.findFirst.mockResolvedValue({ id: 'pub-1', numero: 1 });
+      prismaMock.rankingSnapshot.findMany.mockResolvedValue([
+        { id: 's1', posicao: 1, pontuacaoTotal: 20 },
+        { id: 's2', posicao: 2, pontuacaoTotal: 5 },
+      ]);
+      prismaMock.configuracaoPontuacao.findFirst.mockResolvedValue({ pontos: 10 });
+      // max = 10 (placar exato) × (5 + 5) de peso = 100
+      prismaMock.jogo.findMany.mockResolvedValue([{ pesoPontuacao: 5 }, { pesoPontuacao: 5 }]);
+
+      const r = await service.obterRanking('b1');
+
+      expect(r[0].aproveitamento).toBe(20); // 20/100
+      expect(r[1].aproveitamento).toBe(5);  // 5/100
+      expect(prismaMock.jogo.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { publicacaoId: { not: null } } }),
+      );
+    });
+
+    it('aproveitamento = 0 quando o máximo possível é 0 (sem jogos publicados)', async () => {
+      prismaMock.publicacao.findFirst.mockResolvedValue({ id: 'pub-1', numero: 1 });
+      prismaMock.rankingSnapshot.findMany.mockResolvedValue([
+        { id: 's1', posicao: 1, pontuacaoTotal: 20 },
+      ]);
+      prismaMock.configuracaoPontuacao.findFirst.mockResolvedValue({ pontos: 10 });
+      prismaMock.jogo.findMany.mockResolvedValue([]);
+
+      const r = await service.obterRanking('b1');
+
+      expect(r[0].aproveitamento).toBe(0);
+    });
+
+    it('respeita os pontos do nível 1 vindos da configuração', async () => {
+      prismaMock.publicacao.findFirst.mockResolvedValue({ id: 'pub-1', numero: 1 });
+      prismaMock.rankingSnapshot.findMany.mockResolvedValue([
+        { id: 's1', posicao: 1, pontuacaoTotal: 6 },
+      ]);
+      prismaMock.configuracaoPontuacao.findFirst.mockResolvedValue({ pontos: 12 });
+      prismaMock.jogo.findMany.mockResolvedValue([{ pesoPontuacao: 1 }]); // max = 12
+
+      const r = await service.obterRanking('b1');
+
+      expect(r[0].aproveitamento).toBe(50); // 6/12
+      expect(prismaMock.configuracaoPontuacao.findFirst).toHaveBeenCalledWith({
+        where: { nivel: 1 },
+      });
     });
   });
 

@@ -63,11 +63,36 @@ export class RankingService {
       : await this.prisma.publicacao.findFirst({ orderBy: { numero: 'desc' } });
     if (!publicacao) return [];
 
-    return this.prisma.rankingSnapshot.findMany({
+    const snapshots = await this.prisma.rankingSnapshot.findMany({
       where: { bolaoId, publicacaoId: publicacao.id },
       include: { usuario: { select: { id: true, nome: true, avatarUrl: true } } },
       orderBy: { posicao: 'asc' },
     });
+
+    const maxPossivel = await this.calcularMaxPossivel();
+
+    return snapshots.map((s) => ({
+      ...s,
+      aproveitamento:
+        maxPossivel > 0 ? Math.round((s.pontuacaoTotal / maxPossivel) * 100) : 0,
+    }));
+  }
+
+  // Máximo de pontos possível somando os jogos já publicados:
+  // placar exato (nível 1) × peso de cada jogo. Global: jogos e publicações
+  // não são por bolão. O `?? []`/guards mantêm o método seguro com mocks parciais.
+  private async calcularMaxPossivel(): Promise<number> {
+    const config = await this.prisma.configuracaoPontuacao.findFirst({
+      where: { nivel: 1 },
+    });
+    const pontosExato = config?.pontos ?? 0;
+    if (pontosExato === 0) return 0;
+
+    const jogos = await this.prisma.jogo.findMany({
+      where: { publicacaoId: { not: null } },
+      select: { pesoPontuacao: true },
+    });
+    return (jogos ?? []).reduce((acc, j) => acc + pontosExato * j.pesoPontuacao, 0);
   }
 
   async listarPublicacoes(bolaoId: string) {

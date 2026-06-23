@@ -64,7 +64,7 @@ export function RankingRow({ entry, myId, bolaoId, posicaoRodada, publicacaoNume
     <div className={`rounded-xl border bg-trovao-card transition-colors ${
       medalha ? medalha.border : 'border-trovao-border'
     } ${isMe ? 'ring-2 ring-trovao-gold/60' : ''}`}>
-      <button onClick={handleExpand} className="w-full flex items-center gap-3 px-4 py-3 text-left">
+      <button onClick={handleExpand} className="relative w-full flex items-center gap-3 px-4 py-3 text-left">
         <span className={`text-sm w-7 flex-shrink-0 ${
           medalha ? `${medalha.texto} font-bold` : 'text-trovao-muted'
         }`}>
@@ -101,6 +101,12 @@ export function RankingRow({ entry, myId, bolaoId, posicaoRodada, publicacaoNume
         </span>
 
         <span className="text-trovao-muted text-xs ml-1">{expandido ? '▲' : '▼'}</span>
+
+        {!modoRodada && (
+          <span className="absolute bottom-1 right-3 text-[9px] font-medium tabular-nums text-trovao-muted leading-none">
+            {entry.aproveitamento}%
+          </span>
+        )}
       </button>
 
       {expandido && (

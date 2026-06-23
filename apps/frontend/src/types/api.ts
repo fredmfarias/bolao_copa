@@ -84,6 +84,7 @@ export interface RankingEntry {
   acertosGanhador: number;
   acertosNada: number;
   apostasPostadas: number;
+  aproveitamento: number;
   usuario: { id: string; nome: string; avatarUrl: string | null };
 }
 
