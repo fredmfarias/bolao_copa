@@ -79,6 +79,16 @@ export class AdminController {
     return this.service.enviarNotificacao(dto);
   }
 
+  @Get('selecoes')
+  listarSelecoes() {
+    return this.service.listarSelecoes();
+  }
+
+  @Get('estadios')
+  listarEstadios() {
+    return this.service.listarEstadios();
+  }
+
   @Get('jogos/lembretes')
   verificarLembretes() {
     return this.service.verificarLembretes();
