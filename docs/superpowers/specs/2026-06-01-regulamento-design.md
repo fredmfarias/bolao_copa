@@ -88,7 +88,7 @@ Pontuação universal para todos os bolões.
 
 #### Limite de Apostas Idênticas
 - Fase de grupos: máximo de **18 apostas com o mesmo placar**
-- Fase eliminatória: máximo de **8 apostas com o mesmo placar**
+- Fase eliminatória: máximo de **32 apostas com o mesmo placar**
 
 ### 4. Premiação
 

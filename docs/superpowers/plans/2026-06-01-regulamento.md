@@ -292,7 +292,7 @@ export default function RegulamentoPage() {
                   </p>
                   <p>
                     <strong className="text-white">Limite de apostas idênticas:</strong> máximo de{' '}
-                    <strong className="text-white">18 apostas com o mesmo placar</strong> na fase de
+                    <strong className="text-white">32 apostas com o mesmo placar</strong> na fase de
                     grupos e <strong className="text-white">8</strong> na fase eliminatória por
                     usuário.
                   </p>
@@ -438,7 +438,7 @@ export default function RegulamentoPage() {
                       </li>
                       <li>
                         Fase eliminatória: máximo de{' '}
-                        <strong className="text-white">8 apostas com o mesmo placar</strong>
+                        <strong className="text-white">32 apostas com o mesmo placar</strong>
                       </li>
                     </ul>
                   </div>
