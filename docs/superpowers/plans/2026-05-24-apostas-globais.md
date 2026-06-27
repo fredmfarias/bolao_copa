@@ -260,10 +260,10 @@ describe('ApostaService', () => {
       ).rejects.toThrow(BadRequestException);
     });
 
-    it('lança BadRequestException ao exceder 8 apostas iguais na fase eliminatória', async () => {
+    it('lança BadRequestException ao exceder 32 apostas iguais na fase eliminatória', async () => {
       prismaMock.jogo.findUnique.mockResolvedValue(jogoElim);
       prismaMock.aposta.findUnique.mockResolvedValue(null);
-      prismaMock.aposta.count.mockResolvedValue(8);
+      prismaMock.aposta.count.mockResolvedValue(32);
       await expect(
         service.upsert('user-1', { jogoId: 'jogo-1', placarCasa: 2, placarVisitante: 1 }),
       ).rejects.toThrow(BadRequestException);

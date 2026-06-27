@@ -184,7 +184,7 @@ Fase de Grupos                           limite: 18 apostas idênticas
 1 × 0   ████░░░░░░░░░░░░  4/18                                    ˄
 2 × 1   ██░░░░░░░░░░░░░░  2/18                                    ˅
 
-Fases Eliminatórias                       limite: 8 apostas idênticas
+Fases Eliminatórias                       limite: 32 apostas idênticas
 ─────────────────────────────────────────────────────────────────────
 1 × 1   ██████░░  6/8   ← barra dourada (>75%)                   ˅
 

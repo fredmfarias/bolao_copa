@@ -41,7 +41,7 @@ it('exibe seções Fase de Grupos e Fases Eliminatórias', () => {
 it('exibe o limite correto de cada fase', () => {
   render(<PlacaresDist apostas={[]} onApostar={jest.fn()} />);
   expect(screen.getByText(/limite: 18 apostas idênticas/i)).toBeInTheDocument();
-  expect(screen.getByText(/limite: 8 apostas idênticas/i)).toBeInTheDocument();
+  expect(screen.getByText(/limite: 32 apostas idênticas/i)).toBeInTheDocument();
 });
 
 it('aposta de GRUPOS aparece na seção de Grupos', () => {

@@ -34,6 +34,14 @@ export interface Selecao {
   nome: string;
   codigo: string;
   bandeiraSvg: string;
+  grupo?: string;
+}
+
+export interface Estadio {
+  id: string;
+  nome: string;
+  cidade: string;
+  pais: string;
 }
 
 export interface Jogo {
@@ -48,6 +56,7 @@ export interface Jogo {
   publicacaoId: string | null;
   selecaoCasa: Selecao;
   selecaoVisitante: Selecao;
+  estadio?: Estadio;
 }
 
 export interface Aposta {

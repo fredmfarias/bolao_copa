@@ -154,6 +154,20 @@ export class AdminService {
     return this.jogo.reagendarLembretes();
   }
 
+  async listarSelecoes() {
+    return this.prisma.selecao.findMany({
+      select: { id: true, nome: true, codigo: true, bandeiraSvg: true, grupo: true },
+      orderBy: { nome: 'asc' },
+    });
+  }
+
+  async listarEstadios() {
+    return this.prisma.estadio.findMany({
+      select: { id: true, nome: true, cidade: true, pais: true },
+      orderBy: { nome: 'asc' },
+    });
+  }
+
   async enviarNotificacao(dto: EnviarNotificacaoDto) {
     const payload = { title: dto.titulo, body: dto.corpo };
     if (dto.usuarioIds && dto.usuarioIds.length > 0) {
