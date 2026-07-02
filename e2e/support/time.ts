@@ -3,14 +3,23 @@ import { prisma } from './db';
 import { adminContext } from '../api/client';
 
 // Returns an existing GRUPOS jogo whose kickoff is > 60 min away (bets open).
+// O seed usa datas reais da Copa 2026; conforme o relógio avança, esses jogos
+// acabam ficando todos no passado. Se isso ocorrer, empurramos um jogo para o
+// futuro em vez de depender de que o seed sempre tenha uma partida futura.
 export async function jogoComApostasAbertas() {
   const limite = new Date(Date.now() + 61 * 60 * 1000);
   const jogo = await prisma.jogo.findFirst({
     where: { fase: 'GRUPOS', dataHora: { gt: limite } },
     orderBy: { dataHora: 'asc' },
   });
-  if (!jogo) throw new Error('Nenhum jogo com apostas abertas no seed; ajuste o seed ou a data.');
-  return jogo;
+  if (jogo) return jogo;
+
+  const qualquer = await prisma.jogo.findFirst({ where: { fase: 'GRUPOS' } });
+  if (!qualquer) throw new Error('Nenhum jogo GRUPOS no seed; ajuste o seed.');
+  return prisma.jogo.update({
+    where: { id: qualquer.id },
+    data: { dataHora: new Date(Date.now() + 24 * 60 * 60 * 1000) },
+  });
 }
 
 // Forces a jogo's kickoff to the past so the betting deadline is closed.
