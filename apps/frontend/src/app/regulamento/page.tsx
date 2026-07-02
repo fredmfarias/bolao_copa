@@ -175,6 +175,17 @@ function RegulamentoConteudo() {
                     </tbody>
                   </table>
 
+                  <div className="rounded-lg bg-gray-800 p-3">
+                    <p className="mb-1 font-semibold text-white">Jogos da 2ª fase (mata-mata)</p>
+                    <p>
+                      O placar considerado para pontuação é o resultado ao final dos{' '}
+                      <strong className="text-white">120 minutos</strong> (tempo normal +
+                      prorrogação). Ou seja, se houver empate no tempo regular e o jogo for para a
+                      prorrogação, é o placar após a prorrogação que vale para o palpite —
+                      disputas decididas nos pênaltis não alteram o placar considerado.
+                    </p>
+                  </div>
+
                   <div>
                     <p className="mb-2 font-semibold text-white">Multiplicadores de Peso</p>
                     <table className="w-full text-xs">
