@@ -168,3 +168,56 @@ export interface UsuarioPalpitesRodada {
   publicacao: { numero: number; publicadoEm: string };
   items: RodadaPalpiteItem[];
 }
+
+// --- Estatísticas do bolão ---
+
+export type UsuarioRef = { id: string; nome: string; avatarUrl: string | null };
+export type TopEntry = { usuarios: UsuarioRef[]; valor: number };
+export type RecordeRodada = {
+  valor: number;
+  registros: Array<{ usuario: UsuarioRef; publicacao: number }>;
+};
+
+export type EstatisticasBolao =
+  | { temDados: false }
+  | {
+      temDados: true;
+      ultimaPublicacao: { numero: number; publicadoEm: string };
+      posicoes: {
+        reiDaLideranca: TopEntry[];
+        lanterna: TopEntry[];
+        foguete: RecordeRodada | null;
+        quedaLivre: RecordeRodada | null;
+        maisRegular: { usuarios: UsuarioRef[]; valor: number } | null;
+        top5: TopEntry[];
+      };
+      recordes: {
+        maiorPontuacaoRodada: RecordeRodada | null;
+        rodadaGenerosa: { publicacao: number; media: number } | null;
+        rodadaAvara: { publicacao: number; media: number } | null;
+        reiDoPlacarExato: TopEntry[];
+        aproveitamentoPorFase: Array<{
+          fase: string;
+          aproveitamento: number;
+          melhor: { usuarios: UsuarioRef[]; pontos: number } | null;
+        }>;
+      };
+      palpites: {
+        placaresMaisApostados: Array<{ placar: string; quantidade: number }>;
+        jogoConsensual: { jogo: string; placar: string; percentual: number } | null;
+        jogoDividido: { jogo: string; placaresDistintos: number; percentualModal: number } | null;
+        otimista: { usuarios: UsuarioRef[]; mediaGols: number } | null;
+        pessimista: { usuarios: UsuarioRef[]; mediaGols: number } | null;
+        mediaRealGols: number | null;
+        ultimaHora: { usuarios: UsuarioRef[]; medianaMinutos: number } | null;
+        precavido: { usuarios: UsuarioRef[]; medianaMinutos: number } | null;
+        reenvios: TopEntry[];
+        empates: { percentualApostas: number; percentualJogos: number } | null;
+        esquecidos: TopEntry[];
+      };
+      zebras: {
+        zebra: { jogo: string; percentualPontuaram: number } | null;
+        previsivel: { jogo: string; percentualPontuaram: number } | null;
+        acertosSolitarios: Array<{ jogo: string; usuario: UsuarioRef; placar: string }>;
+      };
+    };
