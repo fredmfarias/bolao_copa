@@ -59,7 +59,12 @@ export default function BolaoDetalhePage() {
           <h1 className="text-xl font-bold">{bolao.nome}</h1>
           {bolao.descricao && <p className="text-gray-400 text-sm mt-0.5">{bolao.descricao}</p>}
         </div>
-        <Link href="/boloes" className="text-trovao-muted text-sm hover:text-white shrink-0">← Voltar</Link>
+        <div className="flex items-center gap-4 shrink-0">
+          <Link href={`/boloes/${id}/estatisticas`} className="text-trovao-muted text-sm hover:text-white">
+            📊 Estatísticas
+          </Link>
+          <Link href="/boloes" className="text-trovao-muted text-sm hover:text-white">← Voltar</Link>
+        </div>
       </div>
 
       {isModerador && (
