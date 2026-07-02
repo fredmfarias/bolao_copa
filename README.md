@@ -13,6 +13,7 @@
 - **Ranking por publicação** — participantes veem um snapshot congelado publicado pelo admin; dois modos: **Geral** (acumulado; cada linha mostra um badge de **aproveitamento** — a pontuação do usuário como percentual do máximo possível somando os jogos já publicados, ou seja `pontos ÷ (placar exato × peso de cada jogo publicado)`; o expand mostra a quantidade de apostas realizadas e um link para todos os palpites do usuário em rodadas publicadas) e **Rodada** (seletor por data da publicação, ranking reordenado pela pontuação da rodada e lista de palpites do usuário no expand). Os **5 primeiros colocados** ganham destaque metálico na listagem (ouro, prata e bronze; 4º e 5º em tons degradê do bronze)
 - **Variação de posição** — seta colorida indicando quantas posições o participante subiu ou caiu em relação à publicação anterior
 - **Gráfico de evolução** — line chart com a trajetória de posição do participante ao longo das rodadas
+- **Estatísticas do bolão** — página por bolão (`/boloes/:id/estatisticas`) com 20 estatísticas e curiosidades calculadas sobre rodadas publicadas: rankings de posição (mais rodadas em 1º, lanterna, foguete/queda, regularidade, top 5), recordes de pontuação (melhor rodada individual, rodada generosa/avara, rei do placar exato, aproveitamento por fase), curiosidades de palpites (placar mais apostado, consenso/divisão, otimistas vs pessimistas, última hora vs precavido, re-envios, empates, esquecidos) e zebras (jogo menos/mais acertado, acertos solitários). O resultado é cacheado em memória por publicação — só a primeira visita após cada rodada publicada recalcula
 - **Notificações push** — alertas via Web Push (PWA) quando partidas começam ou terminam
 - **Login social** — autenticação com Google OAuth ou e-mail/senha
 - **Painel administrativo** — habilitar/desabilitar bolões, gerenciar placares, pré-visualizar ranking (draft ao vivo), publicar rankings globalmente (com modal de confirmação listando os jogos da rodada) e gerir usuários com busca por nome/email (ativar/desativar, resetar senha). Usuários desativados não conseguem entrar (Google ou e-mail/senha) e deixam de aparecer nas listas de membros, nas contagens e nos rankings
@@ -209,6 +210,7 @@ bolao-trovao/
 │   │   │   ├── jogo/        # Partidas da copa
 │   │   │   ├── publicacao/  # Evento global de publicação de ranking
 │   │   │   ├── ranking/     # Processador Bull + snapshots publicados
+│   │   │   ├── estatistica/ # Estatísticas por bolão (cache por publicação)
 │   │   │   └── ...
 │   │   └── prisma/          # Schema, migrações e seed
 │   └── frontend/            # Aplicação web (Next.js 14)
